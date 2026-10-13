@@ -23,11 +23,6 @@ $routes->get('sales/logout', 'Auth::logout');
 $routes->group('sales', ['filter' => 'salesauth'], function ($routes) {
     $routes->get('dashboard', 'Sales\Dashboard::index');
     $routes->get('produk', 'Sales\Produk::index');
-    $routes->get('produk/tambah', 'Sales\Produk::tambah');
-    $routes->post('produk/simpan', 'Sales\Produk::simpan');
-    $routes->get('produk/edit/(:num)', 'Sales\Produk::edit/$1');
-    $routes->post('produk/update/(:num)', 'Sales\Produk::update/$1');
-    $routes->post('produk/hapus/(:num)', 'Sales\Produk::hapus/$1');
 });
 
 // ADMIN ROUTES
