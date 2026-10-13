@@ -3,17 +3,14 @@
 namespace App\Controllers\Sales;
 
 use App\Controllers\BaseController;
-use App\Models\ProductModel;
+use App\Models\SalesProductModel;
 
 class Produk extends BaseController
 {
     public function index()
     {
-        $productModel = new ProductModel();
+        $productModel = new SalesProductModel();
         $q = trim((string)($this->request->getGet('q') ?? ''));
-
-        // Hanya tampilkan produk khusus area Sales (tidak menggunakan data produk web Indonesian Exporter)
-        $productModel->whereIn('id_produk', [267, 268, 269, 270, 271, 272, 273, 274]);
 
         if ($q !== '') {
             $productModel->groupStart()
