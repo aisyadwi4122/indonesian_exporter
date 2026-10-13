@@ -12,6 +12,9 @@ class Produk extends BaseController
         $productModel = new ProductModel();
         $q = trim((string)($this->request->getGet('q') ?? ''));
 
+        // Hanya tampilkan produk khusus area Sales (tidak menggunakan data produk web Indonesian Exporter)
+        $productModel->whereIn('id_produk', [264, 265, 266]);
+
         if ($q !== '') {
             $productModel->groupStart()
                 ->like('nama_produk_id', $q)
