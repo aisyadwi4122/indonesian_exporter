@@ -15,7 +15,7 @@ class SalesAuth implements FilterInterface
         // Cek apakah sesi role sales aktif
         if (!$session->get('sales_logged_in') || $session->get('role') !== 'sales') {
             $session->setFlashdata('error', 'Silakan login terlebih dahulu');
-            return redirect()->to(base_url('sales/login'));
+            return redirect()->to(base_url('sales'));
         }
     }
 

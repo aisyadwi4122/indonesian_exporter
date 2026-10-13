@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log in to Indonesian Exporter</title>
+    <title><?= esc($title ?? 'Log in to Indonesian Exporter'); ?></title>
     <link rel="icon" href="<?= base_url('favicon.ico'); ?>" type="image/x-icon">
 
     <!-- Bootstrap 5 CDN -->
@@ -14,10 +14,8 @@
 
     <style>
         :root {
-            /* ==========================================================================
-               Ganti gambar login di sini / Change login background image here
-               ========================================================================== */
-            --login-bg-image: url('<?= base_url($bg_image ?? 'assets/img/login-bg.jpg'); ?>');
+            /* Gambar login: Mengambil foto slider dari website resmi Indonesian Exporter */
+            --login-bg-image: url('<?= base_url($bg_image ?? 'assets/img/slider/slide1.png'); ?>');
             --primary-green: #16a34a;
             --primary-green-hover: #15803d;
             --border-light: #dee2e6;
@@ -79,7 +77,7 @@
             margin: 0 auto 20px;
         }
 
-        /* 2. Judul "Log in to Indonesian Exporter" (font-size ± 20px, weight 500, #222) */
+        /* 2. Judul "Log in to Indonesian Exporter" */
         .login-title {
             font-size: 20px;
             font-weight: 500;
@@ -89,7 +87,7 @@
             line-height: 1.3;
         }
 
-        /* Pesan Error Kecil di Atas Input */
+        /* Pesan Error Flashdata */
         .login-error-alert {
             color: #dc2626;
             font-size: 13px;
@@ -97,7 +95,7 @@
             margin-bottom: 14px;
             text-align: left;
             line-height: 1.4;
-            padding: 6px 10px;
+            padding: 8px 12px;
             background-color: #fef2f2;
             border-radius: 4px;
             border: 1px solid #fecaca;
@@ -111,7 +109,7 @@
             margin-bottom: 14px;
             text-align: left;
             line-height: 1.4;
-            padding: 6px 10px;
+            padding: 8px 12px;
             background-color: #f0fdf4;
             border-radius: 4px;
             border: 1px solid #bbf7d0;
@@ -124,8 +122,8 @@
 
         .login-input {
             width: 100%;
-            height: 32px;
-            padding: 4px 10px;
+            height: 34px;
+            padding: 6px 10px;
             font-size: 13.5px;
             font-family: inherit;
             color: var(--text-dark);
@@ -146,10 +144,10 @@
             box-shadow: 0 0 0 1px var(--primary-green);
         }
 
-        /* Tombol "Log In" (lebar penuh, hijau #16a34a, teks putih, bold kecil, radius 4px, hover lebih gelap) */
+        /* Tombol "Log In" lebar penuh, warna hijau (#16a34a) */
         .login-btn-submit {
             width: 100%;
-            height: 34px;
+            height: 36px;
             background-color: var(--primary-green);
             color: #ffffff;
             font-size: 13.5px;
@@ -170,7 +168,7 @@
             background-color: #166534;
         }
 
-        /* Kolom Kanan: Gambar Full-Height (± 53%) */
+        /* Kolom Kanan: Gambar Full-Height Website Indonesian Exporter (± 53%) */
         .login-col-right {
             flex: 0 0 53%;
             width: 53%;
@@ -178,14 +176,51 @@
             background-color: var(--bg-fallback);
             background-image: var(--login-bg-image);
             background-size: cover;
-            background-position: center;
+            background-position: center center;
             background-repeat: no-repeat;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
         }
 
-        /* ==========================================================================
-           Responsive Tablet & Mobile (< 768px):
-           Sembunyikan gambar kanan, form tampil full-width di tengah layar
-           ========================================================================== */
+        /* Overlay gelap halus di bagian bawah gambar */
+        .login-right-overlay {
+            width: 100%;
+            padding: 40px 32px 32px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+            color: #ffffff;
+        }
+
+        .login-badge-tag {
+            display: inline-block;
+            background: rgba(22, 163, 74, 0.9);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .login-caption-title {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.35;
+            margin-bottom: 6px;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .login-caption-subtitle {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsive Mobile & Tablet (< 768px) */
         @media (max-width: 767.98px) {
             .login-col-right {
                 display: none !important;
@@ -210,7 +245,7 @@
             <div class="login-form-box">
 
                 <!-- 1. Logo (tinggi ± 45px, rata tengah) -->
-                <a href="<?= base_url('/'); ?>" title="Indonesia Eksporter">
+                <a href="<?= base_url('/'); ?>" title="Indonesian Exporter">
                     <img src="<?= base_url('assets/img/logo.png'); ?>"
                         alt="Logo Indonesian Exporter"
                         class="login-logo"
@@ -220,7 +255,7 @@
                 <!-- 2. Judul "Log in to Indonesian Exporter" -->
                 <h1 class="login-title">Log in to Indonesian Exporter</h1>
 
-                <!-- Pesan Error Flashdata Kecil Merah di Atas Input -->
+                <!-- Pesan Error Flashdata -->
                 <?php if (!empty(session()->getFlashdata('error'))) : ?>
                     <div class="login-error-alert" role="alert">
                         <?= esc(session()->getFlashdata('error')); ?>
@@ -234,10 +269,10 @@
                 <?php endif; ?>
 
                 <!-- Form Login -->
-                <form action="<?= esc($action_url ?? base_url('sales/login')); ?>" method="post">
+                <form action="<?= esc($action_url ?? base_url('sales')); ?>" method="post">
                     <?= csrf_field(); ?>
 
-                    <!-- 3. Input Username (placeholder "username") -->
+                    <!-- 3. Input Username -->
                     <div class="login-input-group">
                         <input type="text"
                             name="username"
@@ -250,7 +285,7 @@
                             autocomplete="username">
                     </div>
 
-                    <!-- 4. Input Password (placeholder "password", type password) -->
+                    <!-- 4. Input Password -->
                     <div class="login-input-group">
                         <input type="password"
                             name="password"
@@ -270,8 +305,14 @@
             </div>
         </div>
 
-        <!-- Kolom Kanan: Gambar Full-Height (± 53%) -->
-        <div class="login-col-right" aria-hidden="true"></div>
+        <!-- Kolom Kanan: Gambar Full-Height Website Indonesian Exporter (± 53%) -->
+        <div class="login-col-right" aria-hidden="true">
+            <div class="login-right-overlay">
+                <span class="login-badge-tag">Indonesian Exporter</span>
+                <h2 class="login-caption-title">Membawa Produk Terbaik Indonesia ke Dunia</h2>
+                <p class="login-caption-subtitle">Portal Manajemen Sales &amp; Katalog Komoditas Ekspor Nusantara</p>
+            </div>
+        </div>
 
     </div>
 </body>

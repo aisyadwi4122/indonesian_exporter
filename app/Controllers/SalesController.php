@@ -32,7 +32,7 @@ class SalesController extends BaseController
         $data = [
             'title'      => 'Login Sales | Indonesia Eksporter',
             'profil'     => $profil,
-            'action_url' => base_url('sales/login'),
+            'action_url' => base_url('sales'),
         ];
 
         return view('sales/login', $data);

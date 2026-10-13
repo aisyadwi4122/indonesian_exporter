@@ -12,7 +12,10 @@ use CodeIgniter\Exceptions\PageNotFoundException;
 
 // SALES AUTH ROUTES
 $routes->get('sales', 'Auth::login');
-$routes->get('sales/login', 'Auth::login');
+$routes->post('sales', 'Auth::attempt');
+$routes->get('sales/login', function () {
+    return redirect()->to(base_url('sales'));
+});
 $routes->post('sales/login', 'Auth::attempt');
 $routes->get('sales/logout', 'Auth::logout');
 

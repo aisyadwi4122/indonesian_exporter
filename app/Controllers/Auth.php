@@ -20,19 +20,20 @@ class Auth extends BaseController
 
         /*
          * ==========================================================================
-         * Ganti gambar login di sini / Change login background image here
+         * Gambar latar belakang login sales / Sales login background image
          * ==========================================================================
-         * Path default: assets/img/login-bg.jpg
+         * Menggunakan foto slider web resmi Indonesian Exporter:
+         * Path: assets/img/slider/slide1.png
          */
-        $bgImage = 'assets/img/login-bg.jpg';
+        $bgImage = 'assets/img/slider/slide1.png';
 
         $data = [
             'title'      => 'Log in to Indonesian Exporter',
-            'action_url' => base_url('sales/login'),
+            'action_url' => base_url('sales'),
             'bg_image'   => $bgImage,
         ];
 
-        return view('auth/login', $data);
+        return view('sales/login', $data);
     }
 
     /**
@@ -115,6 +116,6 @@ class Auth extends BaseController
     public function logout()
     {
         session()->destroy();
-        return redirect()->to(base_url('sales/login'));
+        return redirect()->to(base_url('sales'));
     }
 }
