@@ -13,7 +13,7 @@ class Produk extends BaseController
         $q = trim((string)($this->request->getGet('q') ?? ''));
 
         // Hanya tampilkan produk khusus area Sales (tidak menggunakan data produk web Indonesian Exporter)
-        $productModel->whereIn('id_produk', [264, 265, 266]);
+        $productModel->whereIn('id_produk', [267, 268, 269, 270, 271, 272, 273, 274]);
 
         if ($q !== '') {
             $productModel->groupStart()
@@ -24,7 +24,7 @@ class Produk extends BaseController
                 ->groupEnd();
         }
 
-        $products = $productModel->orderBy('id_produk', 'DESC')->findAll();
+        $products = $productModel->orderBy('id_produk', 'ASC')->findAll();
 
         $data = [
             'title'      => 'Produk Sales - Indonesian Exporter',
