@@ -21,11 +21,31 @@ class LoginController extends BaseController
 
     public function process()
     {
-        $users = new ProfilModel();
-        $username = $this->request->getVar('username');
-        $password = $this->request->getVar('password');
+        $username = trim((string)($this->request->getVar('username') ?? ''));
+        $password = (string)($this->request->getVar('password') ?? '');
 
-        // Ambil data user admin dari database (hanya role = 'user')
+        // 1. Cek autentikasi dari tabel users (UserModel)
+        $userModel = new \App\Models\UserModel();
+        $user = $userModel->where('email', $username)->first();
+
+        if ($user && !empty($user['is_active']) && password_verify($password, $user['password'])) {
+            session()->set([
+                'user_id'   => $user['id'],
+                'name'      => $user['name'],
+                'email'     => $user['email'],
+                'role'      => $user['role'],
+                'logged_in' => true,
+            ]);
+
+            if ($user['role'] === 'sales') {
+                return redirect()->to(base_url('sales/products'));
+            }
+
+            return redirect()->to(base_url('admin/dashboard'));
+        }
+
+        // 2. Fallback autentikasi legacy dari tabel tb_profil
+        $users = new ProfilModel();
         $dataUser = $users->where(['username' => $username, 'role' => 'user'])->first();
 
         if ($dataUser) {

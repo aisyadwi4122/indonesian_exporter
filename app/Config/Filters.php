@@ -36,6 +36,7 @@ class Filters extends BaseFilters
         'performance'   => PerformanceMetrics::class,
         'lang'          => \App\Filters\LanguageFilter::class,
         'salesauth'     => \App\Filters\SalesAuth::class,
+        'role'          => \App\Filters\RoleFilter::class,
     ];
 
     /**

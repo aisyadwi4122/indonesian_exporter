@@ -25,6 +25,12 @@ $routes->group('sales', ['filter' => 'salesauth'], function ($routes) {
     $routes->get('produk', 'Sales\Produk::index');
 });
 
+$routes->group('sales', ['filter' => 'role:sales'], function ($r) {
+    $r->get('products', 'Sales\ProductController::index');
+    $r->get('products/detail/(:num)', 'Sales\ProductController::detail/$1');
+    $r->get('products/pdf/(:num)', 'Sales\ProductController::downloadPdf/$1');
+});
+
 // ADMIN ROUTES
 $routes->get('login', 'LoginController::index');
 $routes->post('login/process', 'LoginController::process');
