@@ -1,0 +1,910 @@
+/*******************************/
+/********* General CSS *********/
+/*******************************/
+body {
+    color: #444444;
+    font-weight: 400;
+    background: #ffffff;
+    font-family: 'Barlow', sans-serif;
+}
+
+h1,
+h2, 
+h3, 
+h4,
+h5, 
+h6 {
+    color: black; /* Dark green for headings */
+}
+
+a {
+    color: #61610A; /* Dark green for links */
+    transition: .3s;
+}
+
+p {
+    color: black; /* Set all paragraph text to black */
+}
+
+a:hover,
+a:active,
+a:focus {
+    color: #7D7D1B; /* Light green for link hover, active, and focus states */
+    outline: none;
+    text-decoration: none;
+}
+
+.btn.btn-custom {
+    padding: 10px 30px 12px 30px;
+    text-align: center; 
+    font-size: 16px;
+    font-weight: 500;
+    color: #ffffff;
+    background: #7D7D1B; /* Light green for button background */
+    border: none;
+    border-radius: 60px;
+    box-shadow: inset 0 0 0 0 #61610A; /* Dark green for button shadow */
+    transition: ease-out 0.5s;
+}
+
+.btn.btn-custom:hover {
+    color: #7D7D1B; /* Light green for button text on hover */
+    background: #61610A; /* Dark green for button background on hover */
+    box-shadow: inset 200px 0 0 0 #61610A; /* Dark green for button shadow on hover */
+}
+
+.btn:focus,
+.form-control:focus {
+    box-shadow: none;
+}
+
+.container-fluid {
+    max-width: 1366px;
+}
+
+
+/**********************************/
+/****** Loader & Back to Top ******/
+/**********************************/
+#loader {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s ease-out, visibility 0s linear .3s;
+    z-index: 999;
+}
+
+#loader.show {
+    transition: opacity .6s ease-out, visibility 0s linear 0s;
+    visibility: visible;
+    opacity: 1;
+}
+
+#loader .loader {
+    position: relative;
+    width: 45px;
+    height: 45px;
+    border: 5px solid #dddddd;
+    border-top: 5px solid #61610A; /* Dark green for loader top border */
+    border-radius: 50%;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.back-to-top {
+    position: fixed;
+    display: none;
+    width: 44px;
+    height: 44px;
+    text-align: center;
+    line-height: 1;
+    font-size: 22px;
+    right: 15px;
+    bottom: 15px;
+    transition: .5s;
+    background: #61610A; /* Dark green for back-to-top button */
+    border-radius: 44px;
+    z-index: 9;
+}
+
+.back-to-top i {
+    color: #ffffff;
+    padding-top: 10px;
+}
+
+.back-to-top:hover {
+    background: #7D7D1B; /* Light green for back-to-top button on hover */
+}
+
+/**********************************/
+/********** Top Bar CSS ***********/
+/**********************************/
+.top-bar {
+    position: relative;
+    height: 75px;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+}
+
+.top-bar .logo {
+    text-align: left;
+    overflow: hidden;
+}
+
+.top-bar .logo h1 {
+    margin: -4px 0 0 0;
+    color: #61610A; /* Dark green for logo text */
+    font-size: 50px;
+    line-height: 50px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    font-style: italic;
+}
+
+.top-bar .logo h1 span {
+    color: #7D7D1B; /* Light green for logo span */
+}
+
+.top-bar .logo img {
+    max-width: 100%;
+    max-height: 60px;
+}
+
+.top-bar .top-bar-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.top-bar .top-bar-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #61610A; /* Dark green for icon background */
+    border-radius: 40px;
+}
+
+.top-bar .top-bar-icon i {
+    margin: 0;
+    color: #ffffff;
+    font-size: 16px;
+}
+
+.top-bar .top-bar-text {
+    padding-left: 15px;
+}
+
+.top-bar .top-bar-text h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.top-bar .top-bar-text p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+@media (max-width: 991.98px) {
+    .top-bar .logo {
+        text-align: center;
+    }
+}
+
+
+/**********************************/
+/*********** Nav Bar CSS **********/
+/**********************************/
+/* Navbar styling */
+.nav-bar {
+    position: relative;
+    background: #ffffff; /* Dark brown for navbar background */
+    padding: 15px 0;
+}
+
+.nav-bar .navbar {
+    padding: 0;
+    background: white !important; /* Dark brown for navbar background */
+}
+
+/* Logo settings: adjust the size and position */
+.nav-bar .navbar-brand {
+    padding-left: 15px; /* Menyediakan jarak dari tepi kiri */
+}
+
+.nav-bar .navbar-brand img {
+    width: 80px; /* Ukuran logo */
+    height: auto; /* Menjaga proporsi logo */
+}
+
+/* Navbar link styling */
+.navbar-dark .navbar-nav .nav-link {
+    color: #61610A; /* Hijau tua untuk teks biasa */
+    padding: 10px 20px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    transition: color 0.3s ease;
+}
+
+/* Hover and active state styling */
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link.active {
+    color: #ffffff; /* Warna teks putih saat hover/aktif untuk kontras */
+    background-color: #A2A20A; /* Hijau muda yang sedikit lebih terang untuk background */
+    border-radius: 4px; /* Sudut yang melengkung */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+
+
+/* Dropdown styling */
+.navbar-dark .navbar-nav .dropdown-menu {
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding: 10px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-dark .navbar-nav .dropdown-menu .dropdown-item {
+    color: #202C45;
+    padding: 10px 20px;
+}
+
+.navbar-dark .navbar-nav .dropdown-menu .dropdown-item:hover {
+    background-color: #7D7D1B; /* Light green for dropdown item hover */
+    color: #fff;
+}
+
+/* Centering logo and aligning nav-items */
+.navbar-collapse {
+    justify-content: space-between; /* Logo on left, items on right */
+}
+
+/* Sticky navbar on scroll */
+
+/* Responsive styling */
+@media (max-width: 991.98px) {
+    .navbar-dark .navbar-nav .nav-link {
+        padding: 10px;
+    }
+    
+    .nav-bar .navbar-brand {
+        margin-left: 0; /* Pastikan logo tetap di kiri pada layar kecil */
+    }
+    
+    .navbar-toggler {
+        margin-left: auto; /* Navbar toggle tetap di sebelah kanan pada layar kecil */
+    }
+    
+    .nav-bar .navbar-nav {
+        text-align: center;
+    }
+}
+
+/* Hover Effect */
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: #7D7D1B; /* Light green for link hover */
+    background-color: rgba(255, 255, 255, 0.1); /* Memberikan background saat dihover */
+    border-radius: 5px; /* Menambahkan sudut melengkung */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 991.98px) {
+    .navbar-dark .navbar-nav .nav-link {
+        padding: 10px;
+    }
+    
+    .nav-bar .navbar-brand {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .nav-bar .navbar-nav {
+        text-align: center;
+    }
+}
+
+
+/*******************************/
+/********** Hero CSS ***********/
+/*******************************/
+.carousel {
+    position: relative;
+    width: 100%;
+    min-height: 100px;
+    background: #ffffff;
+    margin-bottom: 45px;
+}
+
+.carousel .container-fluid {
+    padding: 0;
+}
+
+.carousel .carousel-item {
+    position: relative;
+    width: 100%;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+
+
+
+.carousel .carousel-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.carousel .btn.btn-custom {
+    padding: 20px 45px 22px 45px;
+    color: #ffffff;
+}
+
+.carousel .btn.btn-custom:hover {
+    color: black;
+}
+
+
+/*******************************/
+/******* Page Header CSS *******/
+/*******************************/
+.page-header {
+    position: relative;
+    /* margin-bottom: 45px; */
+    padding: 90px 0;
+    text-align: center;
+    opacity: 0.8;
+    height: 450px;
+    background: #202C45;
+    border-top: 1px dotted #ffffff;
+}
+
+.page-header h2 {
+    position: relative;
+    color: #ffffff;
+    font-size: 60px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 5px;
+}
+
+.page-header h2::after {
+    position: absolute;
+    content: "";
+    width: 100px;
+    height: 2px;
+    left: calc(50% - 50px);
+    bottom: 0;
+    background: #ffffff;
+}
+
+.page-header a {
+    position: relative;
+    padding: 0 12px;
+    font-size: 22px;
+    color: #ffffff;
+}
+
+.page-header a:hover {
+    color: black;
+}
+
+.page-header a::after {
+    position: absolute;
+    content: "/";
+    width: 8px;
+    height: 8px;
+    top: -2px;
+    right: -7px;
+    text-align: center;
+    color: #ffffff;
+}
+
+.page-header a:last-child::after {
+    display: none;
+}
+.container-center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    text-align: center;
+}
+
+.text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6); /* Efek bayangan teks */
+  }
+
+@media (max-width: 991.98px) {
+    .page-header {
+        padding: 60px 0;
+    }
+    
+    .page-header h2 {
+        font-size: 45px;
+    }
+    
+    .page-header a {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .page-header {
+        padding: 45px 0;
+    }
+    
+    .page-header h2 {
+        font-size: 35px;
+    }
+    
+    .page-header a {
+        font-size: 18px;
+    }
+}
+
+
+/*******************************/
+/******* Section Header ********/
+/*******************************/
+.section-header {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 45px auto;
+}
+
+.section-header p {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    position: relative;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: black;
+}
+
+.section-header p::after {
+    position: absolute;
+    content: "";
+    width: 50%;
+    height: 2px;
+    left: 25%;
+    bottom: 0;
+    background: black;
+}
+
+.section-header.text-left p::after {
+    left: 0;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 65px;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+@media (max-width: 991.98px) {
+    .section-header h2 {
+        font-size: 45px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .section-header h2 {
+        font-size: 40px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .section-header h2 {
+        font-size: 35px;
+    }
+}
+
+
+/*******************************/
+/********** About CSS **********/
+/*******************************/
+.about {
+    position: relative;
+    width: 100%;
+    padding: 0px 0 15px 0;
+}
+
+.about .section-header {
+    margin-bottom: 30px;
+    margin-left: 0;
+}
+
+.about .about-img img {
+    width: 100%;
+    border-radius: 5px;
+    margin-bottom: 30px;
+}
+
+.about .about-content {
+    margin-bottom: 30px;
+    text-align: justify;
+}
+
+.about .about-content ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    margin-bottom: 25px;
+}
+
+.about .about-content ul li {
+    margin-bottom: 5px;
+}
+
+.about .about-content ul li i {
+    margin-right: 8px;
+    color: black;
+}
+
+.about-title {
+    text-align: center;
+    /* font-size: 700px; */
+    margin-bottom: 0px;
+    padding: 0 px;
+    /* font-weight: 700; */
+    text-transform: capitalize;
+}
+
+/*******************************/
+/********* Service CSS *********/
+/*******************************/
+
+
+/*******************************/
+/********** Facts CSS **********/
+/*******************************/
+
+
+/*******************************/
+/********* Pricing CSS *********/
+/*******************************/
+
+.footer .copyright p {
+    color: #ffffff; /* Set footer text color to white */
+    font-size: 16px; /* You can adjust the size if needed */
+    margin: 0; /* Ensure no extra margin around the text */
+}
+
+
+/*******************************/
+/******** Location CSS *********/
+/*******************************/
+.location {
+    position: relative;
+    width: 100%;
+    padding: 45px 0;
+}
+
+
+/*******************************/
+/*********** Team CSS **********/
+/*******************************/
+.team {
+    position: relative;
+    width: 100%;
+    padding: 45px 0 15px 0;
+}
+
+
+/*******************************/
+/******* Testimonial CSS *******/
+/*******************************/
+.testimonial {
+    position: relative;
+    width: 100%;
+    padding: 45px 0;
+}
+
+
+/*******************************/
+/*********** Blog CSS **********/
+/*******************************/
+
+
+/*******************************/
+/********* Contact CSS *********/
+/*******************************/
+.contact {
+    position: relative;
+    width: 100%;
+    padding: 45px 0;
+}
+
+
+/*******************************/
+/******* Single Post CSS *******/
+/*******************************/
+
+
+/**********************************/
+/*********** Sidebar CSS **********/
+/**********************************/
+
+
+/*******************************/
+/********* Footer CSS **********/
+/*******************************/
+.footer {
+    position: relative;
+    margin-top: 45px;
+    padding-top: 50px;
+    background: #4B3B0A; /* Dark brown for footer background */
+}
+
+.footer .copyright {
+    text-align: center;
+    /* padding-top: 15px; */
+    padding-bottom: 45px;
+}
+
+.footer .copyright p {
+    margin: 0;
+    color: #ffffff;
+}
+
+.footer .copyright p a {
+    color: #7D7D1B; /* Light green for link */
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.footer .copyright p a:hover {
+    color: #ffffff;
+}
+
+.whats-app {
+    position: fixed; /* Tetap di tempat saat digulir */
+    display: none;
+    bottom: 75px; /* Jarak dari bawah layar (sesuaikan sesuai kebutuhan) */
+    right: 15px; /* Jarak dari kanan layar (sesuaikan sesuai kebutuhan) */
+    z-index: 1000; /* Pastikan ikon berada di atas elemen lainnya */
+    transition: 0.3s;
+}
+
+/*home css*/
+.product-card {
+    border: none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    position: relative;
+    color: white;
+    padding: 0 30px;
+    border-radius: 20px;
+}
+
+.product-card .background-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+}
+
+.product-card .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.85);
+    z-index: 1;
+    border-radius: 20px;
+}
+
+.product-card .card-body {
+    padding: 30px;
+    z-index: 2;
+    position: relative;
+    text-align: center;
+}
+
+.product-card .card-img-top {
+    width: 100%;
+    max-width: 572px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.section-header p {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.about-content p {
+    font-size: 18px;
+    margin-bottom: 25px;
+    color: #333;
+    position: relative;
+    z-index: 2;
+}
+
+.btn-custom {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 25px;
+    text-transform: uppercase;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    z-index: 2;
+}
+
+.btn-custom:hover {
+    background-color: #0056b3;
+}
+
+.about-title {
+    margin-top: 10px;
+}
+
+.small-content {
+    max-width: 80%;
+    margin: 0 auto;
+}
+
+.product-image img {
+    max-width: 100%;
+    height: auto;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.col-lg-6 {
+    flex: 1;
+    padding: 30px;
+}
+
+.product-image,
+.product-description {
+    max-width: 90%;
+}
+
+.section-header h2.ourproduct {
+    font-size: 50px; /* Larger font size for emphasis */
+    font-weight: 700; /* Bold weight for a strong heading */
+    text-transform: uppercase; /* Uppercase for a professional style */
+    color: black; /* Black color for the text */
+    letter-spacing: 3px; /* Slight letter spacing for a refined look */
+    margin-bottom: 20px;
+    text-shadow: none; /* Removed the text shadow for a clean black text */
+    position: relative;
+}
+
+.section-header h2.ourproduct::after {
+    content: "";
+    width: 120px;
+    height: 3px;
+    background-color: black; /* Light green matching button color */
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.team {
+    background-color: #E2FFF1;
+}
+
+.section-title h5 {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.article-card {
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.article-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.article-content {
+    transition: background-color 0.3s ease-in-out;
+}
+
+.article-card:hover .article-content {
+    background-color: #202C45;
+}
+
+.article-title {
+    transition: color 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.article-card:hover .article-title {
+    color: #202C45;
+    text-decoration: underline;
+}
+
+.text-primary {
+    color: #6c757d !important;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.article-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.lazyload {
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.custom-toggler .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='%2361610A' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+.text-center {
+    display: flex;
+    justify-content: center;
+    align-items: center !important; 
+}
+
+.btn-custom {
+    display: inline-block;
+    text-align: center;
+    padding: 10px 20px; /* Adjust padding as needed */
+    background-color: #556b2f; /* Customize button color */
+    color: white; /* Customize text color */
+    border-radius: 5px; /* Optional: rounded corners */
+    text-decoration: none; /* Remove underline */
+}
+
+.about-img img {
+    width: auto;
+    height: 570px;
+}
