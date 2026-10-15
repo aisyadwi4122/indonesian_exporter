@@ -142,7 +142,13 @@ $routes->get('admin/meta/edit/(:num)', 'admin\MetaController::edit/$1');
 $routes->post('admin/meta/proses_edit/(:num)', 'admin\MetaController::proses_edit/$1');
 $routes->get('admin/meta/delete/(:any)', 'admin\MetaController::delete/$1');
 
-
+// ADMIN AKUN SALES
+$routes->get('admin/akun_sales/index', 'admin\AkunSales::index');
+$routes->get('admin/akun_sales/tambah', 'admin\AkunSales::tambah');
+$routes->post('admin/akun_sales/proses_tambah', 'admin\AkunSales::proses_tambah');
+$routes->get('admin/akun_sales/edit/(:num)', 'admin\AkunSales::edit/$1');
+$routes->post('admin/akun_sales/proses_edit/(:num)', 'admin\AkunSales::proses_edit/$1');
+$routes->post('admin/akun_sales/delete/(:num)', 'admin\AkunSales::delete/$1');
 
 $routes->get('/', function () {
     return redirect()->to('/en/'); // Default redirect ke /en/home
