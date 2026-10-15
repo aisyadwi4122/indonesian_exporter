@@ -68,20 +68,60 @@ class Auth extends BaseController
 
         $db = Database::connect();
 
-        // 2. Ambil user dari tabel tb_profil dengan username dan role = 'sales'
+        // 2. Autentikasi Sales: Cek tabel tb_sales (SalesModel)
+        $salesModel = new \App\Models\SalesModel();
+        $salesUser  = $salesModel->where('username', $username)->first();
+
+        if ($salesUser) {
+            if (isset($salesUser['status']) && $salesUser['status'] !== 'aktif') {
+                session()->setFlashdata('error', 'Akun Sales Anda berstatus nonaktif. Silakan hubungi admin.');
+                return redirect()->back()->withInput();
+            }
+
+            $passwordHash = $salesUser['password'] ?? '';
+            $isPasswordValid = false;
+
+            if (password_verify($password, $passwordHash)) {
+                $isPasswordValid = true;
+            } elseif ($password === $passwordHash) {
+                // Fallback jika password di database belum di-hash
+                $isPasswordValid = true;
+            }
+
+            if (!$isPasswordValid) {
+                session()->setFlashdata('error', 'Username atau password salah');
+                return redirect()->back()->withInput();
+            }
+
+            session()->set([
+                'user_id'         => $salesUser['id_sales'],
+                'sales_id'        => $salesUser['id_sales'],
+                'sales_name'      => $salesUser['nama_sales'],
+                'nama_sales'      => $salesUser['nama_sales'],
+                'username'        => $salesUser['username'],
+                'sales_username'  => $salesUser['username'],
+                'sales_email'     => $salesUser['email'] ?? '',
+                'role'            => 'sales',
+                'sales_logged_in' => true,
+            ]);
+
+            return redirect()->to(base_url('sales/dashboard'));
+        }
+
+        // 3. Fallback: Ambil user dari tabel tb_profil dengan username dan role = 'sales'
         $user = $db->table('tb_profil')
             ->where('username', $username)
             ->where('role', 'sales')
             ->get()
             ->getRowArray();
 
-        // 3. Verifikasi pengguna dan role
+        // Verifikasi pengguna dan role
         if (!$user) {
             session()->setFlashdata('error', 'Username atau password salah');
             return redirect()->back()->withInput();
         }
 
-        // 4. Verifikasi password menggunakan password_verify() (dengan fallback plain-text jika legacy)
+        // Verifikasi password menggunakan password_verify() (dengan fallback plain-text jika legacy)
         $passwordHash = $user['password'] ?? '';
         $isPasswordValid = false;
 
@@ -97,7 +137,7 @@ class Auth extends BaseController
             return redirect()->back()->withInput();
         }
 
-        // 5. Simpan sesi login (user_id, username, role) ke session
+        // Simpan sesi login (user_id, username, role) ke session
         session()->set([
             'user_id'         => $user['id_perusahaan'],
             'username'        => $user['username'],
@@ -105,7 +145,7 @@ class Auth extends BaseController
             'sales_logged_in' => true,
         ]);
 
-        // 6. Redirect ke halaman dashboard sales
+        // Redirect ke halaman dashboard sales
         return redirect()->to(base_url('sales/dashboard'));
     }
 

@@ -59,8 +59,9 @@ class ProductModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
-    
-    /** Ambil produk berdasarkan slug bahasa Indonesia atau Inggris */
+    /**
+     * Ambil produk berdasarkan slug bahasa Indonesia atau Inggris
+     */
     public function getProductBySlug(string $slug)
     {
         return $this->where('slug_id', $slug)
@@ -68,7 +69,9 @@ class ProductModel extends Model
             ->first();
     }
 
-    /** Ambil produk secara acak */
+    /**
+     * Ambil produk secara acak
+     */
     public function getRandomProducts(int $limit = 10, ?int $excludeId = null)
     {
         $builder = $this->orderBy('RAND()');
@@ -76,5 +79,52 @@ class ProductModel extends Model
             $builder->where('id_produk !=', $excludeId);
         }
         return $builder->limit($limit)->find();
+    }
+
+    /**
+     * Ambil semua produk untuk modul sales / public dengan fallback alias
+     */
+    public function getPublishedProducts()
+    {
+        $products = $this->orderBy('id_produk', 'DESC')->findAll();
+        foreach ($products as &$p) {
+            if (!isset($p['nama_produk'])) {
+                $p['nama_produk'] = $p['nama_produk_id'] ?? ($p['nama_produk_en'] ?? '');
+            }
+            if (!isset($p['id'])) {
+                $p['id'] = $p['id_produk'] ?? 0;
+            }
+            if (!isset($p['deskripsi'])) {
+                $p['deskripsi'] = $p['deskripsi_produk_id'] ?? ($p['deskripsi_produk_en'] ?? '');
+            }
+            if (!isset($p['gambar_utama'])) {
+                $p['gambar_utama'] = $p['foto_produk'] ?? '';
+            }
+        }
+        return $products;
+    }
+
+    /**
+     * Ambil 1 detail produk dengan fallback alias
+     */
+    public function getDetail($id)
+    {
+        $product = $this->find($id);
+        if (!$product) {
+            return null;
+        }
+        if (!isset($product['nama_produk'])) {
+            $product['nama_produk'] = $product['nama_produk_id'] ?? ($product['nama_produk_en'] ?? '');
+        }
+        if (!isset($product['id'])) {
+            $product['id'] = $product['id_produk'] ?? 0;
+        }
+        if (!isset($product['deskripsi'])) {
+            $product['deskripsi'] = $product['deskripsi_produk_id'] ?? ($product['deskripsi_produk_en'] ?? '');
+        }
+        if (!isset($product['gambar_utama'])) {
+            $product['gambar_utama'] = $product['foto_produk'] ?? '';
+        }
+        return $product;
     }
 }
