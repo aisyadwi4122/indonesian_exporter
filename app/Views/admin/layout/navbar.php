@@ -166,6 +166,15 @@
                     </a>
                 </li>
 
+                <!-- MANAJEMEN AKUN SALES -->
+                <li class="nav-item">
+                    <a class="nav-link <?= (strpos(current_url(), 'admin/akun_sales') !== false ? 'active' : '') ?>" href="<?= base_url('admin/akun_sales/index') ?>">
+                        <span class="nav-icon">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </span>
+                        <span class="nav-link-text">Akun Sales</span>
+                    </a>
+                </li>
 
             </ul><!--//app-menu-->
         </nav><!--//app-nav-->
