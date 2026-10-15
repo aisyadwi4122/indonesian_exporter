@@ -40,7 +40,13 @@
                                             <td><?= $artikel['judul_artikel_en'] ?></td>
                                             <td><?= $artikel['deskripsi_artikel_id'] ?></td>
                                             <td><?= $artikel['deskripsi_artikel_en'] ?></td>
-                                            <td><img src="<?= base_url() . 'assets/img/artikel/' . $artikel['foto_artikel'] ?>" class="img-fluid" alt="Foto artikel"></td>
+                                            <td class="text-center" valign="middle">
+                                                <img src="<?= base_url('assets/img/artikel/' . $artikel['foto_artikel']) ?>" 
+                                                     class="img-fluid" 
+                                                     style="max-width: 90px; max-height: 70px; object-fit: cover; border-radius: 6px;" 
+                                                     alt="Foto artikel"
+                                                     onerror="this.onerror=null; this.src='<?= base_url('assets/img/artikel/default.jpg') ?>';">
+                                            </td>
 
                                             <td valign="middle">
                                                 <div class="d-grid gap-2">

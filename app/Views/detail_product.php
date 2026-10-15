@@ -70,7 +70,8 @@ $background_image  = 'assets/img/header.jpeg';
         <div class="detproduct-img" style="flex:1 1 45%;">
             <img src="<?= base_url('assets/img/produk/' . esc($product['foto_produk'])) ?>" 
                  alt="<?= esc($product['nama_produk_' . $lang] ?? $product['nama_produk_id']) ?>" 
-                 style="width:100%; height:auto; border-radius:10px;">
+                 style="width:100%; height:auto; border-radius:10px;"
+                 onerror="this.onerror=null; this.src='<?= base_url('assets/img/produk/default.png') ?>';">
         </div>
         <div class="detproduct-info" style="flex:1 1 50%;">
             <p class="detproduct-description" style="margin:0;">
@@ -93,7 +94,8 @@ $background_image  = 'assets/img/header.jpeg';
                         <div class="product-item text-center">
                             <div class="product-img-home">
                                 <img src="<?= base_url('assets/img/produk/' . esc($item['foto_produk'])) ?>"
-                                    alt="<?= esc($item['alt_produk_' . $lang] ?? $item['alt_produk_id']) ?>">
+                                    alt="<?= esc($item['alt_produk_' . $lang] ?? $item['alt_produk_id']) ?>"
+                                    onerror="this.onerror=null; this.src='<?= base_url('assets/img/produk/default.png') ?>';">
                             </div>
                             <div class="product-content">
                                 <h5><?= esc($item['nama_produk_' . $lang] ?? $item['nama_produk_id']) ?></h5>

@@ -38,10 +38,13 @@
                                 <tbody>
                                     <?php foreach ($all_data_slider as $tampilSlider) : ?>
                                         <!-- Baris 1: Gambar Slider 1, Alt Text (ID) dan Alt Text (EN) -->
-                                        <tr>
-                                            <td>
+                                            <td class="text-center" valign="middle">
                                                 <?php if (!empty($tampilSlider['foto_slider'])) : ?>
-                                                    <img src="<?= base_url() . 'assets/img/slider/' . $tampilSlider['foto_slider'] ?>" class="img-fluid" alt="<?= $tampilSlider['alt_foto_slider_id'] ?>">
+                                                    <img src="<?= base_url('assets/img/slider/' . $tampilSlider['foto_slider']) ?>" 
+                                                         class="img-fluid" 
+                                                         style="max-width: 140px; max-height: 80px; object-fit: cover; border-radius: 6px;" 
+                                                         alt="<?= esc($tampilSlider['alt_foto_slider_id']) ?>"
+                                                         onerror="this.onerror=null; this.src='<?= base_url('assets/img/slider/default.jpg') ?>';">
                                                 <?php endif; ?>
                                             </td>
                                             <td><?= $tampilSlider['alt_foto_slider_id'] ?></td>

@@ -37,7 +37,7 @@
                                         <tr>
                                             <td><?= $s['nama_sosmed'] ?></td>
                                             <td><?= $s['link_sosmed'] ?></td>
-                                            <td><img src="<?= base_url() . 'assets/img/logo/' . $s['logo_sosmed'] ?>" class="img-fluid" alt="Foto Sosmed" width="50"></td>
+                                            <td><img src="<?= base_url('assets/img/logo/' . $s['logo_sosmed']) ?>" class="img-fluid" alt="Foto Sosmed" width="50" onerror="this.onerror=null; this.src='<?= base_url('assets/img/logo/logo.png') ?>';"></td>
 
                                             <td valign="middle">
                                                 <div class="d-grid gap-2">

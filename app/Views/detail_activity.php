@@ -63,7 +63,10 @@ $background_image = 'assets/img/header.jpeg';
             <span class="detactivity-date"><?= $lang == 'id' ? 'Tanggal : ' : 'Date : ' ?> <?= date('d M Y', strtotime($aktivitas['updated_at'])); ?></span>
           </div>
           <div class="detactivity-header">
-            <img src="<?= base_url('assets/img/aktivitas/' . $aktivitas["foto_aktivitas"]) ?>" class="card-img-top" alt="<?= $lang == 'id' ? $aktivitas['alt_aktivitas_id'] : $aktivitas['alt_aktivitas_en']; ?>" class="detactivity-img">
+            <img src="<?= base_url('assets/img/aktivitas/' . $aktivitas["foto_aktivitas"]) ?>" 
+                 class="card-img-top detactivity-img" 
+                 alt="<?= $lang == 'id' ? $aktivitas['alt_aktivitas_id'] : $aktivitas['alt_aktivitas_en']; ?>"
+                 onerror="this.onerror=null; this.src='<?= base_url('assets/img/aktivitas/default.jpg') ?>';">
           </div>
           <div class="detactivity-body">
             <p class="detactivity-description">
@@ -81,7 +84,10 @@ $background_image = 'assets/img/header.jpeg';
             <?php foreach ($allAktivitas as $p): ?>
               <div class="single-act-item">
                 <div class="single-act-item-img">
-                  <img src="<?= base_url('assets/img/aktivitas/' . $p["foto_aktivitas"]) ?>" class="card-img-top" alt="<?= $lang == 'id' ? $p['alt_aktivitas_id'] : $p['alt_aktivitas_en']; ?>">
+                  <img src="<?= base_url('assets/img/aktivitas/' . $p["foto_aktivitas"]) ?>" 
+                       class="card-img-top" 
+                       alt="<?= $lang == 'id' ? $p['alt_aktivitas_id'] : $p['alt_aktivitas_en']; ?>"
+                       onerror="this.onerror=null; this.src='<?= base_url('assets/img/aktivitas/default.jpg') ?>';">
                 </div>
                 <div class="single-act-item-txt">
                   <h4><a href="<?= base_url(

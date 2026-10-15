@@ -72,7 +72,7 @@ $background_image = 'assets/img/header.jpeg'; // Sesuaikan jika perlu mengganti 
                     <img src="<?= base_url('assets/img/produk/' . esc($product_item['foto_produk'])) ?>" 
                          class="card-img-top" 
                          alt="<?= esc($product_item['alt_produk_' . $lang] ?? $product_item['alt_produk_id']) ?>" 
-                         >
+                         onerror="this.onerror=null; this.src='<?= base_url('assets/img/produk/default.png') ?>';">
                     <div class="card-body">
                         <h5 class="card-title"><?= esc($product_item['nama_produk_' . $lang] ?? $product_item['nama_produk_id']) ?></h5>
                         <?php

@@ -53,7 +53,11 @@ $background_image = 'assets/img/header.jpeg'; // Sesuaikan jika perlu mengganti 
   <div class="activities-grid">
     <?php foreach ($allAktivitas as $p): ?>
       <div class="activity-card">
-        <img src="<?= base_url('assets/img/aktivitas/' . $p["foto_aktivitas"]) ?>" class="card-img-top" alt="<?= $lang == 'id' ? $p['alt_aktivitas_id'] : $p['alt_aktivitas_en']; ?>" style="border-bottom: 8px solid #7b7b1a;;">
+        <img src="<?= base_url('assets/img/aktivitas/' . $p["foto_aktivitas"]) ?>" 
+             class="card-img-top" 
+             alt="<?= $lang == 'id' ? $p['alt_aktivitas_id'] : $p['alt_aktivitas_en']; ?>" 
+             style="border-bottom: 8px solid #7b7b1a;"
+             onerror="this.onerror=null; this.src='<?= base_url('assets/img/aktivitas/default.jpg') ?>';">
         <div class="activity-info">
           <p class="activity-tag"><?= $lang == 'id' ? $p['nama_kategori'] : $p['nama_kategori']; ?></p>
         </div>

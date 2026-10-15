@@ -37,7 +37,7 @@
                                         <tr>
                                             <td><?= $marketplace['nama_marketplace'] ?></td>
                                             <td><?= $marketplace['link_marketplace'] ?></td>
-                                            <td><img src="<?= base_url() . 'assets/img/logo/' . $marketplace['logo_marketplace'] ?>" class="img-fluid" alt="Foto artikel" width="50"></td>
+                                            <td><img src="<?= base_url('assets/img/logo/' . $marketplace['logo_marketplace']) ?>" class="img-fluid" alt="Logo Marketplace" width="50" onerror="this.onerror=null; this.src='<?= base_url('assets/img/logo/logo.png') ?>';"></td>
 
                                             <td valign="middle">
                                                 <div class="d-grid gap-2">

@@ -23,14 +23,16 @@
                 <?php foreach ($slider as $key => $slide) : ?>
                     <div class="carousel-item <?= $key === 0 ? 'active' : '' ?>">
                         <img class="w-100" src="<?= base_url('assets/img/slider/' . esc($slide['foto_slider'])) ?>"
-                            alt="<?= esc($slide['alt_foto_slider_' . ($lang ?? 'en')]) ?>">
+                            alt="<?= esc($slide['alt_foto_slider_' . ($lang ?? 'en')]) ?>"
+                            onerror="this.onerror=null; this.src='<?= base_url('assets/img/slider/default.jpg') ?>';">
                         <div class="carousel-caption d-flex align-items-center justify-content-center">
                             <div class="container text-center">
                                 <div class="row align-items-center justify-content-center">
                                     <div class="col-lg-5 col-md-6 col-sm-12 d-flex justify-content-center">
                                         <img class="img-fluid animate__animated animate__zoomIn"
                                             src="<?= base_url('assets/img/produk/pro' . ($key + 1) . '.png') ?>"
-                                            alt="<?= $lang === 'id' ? 'Gambar Produk ' . ($key + 1) : 'Product Image ' . ($key + 1) ?>">
+                                            alt="<?= $lang === 'id' ? 'Gambar Produk ' . ($key + 1) : 'Product Image ' . ($key + 1) ?>"
+                                            onerror="this.onerror=null; this.src='<?= base_url('assets/img/produk/pro1.png') ?>';">
                                     </div>
                                     <div class="col-lg-7">
                                         <h2 class="text-white animate__animated animate__slideInDown">
@@ -172,7 +174,8 @@
                                 <div class="product-item text-center">
                                     <div class="product-img-home">
                                         <img src="<?= base_url('assets/img/produk/' . esc($item['foto_produk'])) ?>"
-                                            alt="<?= esc($item['alt_produk_' . $lang] ?? $item['alt_produk_id']) ?>">
+                                            alt="<?= esc($item['alt_produk_' . $lang] ?? $item['alt_produk_id']) ?>"
+                                            onerror="this.onerror=null; this.src='<?= base_url('assets/img/produk/default.png') ?>';">
                                     </div>
                                     <div class="product-content">
                                         <h5><?= esc($item['nama_produk_' . $lang] ?? $item['nama_produk_id']) ?></h5>
@@ -220,7 +223,8 @@
     ?>
             <div class="activity-item">
                 <img src="<?= base_url('assets/img/aktivitas/' . esc($item['foto_aktivitas'])) ?>"
-                    alt="<?= esc($item['judul_aktivitas_id']) ?>" class="activity-img">
+                    alt="<?= esc($item['judul_aktivitas_id']) ?>" class="activity-img"
+                    onerror="this.onerror=null; this.src='<?= base_url('assets/img/aktivitas/default.jpg') ?>';">
                 <a href="<?= base_url(
                                 $lang === 'id'
                                     ? 'id/aktivitas/' . ($item['slug_kategori_id'] ?? 'kategori-tidak-ditemukan') . '/' . ($item['slug_aktivitas_id'] ?? 'aktivitas-tidak-ditemukan')
@@ -265,7 +269,8 @@
                                         <img src="<?= base_url('assets/img/artikel/' . esc($item['foto_artikel'])) ?>"
                                             alt="<?= esc($lang === 'id' ? $item['alt_artikel_id'] : $item['alt_artikel_en']) ?>"
                                             class="img-fluid rounded"
-                                            style="box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);">
+                                            style="box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);"
+                                            onerror="this.onerror=null; this.src='<?= base_url('assets/img/artikel/default.jpg') ?>';">
                                     </div>
                                     <div class="single-blog-item-txt mt-3">
                                         <div>
@@ -311,7 +316,8 @@
                             <?php foreach (array_slice($sideArtikel, 1) as $item) : ?>
                                 <div class="blog-sidebar d-flex align-items-center mb-3">
                                     <div class="single-blog-item-img" style="width: 80px; height: 80px; overflow: hidden; border-radius: 5px;">
-                                        <img src="<?= base_url('assets/img/artikel/' . esc($item['foto_artikel'])) ?>" class="img-fluid" alt="<?= esc($item['alt_artikel_' . $lang] ?? 'Gambar tidak tersedia') ?>">
+                                        <img src="<?= base_url('assets/img/artikel/' . esc($item['foto_artikel'])) ?>" class="img-fluid" alt="<?= esc($item['alt_artikel_' . $lang] ?? 'Gambar tidak tersedia') ?>"
+                                             onerror="this.onerror=null; this.src='<?= base_url('assets/img/artikel/default.jpg') ?>';">
                                     </div>
                                     <div class="single-blog-item-txt ms-3">
                                         <h4>

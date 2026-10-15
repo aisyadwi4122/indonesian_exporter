@@ -62,7 +62,8 @@ $background_image = 'assets/img/header.jpeg'; // Sesuaikan jika perlu mengganti 
                                     <img src="<?= base_url('assets/img/artikel/' . $article["foto_artikel"]) ?>"
                                         class="card-img-top"
                                         alt="<?= $lang == 'id' ? $article['alt_artikel_id'] : $article['alt_artikel_en']; ?>"
-                                        style="box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);">
+                                        style="box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);"
+                                        onerror="this.onerror=null; this.src='<?= base_url('assets/img/artikel/default.jpg') ?>';">
                                 </div>
                                 <div class="single-blog-item-txt">
                                     <h2 style="color: black; font-size:30px;">

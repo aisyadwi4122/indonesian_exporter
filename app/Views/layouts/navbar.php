@@ -93,18 +93,20 @@ if (!empty($categoriesProduk)) {
     <div class="container-fluid">
         <div class="header-logo-container">
             <a class="navbar-brand me-auto" href="#">
-                <img src="<?= base_url('assets/img/logo/' . $profil['logo_perusahaan']); ?>"
-                    alt="<?= $lang == 'id' ? $profil['alt_logo_perusahaan_id'] : $profil['alt_logo_perusahaan_en']; ?>"
-                    class="header-logo-img">
+                <img src="<?= base_url('assets/img/logo/' . ($profil['logo_perusahaan'] ?? 'IE.png')); ?>"
+                    alt="<?= $lang == 'id' ? ($profil['alt_logo_perusahaan_id'] ?? 'Logo') : ($profil['alt_logo_perusahaan_en'] ?? 'Logo'); ?>"
+                    class="header-logo-img"
+                    onerror="this.onerror=null; this.src='<?= base_url('assets/img/logo.png') ?>';">
             </a>
         </div>
         <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar">
             <div class="offcanvas-header">
                 <div class="header-logo-container-offcanvas">
                     <a class="navbar-brand me-auto" href="#">
-                        <img src="<?= base_url('assets/img/logo/' . $profil['logo_perusahaan']); ?>"
-                            alt="<?= $lang == 'id' ? $profil['alt_logo_perusahaan_id'] : $profil['alt_logo_perusahaan_en']; ?>"
-                            class="header-logo-img">
+                        <img src="<?= base_url('assets/img/logo/' . ($profil['logo_perusahaan'] ?? 'IE.png')); ?>"
+                            alt="<?= $lang == 'id' ? ($profil['alt_logo_perusahaan_id'] ?? 'Logo') : ($profil['alt_logo_perusahaan_en'] ?? 'Logo'); ?>"
+                            class="header-logo-img"
+                            onerror="this.onerror=null; this.src='<?= base_url('assets/img/logo.png') ?>';">
                     </a>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>

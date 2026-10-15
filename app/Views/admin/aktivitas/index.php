@@ -44,7 +44,13 @@
                                             <td><?= $tampilAktivitas['judul_aktivitas_en']?></td>
                                             <td><?= $tampilAktivitas['deskripsi_aktivitas_id']?></td>
                                             <td><?= $tampilAktivitas['deskripsi_aktivitas_en']?></td>
-                                            <td><img src="<?= base_url() . 'assets/img/aktivitas/' . $tampilAktivitas['foto_aktivitas'] ?>" class="img-fluid" alt="Foto Aktivitas"></td>
+                                            <td class="text-center" valign="middle">
+                                                <img src="<?= base_url('assets/img/aktivitas/' . $tampilAktivitas['foto_aktivitas']) ?>" 
+                                                     class="img-fluid" 
+                                                     style="max-width: 90px; max-height: 70px; object-fit: cover; border-radius: 6px;" 
+                                                     alt="Foto Aktivitas"
+                                                     onerror="this.onerror=null; this.src='<?= base_url('assets/img/aktivitas/default.jpg') ?>';">
+                                            </td>
                                             <td valign="middle">
                                                 <div class="d-grid gap-2">
                                                     <!--<a href="<?= base_url('admin/aktivitas/delete') . '/' . $tampilAktivitas['id_aktivitas'] ?>" class="btn btn-danger">Hapus</a>-->
