@@ -56,8 +56,7 @@ ini_set('display_errors', '1');
  *---------------------------------------------------------------
  */
 
-// Path to the front controller
-define('FCPATH', (is_dir(__DIR__ . DIRECTORY_SEPARATOR . 'public') && is_file(__DIR__ . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'index.php')) ? __DIR__ . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR : dirname(__DIR__) . DIRECTORY_SEPARATOR);
+define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR);
 
 // Ensure the current directory is pointing to the front controller's directory
 chdir(FCPATH);
