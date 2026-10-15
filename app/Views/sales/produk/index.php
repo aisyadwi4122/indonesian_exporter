@@ -2,10 +2,139 @@
 
 <?= $this->section('content') ?>
 
-<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
-    <div>
-        <h2 class="fw-bold mb-1" style="font-size: 24px; color: #1e293b;">Produk</h2>
-        <p class="text-muted mb-0" style="font-size: 14px;">Daftar katalog produk ekspor (hanya lihat).</p>
+<style>
+:root {
+  --produk-overlay: rgba(0, 0, 0, 0.45);
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.35);
+  --glass-blur: 10px;
+}
+
+body {
+  background-color: #14532d !important;
+  background-image: linear-gradient(var(--produk-overlay), var(--produk-overlay)), url('<?= base_url('assets/img/header.jpeg') ?>') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+}
+
+@media (max-width: 767.98px) {
+  body {
+    background-attachment: scroll !important;
+  }
+}
+
+.sales-topbar {
+  background: rgba(255, 255, 255, 0.80) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.sales-sidebar {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.sales-card {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(var(--glass-blur)) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+  color: #1e293b !important;
+}
+
+.sales-card table {
+  --bs-table-bg: transparent !important;
+  --bs-table-striped-bg: rgba(0, 0, 0, 0.03) !important;
+  background-color: transparent !important;
+}
+
+.sales-card .form-control,
+.sales-card .form-select,
+.sales-card .input-group-text {
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+.sales-card .btn-sales-secondary {
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+.pagination .page-link {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(226, 232, 240, 0.8) !important;
+  color: #1e293b !important;
+}
+
+.pagination .page-item.active .page-link {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+  color: #ffffff !important;
+}
+
+/* Produk Hero & Breadcrumb */
+.produk-hero {
+  color: #ffffff !important;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+
+.produk-hero h2 {
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+
+.produk-hero p {
+  color: #ffffff !important;
+  opacity: 0.9;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.produk-breadcrumb {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 13px;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  margin-bottom: 6px;
+}
+
+.produk-breadcrumb strong {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Fallback jika backdrop-filter tidak didukung */
+@supports not ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
+  .sales-card {
+    background: rgba(255, 255, 255, 0.95) !important;
+  }
+  .sales-topbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+  }
+  .sales-sidebar {
+    background: rgba(255, 255, 255, 0.96) !important;
+  }
+}
+</style>
+
+<div class="produk-hero mb-4">
+    <div class="produk-breadcrumb"><strong>SALES</strong> / PRODUK</div>
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="font-size: 24px;">Produk</h2>
+            <p class="mb-0" style="font-size: 14px;">Daftar katalog produk ekspor (hanya lihat).</p>
+        </div>
+        <div>
+            <a href="<?= base_url('sales/produk/pdf') . (!empty($q) ? '?q=' . urlencode($q) : '') ?>" 
+               id="btnExportPdf"
+               class="btn btn-sales-primary shadow-sm" 
+               target="_blank">
+                <i class="fa-solid fa-file-pdf me-1"></i> Export PDF
+            </a>
+        </div>
     </div>
 </div>
 
@@ -104,22 +233,18 @@
                         </p>
                         
                         <!-- Aksi Kartu Produk (Hanya Lihat & Unduh) -->
-                        <div class="pt-2 border-top">
-                            <a href="<?= base_url('sales/produk/' . $p['id_produk']) ?>" 
-                               class="btn btn-sm btn-outline-success w-100 mb-2"
+                        <div class="pt-2 border-top d-flex gap-2">
+                            <a href="<?= base_url('sales/produk/' . $idProduk) ?>" 
+                               class="btn btn-sm btn-outline-success flex-grow-1"
                                title="Detail">
                                 <i class="fa-solid fa-eye me-1"></i> Detail
                             </a>
-
-                            <button type="button" 
-                                    class="btn btn-sm btn-sales-primary w-100 btn-download-pdf"
-                                    data-id="<?= $p['id_produk'] ?>"
-                                    data-name="<?= esc($nama) ?>"
-                                    data-img="<?= $imgUrl ?>"
-                                    data-desc="<?= esc($descClean) ?>"
-                                    data-slug="<?= esc($slug) ?>">
-                                <i class="fa-solid fa-file-pdf me-1"></i> Unduh PDF
-                            </button>
+                            <a href="<?= base_url('sales/produk/' . $idProduk . '/pdf') ?>" 
+                               target="_blank"
+                               class="btn btn-sm btn-outline-danger"
+                               title="Export PDF">
+                                <i class="fa-solid fa-file-pdf me-1"></i> PDF
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -128,26 +253,19 @@
     <?php endif; ?>
 </div>
 
-<!-- Kontainer Tersembunyi untuk Render PDF A4 -->
-<div id="pdfRenderContainer" style="display: none;"></div>
-
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
-<!-- html2pdf.js via CDN (hanya dimuat di halaman produk Sales ini) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" 
-        integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqg3/Hqd0OTaiJTEAUVVGUvPBnrA==" 
-        crossorigin="anonymous" 
-        referrerpolicy="no-referrer"></script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // -------------------------------------------------------------
-    // FITUR PENCARIAN REAL-TIME
+    // FITUR PENCARIAN REAL-TIME & SINKRONISASI EXPORT PDF
     // -------------------------------------------------------------
     const searchInput = document.getElementById('searchInput');
     const productCards = document.querySelectorAll('.product-card-col');
     const emptyState = document.getElementById('emptyState');
+    const btnExportPdf = document.getElementById('btnExportPdf');
+    const baseExportUrl = '<?= base_url('sales/produk/pdf') ?>';
 
     function filterProducts(query) {
         const q = (query || '').trim().toLowerCase();
@@ -170,6 +288,11 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             emptyState.style.display = 'none';
         }
+
+        if (btnExportPdf) {
+            const rawVal = (query || '').trim();
+            btnExportPdf.href = baseExportUrl + (rawVal !== '' ? '?q=' + encodeURIComponent(rawVal) : '');
+        }
     }
 
     if (searchInput) {
@@ -181,121 +304,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (searchInput.value.trim() !== '') {
             filterProducts(searchInput.value);
         }
-    }
-
-    // -------------------------------------------------------------
-    // FITUR UNDUH PDF PER PRODUK (A4 Portrait)
-    // -------------------------------------------------------------
-    const pdfButtons = document.querySelectorAll('.btn-download-pdf');
-    const pdfRenderContainer = document.getElementById('pdfRenderContainer');
-
-    pdfButtons.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            const button = this;
-            const productName = button.getAttribute('data-name') || 'Produk';
-            const productImg = button.getAttribute('data-img') || '';
-            const productDesc = button.getAttribute('data-desc') || '';
-            const productSlug = button.getAttribute('data-slug') || 'produk';
-
-            const originalHtml = button.innerHTML;
-            button.disabled = true;
-            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Memproses PDF...';
-
-            // Pastikan gambar sudah selesai dimuat sebelum merender PDF (cegah gambar kosong)
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-
-            function renderAndDownload(imageSrc) {
-                // Bersihkan kontainer render
-                pdfRenderContainer.innerHTML = '';
-                pdfRenderContainer.style.display = 'block';
-
-                // Siapkan template A4 portrait khusus produk ini
-                const pdfContent = document.createElement('div');
-                pdfContent.style.width = '190mm';
-                pdfContent.style.minHeight = '270mm';
-                pdfContent.style.padding = '20mm 15mm';
-                pdfContent.style.background = '#ffffff';
-                pdfContent.style.color = '#1e293b';
-                pdfContent.style.fontFamily = 'Arial, sans-serif';
-                pdfContent.style.boxSizing = 'border-box';
-
-                pdfContent.innerHTML = `
-                    <div style="text-align: center; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid #16a34a;">
-                        <h1 style="font-size: 24px; font-weight: bold; color: #16a34a; margin: 0 0 6px 0; text-transform: uppercase;">
-                            ${escapeHtml(productName)}
-                        </h1>
-                    </div>
-                    <div style="text-align: center; margin-bottom: 28px;">
-                        <img src="${imageSrc}" 
-                             style="max-width: 100%; max-height: 130mm; object-fit: contain; border-radius: 8px; border: 1px solid #e2e8f0; padding: 4px;" 
-                             alt="${escapeHtml(productName)}">
-                    </div>
-                    <div style="margin-top: 10px;">
-                        <h3 style="font-size: 15px; font-weight: bold; color: #334155; margin: 0 0 10px 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
-                            Deskripsi Produk
-                        </h3>
-                        <p style="font-size: 13.5px; line-height: 1.7; color: #475569; text-align: justify; margin: 0; white-space: pre-line;">
-                            ${escapeHtml(productDesc)}
-                        </p>
-                    </div>
-                `;
-
-                pdfRenderContainer.appendChild(pdfContent);
-
-                // Nama file PDF: nama-produk.pdf
-                let cleanFileName = productSlug.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-');
-                if (!cleanFileName) {
-                    cleanFileName = 'produk';
-                }
-                const filename = cleanFileName + '.pdf';
-
-                const opt = {
-                    margin:       [10, 10, 10, 10],
-                    filename:     filename,
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true, logging: false },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-
-                html2pdf().set(opt).from(pdfContent).save().then(function () {
-                    pdfRenderContainer.style.display = 'none';
-                    pdfRenderContainer.innerHTML = '';
-                    button.disabled = false;
-                    button.innerHTML = originalHtml;
-                }).catch(function (err) {
-                    console.error('Gagal membuat PDF:', err);
-                    pdfRenderContainer.style.display = 'none';
-                    pdfRenderContainer.innerHTML = '';
-                    button.disabled = false;
-                    button.innerHTML = originalHtml;
-                    alert('Gagal mengunduh PDF produk.');
-                });
-            }
-
-            img.onload = function () {
-                renderAndDownload(productImg);
-            };
-
-            img.onerror = function () {
-                // Jika gambar gagal dimuat via CORS atau offline, tetap render dengan URL langsung
-                renderAndDownload(productImg);
-            };
-
-            img.src = productImg;
-        });
-    });
-
-    function escapeHtml(text) {
-        if (!text) return '';
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return text.replace(/[&<>"']/g, function (m) { return map[m]; });
     }
 });
 </script>

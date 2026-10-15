@@ -3,107 +3,258 @@
 <?= $this->section('content') ?>
 
 <style>
+:root {
+  --produk-overlay: rgba(0, 0, 0, 0.45);
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.35);
+  --glass-blur: 10px;
+}
+
+body {
+  background-color: #14532d !important;
+  background-image: linear-gradient(var(--produk-overlay), var(--produk-overlay)), url('<?= base_url('assets/img/header.jpeg') ?>') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+}
+
+@media (max-width: 767.98px) {
+  body {
+    background-attachment: scroll !important;
+  }
+}
+
+.sales-topbar {
+  background: rgba(255, 255, 255, 0.80) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.sales-sidebar {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.sales-card {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(var(--glass-blur)) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+  color: #1e293b !important;
+}
+
+.sales-card table {
+  --bs-table-bg: transparent !important;
+  --bs-table-striped-bg: rgba(0, 0, 0, 0.03) !important;
+  background-color: transparent !important;
+}
+
+.sales-card .form-control,
+.sales-card .form-select,
+.sales-card .input-group-text {
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+.sales-card .btn-sales-secondary {
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+.pagination .page-link {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(226, 232, 240, 0.8) !important;
+  color: #1e293b !important;
+}
+
+.pagination .page-item.active .page-link {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+  color: #ffffff !important;
+}
+
+/* Produk Hero & Breadcrumb */
+.produk-hero {
+  color: #ffffff !important;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+
+.produk-hero h2 {
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+
+.produk-hero p {
+  color: #ffffff !important;
+  opacity: 0.9;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.produk-breadcrumb {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 13px;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  margin-bottom: 6px;
+}
+
+.produk-breadcrumb strong {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Fallback jika backdrop-filter tidak didukung */
+@supports not ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
+  .sales-card {
+    background: rgba(255, 255, 255, 0.95) !important;
+  }
+  .sales-topbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+  }
+  .sales-sidebar {
+    background: rgba(255, 255, 255, 0.96) !important;
+  }
+  .tab-content {
+    background: rgba(255, 255, 255, 0.95) !important;
+  }
+}
+
+/* Detail Page Specific Styling */
+.tab-content {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 12px !important;
+  padding: 24px !important;
+  backdrop-filter: blur(var(--glass-blur)) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.10) !important;
+}
+
+.nav-tabs {
+  border-bottom: 2px solid rgba(255, 255, 255, 0.35) !important;
+  gap: 8px;
+}
+
 .nav-tabs .nav-link {
-    color: #64748b;
-    border: none;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
-    transition: all 0.2s ease;
-    background: transparent;
+  color: #ffffff !important;
+  font-weight: 500;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  border: none !important;
+  border-radius: 8px 8px 0 0 !important;
+  padding: 12px 20px !important;
+  background: rgba(0, 0, 0, 0.25) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: all 0.2s ease;
 }
+
 .nav-tabs .nav-link:hover {
-    color: #16a34a;
-    border-color: transparent;
-    background-color: #f8fafc;
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
 }
+
 .nav-tabs .nav-link.active {
-    color: #16a34a !important;
-    background-color: transparent !important;
-    border-bottom: 3px solid #16a34a !important;
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  font-weight: 600 !important;
+  border-radius: 8px 8px 0 0 !important;
+  text-shadow: none !important;
+  border-top: 1px solid var(--glass-border) !important;
+  border-left: 1px solid var(--glass-border) !important;
+  border-right: 1px solid var(--glass-border) !important;
+  border-bottom: 3px solid #16a34a !important;
 }
+
+.nav-tabs .nav-link.active i {
+  color: #16a34a !important;
+}
+
+.nav-tabs .nav-link:not(.active) i {
+  color: #dcfce7 !important;
+}
+
 .label-col {
-    color: #64748b;
-    font-size: 13.5px;
-    font-weight: 500;
+  color: #475569;
+  font-size: 13.5px;
+  font-weight: 500;
 }
+
 .value-col {
-    color: #1e293b;
-    font-size: 14px;
-    font-weight: 600;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
 }
+
 .info-row {
-    padding: 10px 0;
-    border-bottom: 1px solid #f1f5f9;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.7);
 }
+
 .info-row:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
+
 .desc-content {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 16px;
-    font-size: 13.5px;
-    line-height: 1.65;
-    color: #334155;
+  background-color: rgba(255, 255, 255, 0.65) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: #334155;
 }
-.desc-content p {
-    margin-bottom: 0.75rem;
-}
-.desc-content p:last-child {
-    margin-bottom: 0;
-}
+
 .desc-content table {
-    width: 100%;
-    margin-bottom: 1rem;
-    border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 1rem;
+  border-collapse: collapse;
 }
+
 .desc-content th, .desc-content td {
-    padding: 6px 10px;
-    border: 1px solid #cbd5e1;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
 }
 </style>
 
-<!-- Breadcrumb -->
-<nav aria-label="breadcrumb" class="mb-3">
-    <ol class="breadcrumb mb-0" style="font-size: 13.5px;">
-        <li class="breadcrumb-item">
-            <a href="<?= base_url('sales/produk') ?>" class="text-decoration-none text-success">
-                <i class="fa-solid fa-box-open me-1"></i>Produk
-            </a>
-        </li>
-        <li class="breadcrumb-item active text-truncate" aria-current="page" style="max-width: 400px;">
-            <?= esc($product['nama_produk_id'] ?? $product['nama_produk_en'] ?? 'Detail Produk') ?>
-        </li>
-    </ol>
-</nav>
-
-<!-- Header Title & Back Button -->
-<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
-    <div>
-        <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
-            <h2 class="fw-bold mb-0" style="font-size: 24px; color: #1e293b;">
-                <?= esc($product['nama_produk_id'] ?? '-') ?>
-            </h2>
-            <?php 
-                $kategori = !empty($product['nama_kategori_id']) 
-                    ? $product['nama_kategori_id'] 
-                    : (!empty($product['nama_kategori_en']) ? $product['nama_kategori_en'] : 'Umum');
-            ?>
-            <span class="badge" style="background-color: #dcfce7; color: #15803d; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 6px;">
-                <i class="fa-solid fa-tag me-1"></i><?= esc($kategori) ?>
-            </span>
-        </div>
-        <?php if (!empty($product['nama_produk_en'])): ?>
-            <p class="text-muted mb-0" style="font-size: 14.5px;">
-                <?= esc($product['nama_produk_en']) ?>
-            </p>
-        <?php endif; ?>
+<!-- Header Title & Back Button (Produk Hero) -->
+<div class="produk-hero mb-4">
+    <div class="produk-breadcrumb">
+        <strong>SALES</strong> / <a href="<?= base_url('sales/produk') ?>" class="text-white text-decoration-none">PRODUK</a> / <span style="opacity: 0.85;"><?= esc(strtoupper($product['nama_produk_id'] ?? 'DETAIL PRODUK')) ?></span>
     </div>
-    <div>
-        <a href="<?= base_url('sales/produk') ?>" class="btn btn-sales-secondary">
-            <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar
-        </a>
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div>
+            <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+                <h2 class="fw-bold mb-0" style="font-size: 26px;">
+                    <?= esc($product['nama_produk_id'] ?? '-') ?>
+                </h2>
+                <?php 
+                    $kategori = !empty($product['nama_kategori_id']) 
+                        ? $product['nama_kategori_id'] 
+                        : (!empty($product['nama_kategori_en']) ? $product['nama_kategori_en'] : 'Umum');
+                ?>
+                <span class="badge" style="background-color: rgba(220, 252, 231, 0.95); color: #15803d; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+                    <i class="fa-solid fa-tag me-1"></i><?= esc($kategori) ?>
+                </span>
+            </div>
+            <?php if (!empty($product['nama_produk_en'])): ?>
+                <p class="mb-0" style="font-size: 14.5px;">
+                    <?= esc($product['nama_produk_en']) ?>
+                </p>
+            <?php endif; ?>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="<?= base_url('sales/produk/' . esc($product['id_produk'] ?? '') . '/pdf') ?>" 
+               target="_blank" 
+               class="btn btn-sales-primary shadow-sm">
+                <i class="fa-solid fa-file-pdf me-1"></i> Cetak PDF
+            </a>
+            <a href="<?= base_url('sales/produk') ?>" class="btn btn-sales-secondary shadow-sm">
+                <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar
+            </a>
+        </div>
     </div>
 </div>
 
