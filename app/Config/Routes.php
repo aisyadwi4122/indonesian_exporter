@@ -23,6 +23,9 @@ $routes->get('sales/logout', 'Auth::logout');
 $routes->group('sales', ['filter' => 'salesauth'], function ($routes) {
     $routes->get('dashboard', 'Sales\Dashboard::index');
     $routes->get('produk', 'Sales\Produk::index');
+    $routes->get('produk/pdf', 'Sales\Produk::exportPdf');
+    $routes->get('produk/(:num)/pdf', 'Sales\Produk::detailPdf/$1');
+    $routes->get('produk/(:num)', 'Sales\Produk::detail/$1');
 });
 
 // ADMIN ROUTES

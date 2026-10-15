@@ -48,41 +48,68 @@
     <?php if (!empty($products)): ?>
         <?php foreach ($products as $p): ?>
             <?php
-                $nama = !empty($p['nama_produk_id']) ? $p['nama_produk_id'] : $p['nama_produk_en'];
-                $descRaw = !empty($p['deskripsi_produk_id']) ? $p['deskripsi_produk_id'] : $p['deskripsi_produk_en'];
+                $idProduk = $p['id_produk_supplier'] ?? ($p['id_produk'] ?? 0);
+                $nama = !empty($p['nama_produk']) ? $p['nama_produk'] : (!empty($p['nama_produk_id']) ? $p['nama_produk_id'] : ($p['nama_produk_en'] ?? 'Produk'));
+                $descRaw = !empty($p['spesifikasi']) ? $p['spesifikasi'] : (!empty($p['deskripsi_produk_id']) ? $p['deskripsi_produk_id'] : ($p['deskripsi_produk_en'] ?? ''));
                 $descClean = trim(strip_tags($descRaw));
                 $descShort = mb_strlen($descClean) > 110 ? mb_substr($descClean, 0, 110) . '...' : $descClean;
-                $imgUrl = base_url('assets/img/produk/' . esc($p['foto_produk']));
-                $slug = !empty($p['slug_id']) ? $p['slug_id'] : (!empty($p['slug_en']) ? $p['slug_en'] : 'produk-' . $p['id_produk']);
+                $supplier = !empty($p['nama_perusahaan']) ? $p['nama_perusahaan'] : '';
+                $lokasi = !empty($p['lokasi_barang']) ? $p['lokasi_barang'] : (!empty($p['domisili_usaha']) ? $p['domisili_usaha'] : '');
+
+                // Resolusi URL Gambar Produk (Default ke logo/placeholder)
+                if (!empty($p['foto_1'])) {
+                    $imgUrl = (str_starts_with($p['foto_1'], 'http://') || str_starts_with($p['foto_1'], 'https://'))
+                        ? $p['foto_1']
+                        : base_url($p['foto_1']);
+                } elseif (!empty($p['foto_produk'])) {
+                    $imgUrl = (str_starts_with($p['foto_produk'], 'http://') || str_starts_with($p['foto_produk'], 'https://'))
+                        ? $p['foto_produk']
+                        : (str_starts_with($p['foto_produk'], 'assets/') ? base_url($p['foto_produk']) : base_url('assets/img/produk/' . esc($p['foto_produk'])));
+                } else {
+                    $imgUrl = base_url('assets/img/logo.png');
+                }
+
+                $slug = 'produk-' . $idProduk;
             ?>
             <div class="col product-card-col" 
-                 data-id="<?= $p['id_produk'] ?>"
+                 data-id="<?= $idProduk ?>"
                  data-title="<?= esc(strtolower($nama)) ?>"
-                 data-desc="<?= esc(strtolower($descClean)) ?>">
+                 data-desc="<?= esc(strtolower($descClean . ' ' . $supplier . ' ' . $lokasi)) ?>">
                 <div class="sales-card h-100 d-flex flex-column p-0 overflow-hidden" style="border-radius: 10px; transition: transform 0.15s ease, box-shadow 0.15s ease;">
                     <div style="height: 180px; background-color: #f1f5f9; position: relative; overflow: hidden;">
                         <img src="<?= $imgUrl ?>" 
                              alt="<?= esc($nama) ?>" 
                              loading="lazy"
-                             style="width: 100%; height: 100%; object-fit: cover;"
+                             style="width: 100%; height: 100%; object-fit: contain; padding: 12px;"
                              onerror="this.onerror=null; this.src='<?= base_url('assets/img/logo.png') ?>'; this.style.objectFit='contain'; this.style.padding='20px';">
                     </div>
                     <div class="p-3 d-flex flex-column flex-grow-1">
+                        <?php if (!empty($supplier)): ?>
+                        <div class="mb-1 text-truncate" style="font-size: 11.5px; font-weight: 600; color: #16a34a;" title="<?= esc($supplier) ?>">
+                            <i class="fa-solid fa-building me-1"></i><?= esc($supplier) ?>
+                        </div>
+                        <?php endif; ?>
                         <h5 class="fw-bold mb-2 text-dark" style="font-size: 15.5px; line-height: 1.35;" title="<?= esc($nama) ?>">
-                            <?= esc($nama) ?>
+                            <a href="<?= base_url('sales/produk/' . $idProduk) ?>" class="text-dark text-decoration-none">
+                                <?= esc($nama) ?>
+                            </a>
                         </h5>
+                        <?php if (!empty($lokasi)): ?>
+                        <div class="text-muted mb-2 small text-truncate" style="font-size: 12px;">
+                            <i class="fa-solid fa-location-dot me-1 text-secondary"></i><?= esc($lokasi) ?>
+                        </div>
+                        <?php endif; ?>
                         <p class="text-muted mb-3 flex-grow-1" style="font-size: 13px; line-height: 1.5;">
                             <?= esc($descShort) ?>
                         </p>
                         
                         <!-- Aksi Kartu Produk (Hanya Lihat & Unduh) -->
                         <div class="pt-2 border-top">
-                            <!-- halaman detail Sales belum dibuat -->
-                            <button type="button" 
-                                    class="btn btn-sm btn-sales-secondary w-100 mb-2 btn-detail-sales"
-                                    title="Lihat Detail (Hanya Tampilan)">
-                                <i class="fa-solid fa-circle-info me-1"></i> Lihat Detail
-                            </button>
+                            <a href="<?= base_url('sales/produk/' . $p['id_produk']) ?>" 
+                               class="btn btn-sm btn-outline-success w-100 mb-2"
+                               title="Detail">
+                                <i class="fa-solid fa-eye me-1"></i> Detail
+                            </a>
 
                             <button type="button" 
                                     class="btn btn-sm btn-sales-primary w-100 btn-download-pdf"
