@@ -16,15 +16,6 @@ class AdminAuthBase extends BaseController
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
         parent::initController($request, $response, $logger);
-
-        // Verifikasi sesi admin saat controller diinisialisasi
-        if (!session()->get('logged_in')) {
-            $loginUrl = base_url('login');
-            if (!headers_sent()) {
-                header('Location: ' . $loginUrl);
-                exit;
-            }
-        }
     }
 
     /**
