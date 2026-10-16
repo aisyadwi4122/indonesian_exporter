@@ -41,6 +41,11 @@ $routes->post('supplier/login', 'Supplier\Auth::attempt');
 $routes->get('supplier/logout', 'Supplier\Auth::logout');
 $routes->group('supplier', ['filter' => 'supplierauth'], function ($routes) {
     $routes->get('dashboard', 'Supplier\Dashboard::index');
+    $routes->get('perusahaan', 'Supplier\Perusahaan::index');
+    $routes->post('perusahaan/simpan', 'Supplier\Perusahaan::simpan');
+    $routes->post('perusahaan/hapus', 'Supplier\Perusahaan::hapus');
+    $routes->get('produk', 'Supplier\Produk::index');
+    $routes->get('history', 'Supplier\History::index');
 });
 
 // ADMIN ROUTES

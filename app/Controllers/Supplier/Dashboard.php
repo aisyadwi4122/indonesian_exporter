@@ -5,7 +5,7 @@ namespace App\Controllers\Supplier;
 use App\Controllers\BaseController;
 use Config\Database;
 
-class Dashboard extends BaseController
+class Dashboard extends SupplierBase
 {
     /**
      * Dashboard sementara Supplier

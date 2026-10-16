@@ -298,6 +298,21 @@
                 <i class="fa-solid fa-chart-pie"></i>
                 <span>Dashboard</span>
             </a>
+            <a href="<?= base_url('supplier/perusahaan'); ?>"
+                class="nav-item-link <?= (isset($activeMenu) && $activeMenu === 'perusahaan') ? 'active' : '' ?>">
+                <i class="fa-solid fa-building"></i>
+                <span>Profil Perusahaan</span>
+            </a>
+            <a href="<?= base_url('supplier/produk'); ?>"
+                class="nav-item-link <?= (isset($activeMenu) && $activeMenu === 'produk') ? 'active' : '' ?>">
+                <i class="fa-solid fa-box-open"></i>
+                <span>Produk</span>
+            </a>
+            <a href="<?= base_url('supplier/history'); ?>"
+                class="nav-item-link <?= (isset($activeMenu) && $activeMenu === 'history') ? 'active' : '' ?>">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>History Ekspor</span>
+            </a>
         </nav>
 
         <div class="sidebar-footer">
@@ -324,6 +339,21 @@
                     class="nav-item-link <?= (isset($activeMenu) && $activeMenu === 'dashboard') ? 'active' : '' ?>">
                     <i class="fa-solid fa-chart-pie"></i>
                     <span>Dashboard</span>
+                </a>
+                <a href="<?= base_url('supplier/perusahaan'); ?>"
+                    class="nav-item-link <?= (isset($activeMenu) && $activeMenu === 'perusahaan') ? 'active' : '' ?>">
+                    <i class="fa-solid fa-building"></i>
+                    <span>Profil Perusahaan</span>
+                </a>
+                <a href="<?= base_url('supplier/produk'); ?>"
+                    class="nav-item-link <?= (isset($activeMenu) && $activeMenu === 'produk') ? 'active' : '' ?>">
+                    <i class="fa-solid fa-box-open"></i>
+                    <span>Produk</span>
+                </a>
+                <a href="<?= base_url('supplier/history'); ?>"
+                    class="nav-item-link <?= (isset($activeMenu) && $activeMenu === 'history') ? 'active' : '' ?>">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>History Ekspor</span>
                 </a>
             </nav>
             <div class="sidebar-footer mt-auto">
