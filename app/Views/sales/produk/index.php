@@ -185,19 +185,8 @@ body {
                 $supplier = !empty($p['nama_perusahaan']) ? $p['nama_perusahaan'] : '';
                 $lokasi = !empty($p['lokasi_barang']) ? $p['lokasi_barang'] : (!empty($p['domisili_usaha']) ? $p['domisili_usaha'] : '');
 
-                // Resolusi URL Gambar Produk (Default ke logo/placeholder)
-                if (!empty($p['foto_1'])) {
-                    $imgUrl = (str_starts_with($p['foto_1'], 'http://') || str_starts_with($p['foto_1'], 'https://'))
-                        ? $p['foto_1']
-                        : base_url($p['foto_1']);
-                } elseif (!empty($p['foto_produk'])) {
-                    $imgUrl = (str_starts_with($p['foto_produk'], 'http://') || str_starts_with($p['foto_produk'], 'https://'))
-                        ? $p['foto_produk']
-                        : (str_starts_with($p['foto_produk'], 'assets/') ? base_url($p['foto_produk']) : base_url('assets/img/produk/' . esc($p['foto_produk'])));
-                } else {
-                    $imgUrl = base_url('assets/img/logo.png');
-                }
-
+                $imgUrl = !empty($p['foto_url']) ? $p['foto_url'] : base_url('assets/img/logo.png');
+                $isPlaceholder = empty($p['foto_url']);
                 $slug = 'produk-' . $idProduk;
             ?>
             <div class="col product-card-col" 
@@ -205,11 +194,12 @@ body {
                  data-title="<?= esc(strtolower($nama)) ?>"
                  data-desc="<?= esc(strtolower($descClean . ' ' . $supplier . ' ' . $lokasi)) ?>">
                 <div class="sales-card h-100 d-flex flex-column p-0 overflow-hidden" style="border-radius: 10px; transition: transform 0.15s ease, box-shadow 0.15s ease;">
-                    <div style="height: 180px; background-color: #f1f5f9; position: relative; overflow: hidden;">
-                        <img src="<?= $imgUrl ?>" 
+                    <div style="height: 180px; background-color: #f1f5f9; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                        <img src="<?= esc($imgUrl) ?>" 
                              alt="<?= esc($nama) ?>" 
                              loading="lazy"
-                             style="width: 100%; height: 100%; object-fit: contain; padding: 12px;"
+                             referrerpolicy="no-referrer"
+                             style="width: 100%; height: 100%; object-fit: <?= $isPlaceholder ? 'contain' : 'cover' ?>; padding: <?= $isPlaceholder ? '20px' : '0' ?>;"
                              onerror="this.onerror=null; this.src='<?= base_url('assets/img/logo.png') ?>'; this.style.objectFit='contain'; this.style.padding='20px';">
                     </div>
                     <div class="p-3 d-flex flex-column flex-grow-1">

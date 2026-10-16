@@ -13,6 +13,8 @@ use Dompdf\Options;
 
 class Produk extends BaseController
 {
+    protected $helpers = ['url'];
+
     public function index()
     {
         $supplierProductModel = new SupplierProductModel();
@@ -38,6 +40,11 @@ class Produk extends BaseController
         }
 
         $products = $builder->orderBy('tb_produk_supplier.id_produk_supplier', 'DESC')->findAll();
+
+        foreach ($products as &$p) {
+            $p['foto_url'] = SupplierProductModel::photoUrl($p, 1);
+        }
+        unset($p);
 
         $data = [
             'title'      => 'Produk Sales - Indonesian Exporter',
@@ -185,8 +192,9 @@ class Produk extends BaseController
             }
             rsort($years);
 
+            $fotos = SupplierProductModel::photos($produkSupplier);
             $defaultImg = 'assets/img/logo.png';
-            $foto = !empty($produkSupplier['foto_1']) ? $produkSupplier['foto_1'] : $defaultImg;
+            $foto = !empty($fotos) ? $fotos[0] : $defaultImg;
 
             $product = [
                 'id_produk'           => $produkSupplier['id_produk_supplier'],
@@ -210,6 +218,12 @@ class Produk extends BaseController
                 return [];
             }
 
+            $fotos = [];
+            $legacyUrl = SupplierProductModel::photoUrl($product, 1);
+            if ($legacyUrl !== null) {
+                $fotos[] = $legacyUrl;
+            }
+
             $produkSupplier = null;   // array|null: data produk dari tb_produk_supplier
             $supplier       = null;   // array|null: data perusahaan dari tb_supplier
             $histories      = [];     // array: baris tb_history_export_supplier
@@ -224,6 +238,7 @@ class Produk extends BaseController
             'histories'      => $histories,
             'years'          => $years,
             'totalNilai'     => $totalNilai,
+            'fotos'          => $fotos,
         ];
     }
 
@@ -244,8 +259,9 @@ class Produk extends BaseController
 
         // Siapkan base64 gambar dan sanitasi HTML deskripsi per item produk
         foreach ($items as &$item) {
+            $supplierProdId = (int)($item['produkSupplier']['id_produk_supplier'] ?? ($item['product']['id_produk'] ?? 0));
             $fotoFile = $item['product']['foto_produk'] ?? null;
-            $item['imageData'] = $this->pdfImageData($fotoFile);
+            $item['imageData'] = $this->pdfImageData($supplierProdId, $fotoFile);
             $item['deskripsi_id_sanitized'] = $this->sanitizeHtml($item['product']['deskripsi_produk_id'] ?? '');
             $item['deskripsi_en_sanitized'] = $this->sanitizeHtml($item['product']['deskripsi_produk_en'] ?? '');
         }
@@ -280,25 +296,32 @@ class Produk extends BaseController
         exit;
     }
 
-    private function pdfImageData(?string $file): ?string
+    private function pdfImageData(int $supplierProductId = 0, ?string $legacyFile = null): ?string
     {
-        if ($file === null || trim($file) === '') {
-            return null;
+        $path = null;
+
+        // Pakai HANYA file lokal uploads/supplier/{id}_1.jpg
+        if ($supplierProductId > 0) {
+            $supplierLocal = FCPATH . 'uploads/supplier/' . $supplierProductId . '_1.jpg';
+            if (is_file($supplierLocal)) {
+                $path = $supplierLocal;
+            }
         }
 
-        $file = trim($file);
-
-        // Cek path sesuai spesifikasi: FCPATH . 'assets/img/produk/' . $file
-        $path = FCPATH . 'assets/img/produk/' . $file;
-        if (!is_file($path)) {
-            // Fallback jika $file sudah memiliki prefix 'assets/' atau path relatif dari FCPATH
-            if (is_file(FCPATH . $file)) {
-                $path = FCPATH . $file;
-            } elseif (is_file(FCPATH . ltrim($file, '/\\'))) {
-                $path = FCPATH . ltrim($file, '/\\');
-            } else {
-                return null;
+        // Fallback untuk produk lokal non-supplier (tb_produk) jika berupa file lokal di disk
+        if ($path === null && $legacyFile !== null && trim($legacyFile) !== '') {
+            $legacyTrimmed = trim($legacyFile);
+            if (!str_starts_with($legacyTrimmed, 'http://') && !str_starts_with($legacyTrimmed, 'https://')) {
+                if (is_file(FCPATH . 'assets/img/produk/' . $legacyTrimmed)) {
+                    $path = FCPATH . 'assets/img/produk/' . $legacyTrimmed;
+                } elseif (is_file(FCPATH . ltrim($legacyTrimmed, '/\\'))) {
+                    $path = FCPATH . ltrim($legacyTrimmed, '/\\');
+                }
             }
+        }
+
+        if ($path === null || !is_file($path)) {
+            return null;
         }
 
         try {

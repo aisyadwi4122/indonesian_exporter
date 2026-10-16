@@ -310,58 +310,65 @@ body {
             <!-- Kolom Kiri: Foto Utama & Galeri -->
             <div class="col-lg-4 col-md-5">
                 <div class="sales-card p-3 mb-4 text-center">
-                    <div style="background-color: #f8fafc; border-radius: 8px; overflow: hidden; height: 320px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0;">
-                        <?php
-                            $fotoProduk = !empty($product['foto_produk']) ? esc($product['foto_produk']) : '';
-                            if (!empty($fotoProduk)) {
-                                if (str_starts_with($fotoProduk, 'http://') || str_starts_with($fotoProduk, 'https://')) {
-                                    $fotoUtamaUrl = $fotoProduk;
-                                } elseif (str_starts_with($fotoProduk, 'assets/')) {
-                                    $fotoUtamaUrl = base_url($fotoProduk);
-                                } else {
-                                    $fotoUtamaUrl = base_url('assets/img/produk/' . $fotoProduk);
-                                }
-                            } else {
-                                $fotoUtamaUrl = base_url('assets/img/logo.png');
-                            }
-                        ?>
-                        <img id="mainProductImage" src="<?= $fotoUtamaUrl ?>" 
+                    <?php
+                        $fotosList = !empty($fotos) && is_array($fotos) ? $fotos : [];
+                        $mainPhoto = !empty($fotosList) ? $fotosList[0] : base_url('assets/img/logo.png');
+                        $hasPhotos = !empty($fotosList);
+                    ?>
+                    <div style="background-color: #f8fafc; border-radius: 8px; overflow: hidden; height: 320px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; cursor: pointer;"
+                         data-bs-toggle="modal" 
+                         data-bs-target="#imageModal"
+                         title="Klik untuk melihat foto lebih besar">
+                        <img id="mainProductImage" src="<?= esc($mainPhoto) ?>" 
                              alt="<?= esc($product['nama_produk_id'] ?? 'Foto Produk') ?>" 
                              class="img-fluid"
-                             style="max-height: 100%; max-width: 100%; object-fit: contain; padding: 12px;"
+                             loading="lazy"
+                             referrerpolicy="no-referrer"
+                             style="max-height: 100%; max-width: 100%; object-fit: contain; padding: <?= $hasPhotos ? '10px' : '24px' ?>;"
                              onerror="this.onerror=null; this.src='<?= base_url('assets/img/logo.png') ?>'; this.style.padding='24px';">
                     </div>
 
-                    <?php
-                        $galleryPhotos = [];
-                        if (!empty($produkSupplier)) {
-                            for ($i = 1; $i <= 5; $i++) {
-                                $key = 'foto_' . $i;
-                                if (!empty($produkSupplier[$key])) {
-                                    $galleryPhotos[] = $produkSupplier[$key];
-                                }
-                            }
-                        }
-                    ?>
-
-                    <?php if (!empty($galleryPhotos)): ?>
+                    <?php if (count($fotosList) > 1): ?>
                         <div class="mt-3 pt-3 border-top">
-                            <div class="text-muted small fw-semibold mb-2 text-start">Galeri Foto</div>
-                            <div class="d-flex flex-wrap gap-2 justify-content-start">
-                                <?php foreach ($galleryPhotos as $gPhoto): ?>
-                                    <?php
-                                        $gUrl = (str_starts_with($gPhoto, 'http://') || str_starts_with($gPhoto, 'https://'))
-                                            ? $gPhoto
-                                            : base_url($gPhoto);
-                                    ?>
-                                    <a href="<?= esc($gUrl) ?>" target="_blank" rel="noopener" class="border rounded p-1 d-inline-block bg-white shadow-sm" style="width: 58px; height: 58px;">
-                                        <img src="<?= esc($gUrl) ?>" alt="Foto Galeri" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;"
+                            <div class="text-muted small fw-semibold mb-2 text-start">Galeri Foto (<?= count($fotosList) ?>)</div>
+                            <div class="d-flex flex-wrap gap-2 justify-content-start" id="productThumbnails">
+                                <?php foreach ($fotosList as $idx => $fUrl): ?>
+                                    <button type="button" 
+                                            class="btn p-0 border rounded bg-white shadow-sm thumb-btn <?= $idx === 0 ? 'border-primary' : '' ?>" 
+                                            style="width: 58px; height: 58px; overflow: hidden; border-width: 2px !important;"
+                                            onclick="switchMainPhoto('<?= esc($fUrl, 'attr') ?>', this)">
+                                        <img src="<?= esc($fUrl) ?>" 
+                                             alt="Thumbnail <?= $idx + 1 ?>" 
+                                             loading="lazy"
+                                             referrerpolicy="no-referrer"
+                                             style="width: 100%; height: 100%; object-fit: cover;"
                                              onerror="this.onerror=null; this.src='<?= base_url('assets/img/logo.png') ?>';">
-                                    </a>
+                                    </button>
                                 <?php endforeach; ?>
                             </div>
                         </div>
                     <?php endif; ?>
+                </div>
+
+                <!-- Modal Bootstrap untuk Foto Besar -->
+                <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header py-2 px-3">
+                                <h6 class="modal-title text-dark fw-semibold" id="imageModalLabel"><?= esc($product['nama_produk_id'] ?? 'Foto Produk') ?></h6>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-2 text-center bg-light">
+                                <img id="modalProductImage" 
+                                     src="<?= esc($mainPhoto) ?>" 
+                                     alt="Preview Foto" 
+                                     loading="lazy"
+                                     referrerpolicy="no-referrer"
+                                     style="max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 6px;"
+                                     onerror="this.onerror=null; this.src='<?= base_url('assets/img/logo.png') ?>';">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -816,5 +823,22 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+function switchMainPhoto(url, btn) {
+    var mainImg = document.getElementById('mainProductImage');
+    var modalImg = document.getElementById('modalProductImage');
+    if (mainImg) {
+        mainImg.src = url;
+    }
+    if (modalImg) {
+        modalImg.src = url;
+    }
+    document.querySelectorAll('.thumb-btn').forEach(function(b) {
+        b.classList.remove('border-primary');
+    });
+    if (btn) {
+        btn.classList.add('border-primary');
+    }
+}
 </script>
 <?= $this->endSection() ?>
