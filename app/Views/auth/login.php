@@ -15,7 +15,10 @@
     <style>
         :root {
             /* Gambar login: Mengambil foto slider dari website resmi Indonesian Exporter */
-            --login-bg-image: url('<?= base_url($bg_image ?? 'assets/img/slider/slide1.png'); ?>');
+            <?php
+            $actualBgImage = (!empty($bg_image) && file_exists(FCPATH . $bg_image)) ? $bg_image : 'assets/img/slider/slide1.png';
+            ?>
+            --login-bg-image: url('<?= base_url($actualBgImage); ?>');
             --primary-green: #16a34a;
             --primary-green-hover: #15803d;
             --border-light: #dee2e6;
@@ -308,9 +311,9 @@
         <!-- Kolom Kanan: Gambar Full-Height Website Indonesian Exporter (± 53%) -->
         <div class="login-col-right" aria-hidden="true">
             <div class="login-right-overlay">
-                <span class="login-badge-tag">Indonesian Exporter</span>
-                <h2 class="login-caption-title">Membawa Produk Terbaik Indonesia ke Dunia</h2>
-                <p class="login-caption-subtitle">Portal Manajemen Sales &amp; Katalog Komoditas Ekspor Nusantara</p>
+                <span class="login-badge-tag"><?= esc($badge_tag ?? 'Indonesian Exporter'); ?></span>
+                <h2 class="login-caption-title"><?= esc($caption_title ?? 'Membawa Produk Terbaik Indonesia ke Dunia'); ?></h2>
+                <p class="login-caption-subtitle"><?= esc($caption_subtitle ?? 'Portal Manajemen Sales & Katalog Komoditas Ekspor Nusantara'); ?></p>
             </div>
         </div>
 

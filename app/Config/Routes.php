@@ -34,6 +34,15 @@ $routes->group('sales', ['filter' => 'role:sales'], function ($r) {
     $r->get('products/pdf/(:num)', 'Sales\ProductController::downloadPdf/$1');
 });
 
+// SUPPLIER ROUTES
+$routes->get('supplier', 'Supplier\Auth::login');
+$routes->get('supplier/login', 'Supplier\Auth::login');
+$routes->post('supplier/login', 'Supplier\Auth::attempt');
+$routes->get('supplier/logout', 'Supplier\Auth::logout');
+$routes->group('supplier', ['filter' => 'supplierauth'], function ($routes) {
+    $routes->get('dashboard', 'Supplier\Dashboard::index');
+});
+
 // ADMIN ROUTES
 $routes->get('login', 'LoginController::index');
 $routes->post('login/process', 'LoginController::process');
@@ -145,13 +154,28 @@ $routes->get('admin/meta/edit/(:num)', 'admin\MetaController::edit/$1');
 $routes->post('admin/meta/proses_edit/(:num)', 'admin\MetaController::proses_edit/$1');
 $routes->get('admin/meta/delete/(:any)', 'admin\MetaController::delete/$1');
 
-// ADMIN AKUN SALES
-$routes->get('admin/akun_sales/index', 'admin\AkunSales::index');
-$routes->get('admin/akun_sales/tambah', 'admin\AkunSales::tambah');
-$routes->post('admin/akun_sales/proses_tambah', 'admin\AkunSales::proses_tambah');
-$routes->get('admin/akun_sales/edit/(:num)', 'admin\AkunSales::edit/$1');
-$routes->post('admin/akun_sales/proses_edit/(:num)', 'admin\AkunSales::proses_edit/$1');
-$routes->post('admin/akun_sales/delete/(:num)', 'admin\AkunSales::delete/$1');
+// ADMIN MANAJEMEN AKUN (SALES & SUPPLIER)
+$routes->get('admin/akun', 'admin\Akun::index');
+$routes->get('admin/akun/index', 'admin\Akun::index');
+$routes->get('admin/akun/tambah', 'admin\Akun::tambah');
+$routes->post('admin/akun/proses_tambah', 'admin\Akun::proses_tambah');
+$routes->get('admin/akun/edit/(:segment)/(:num)', 'admin\Akun::edit/$1/$2');
+$routes->post('admin/akun/proses_edit/(:segment)/(:num)', 'admin\Akun::proses_edit/$1/$2');
+$routes->post('admin/akun/toggle/(:segment)/(:num)', 'admin\Akun::toggle/$1/$2');
+
+// REDIRECT ROUTE LAMA AKUN SALES KE MODUL BARU
+$routes->get('admin/akun_sales', function () {
+    return redirect()->to(base_url('admin/akun/index?tipe=sales'));
+});
+$routes->get('admin/akun_sales/index', function () {
+    return redirect()->to(base_url('admin/akun/index?tipe=sales'));
+});
+$routes->get('admin/akun_sales/tambah', function () {
+    return redirect()->to(base_url('admin/akun/tambah?tipe=sales'));
+});
+$routes->get('admin/akun_sales/edit/(:num)', function ($id) {
+    return redirect()->to(base_url('admin/akun/edit/sales/' . $id));
+});
 
 $routes->get('/', function () {
     return redirect()->to('/en/'); // Default redirect ke /en/home

@@ -166,13 +166,13 @@
                     </a>
                 </li>
 
-                <!-- MANAJEMEN AKUN SALES -->
+                <!-- MANAJEMEN AKUN -->
                 <li class="nav-item">
-                    <a class="nav-link <?= (strpos(current_url(), 'admin/akun_sales') !== false ? 'active' : '') ?>" href="<?= base_url('admin/akun_sales/index') ?>">
+                    <a class="nav-link <?= (strpos(current_url(), 'admin/akun') !== false ? 'active' : '') ?>" href="<?= base_url('admin/akun/index') ?>">
                         <span class="nav-icon">
-                            <i class="fa-solid fa-user-tie"></i>
+                            <i class="fa-solid fa-users-gear"></i>
                         </span>
-                        <span class="nav-link-text">Akun Sales</span>
+                        <span class="nav-link-text">Manajemen Akun</span>
                     </a>
                 </li>
 
