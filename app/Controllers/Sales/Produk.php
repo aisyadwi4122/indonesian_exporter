@@ -3,10 +3,11 @@
 namespace App\Controllers\Sales;
 
 use App\Controllers\BaseController;
-use App\Models\SupplierProductModel;
 use App\Models\SupplierModel;
 use App\Models\SupplierExportHistoryModel;
-use App\Models\ProductModel;
+use App\Models\SupplierProdukModel;
+use App\Models\EcpEksporModel;
+use App\Models\SupplierProductModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -15,257 +16,99 @@ class Produk extends BaseController
 {
     protected $helpers = ['url'];
 
+    /**
+     * Menampilkan katalog produk terpadu dalam satu daftar format grid kartu 4 kolom.
+     * Route: GET /sales/produk
+     */
     public function index()
     {
-        $supplierProductModel = new SupplierProductModel();
         $q = trim((string)($this->request->getGet('q') ?? ''));
+        $page = max(1, (int)($this->request->getGet('page') ?? 1));
+        $perPage = 16; // 4 baris x 4 kolom
 
-        $builder = $supplierProductModel->select('
-            tb_produk_supplier.*,
-            tb_produk_supplier.id_produk_supplier as id_produk,
-            tb_produk_supplier.nama_produk as nama_produk_id,
-            tb_supplier.nama_perusahaan,
-            tb_supplier.jenis_perusahaan,
-            tb_supplier.domisili_usaha
-        ')->join('tb_supplier', 'tb_supplier.id_supplier = tb_produk_supplier.id_supplier', 'left');
-
-        if ($q !== '') {
-            $builder->groupStart()
-                ->like('tb_produk_supplier.nama_produk', $q)
-                ->orLike('tb_supplier.nama_perusahaan', $q)
-                ->orLike('tb_produk_supplier.spesifikasi', $q)
-                ->orLike('tb_produk_supplier.lokasi_barang', $q)
-                ->orLike('tb_supplier.domisili_usaha', $q)
-            ->groupEnd();
+        // Ambil seluruh produk (127 produk: 117 ECP + 10 Supplier) sesuai kata kunci pencarian
+        $allItems = $this->fetchProducts($q);
+        $totalRows = count($allItems);
+        $totalPages = max(1, (int)ceil($totalRows / $perPage));
+        if ($page > $totalPages) {
+            $page = $totalPages;
         }
-
-        $products = $builder->orderBy('tb_produk_supplier.id_produk_supplier', 'DESC')->findAll();
-
-        foreach ($products as &$p) {
-            $p['foto_url'] = SupplierProductModel::photoUrl($p, 1);
-        }
-        unset($p);
+        $offset = ($page - 1) * $perPage;
+        $items = array_slice($allItems, $offset, $perPage);
 
         $data = [
-            'title'      => 'Produk Sales - Indonesian Exporter',
-            'page_title' => 'Produk',
+            'title'      => 'Katalog Produk Sales - Indonesian Exporter',
+            'page_title' => 'Katalog Produk',
             'activeMenu' => 'produk',
-            'products'   => $products,
             'q'          => $q,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'totalRows'  => $totalRows,
+            'totalPages' => $totalPages,
+            'items'      => $items,
         ];
 
         return view('sales/produk/index', $data);
     }
 
+    /**
+     * Menampilkan detail 1 produk (3 tab: Perusahaan, Produk, Riwayat Ekspor).
+     * Route: GET /sales/produk/detail/{id} dan GET /sales/produk/{id}
+     */
     public function detail($id = null)
     {
-        if ($id === null) {
-            throw PageNotFoundException::forPageNotFound();
+        if ($id === null || trim((string)$id) === '') {
+            throw PageNotFoundException::forPageNotFound('ID produk tidak valid');
         }
 
-        $detailData = $this->buildDetailData((int)$id);
+        $detailData = $this->buildDetailData((string)$id);
         if (empty($detailData)) {
-            throw PageNotFoundException::forPageNotFound('Produk tidak ditemukan');
+            throw PageNotFoundException::forPageNotFound('Data produk tidak ditemukan');
         }
+
+        $namaProduk = $detailData['product']['nama_produk'] ?? 'Detail Produk';
+        $namaPerusahaan = $detailData['company']['nama_perusahaan'] ?? '';
 
         $data = array_merge([
-            'title'      => ($detailData['product']['nama_produk_id'] ?? 'Detail Produk') . ' - Area Sales',
+            'title'      => esc($namaProduk) . ' - ' . esc($namaPerusahaan) . ' | Area Sales',
             'page_title' => 'Detail Produk',
             'activeMenu' => 'produk',
+            'id'         => (string)$id,
         ], $detailData);
 
         return view('sales/produk/detail', $data);
     }
 
+    /**
+     * Download PDF detail 1 produk (ringkasan 3 tab + gambar produk).
+     * Route: GET /sales/produk/detail/{id}/pdf dan GET /sales/produk/{id}/pdf
+     */
     public function detailPdf($id = null)
     {
-        if ($id === null) {
-            throw PageNotFoundException::forPageNotFound();
+        if ($id === null || trim((string)$id) === '') {
+            throw PageNotFoundException::forPageNotFound('ID produk tidak valid');
         }
 
-        $detailData = $this->buildDetailData((int)$id);
+        $detailData = $this->buildDetailData((string)$id);
         if (empty($detailData)) {
-            throw PageNotFoundException::forPageNotFound('Produk tidak ditemukan');
+            throw PageNotFoundException::forPageNotFound('Data produk tidak ditemukan');
         }
 
-        $rawSlug = $detailData['product']['nama_produk_id'] ?? ('item-' . $id);
-        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $rawSlug), '-'));
-        if (empty($slug)) {
-            $slug = (string)$id;
-        }
-
-        $filename = 'produk-' . $slug . '-' . date('Ymd') . '.pdf';
-        $this->renderPdf([$detailData], $filename);
-    }
-
-    public function exportPdf()
-    {
-        $supplierProductModel = new SupplierProductModel();
-        $q = trim((string)($this->request->getGet('q') ?? ''));
-
-        $builder = $supplierProductModel->select('
-            tb_produk_supplier.id_produk_supplier
-        ')->join('tb_supplier', 'tb_supplier.id_supplier = tb_produk_supplier.id_supplier', 'left');
-
-        if ($q !== '') {
-            $builder->groupStart()
-                ->like('tb_produk_supplier.nama_produk', $q)
-                ->orLike('tb_supplier.nama_perusahaan', $q)
-                ->orLike('tb_produk_supplier.spesifikasi', $q)
-                ->orLike('tb_produk_supplier.lokasi_barang', $q)
-                ->orLike('tb_supplier.domisili_usaha', $q)
-            ->groupEnd();
-        }
-
-        $rows = $builder->orderBy('tb_produk_supplier.id_produk_supplier', 'DESC')->findAll();
-        $count = count($rows);
-
-        $redirectUrl = base_url('sales/produk') . ($q !== '' ? '?q=' . urlencode($q) : '');
-
-        if ($count > 50) {
-            return redirect()->to($redirectUrl)->with('error', 'Persempit pencarian (maksimal 50 produk per PDF)');
-        }
-
-        if ($count === 0) {
-            // Fallback jika menggunakan tb_produk
-            $productModel = new ProductModel();
-            $pBuilder = $productModel->select('id_produk');
-            if ($q !== '') {
-                $pBuilder->like('nama_produk_id', $q)->orLike('nama_produk_en', $q);
-            }
-            $pRows = $pBuilder->findAll();
-            $pCount = count($pRows);
-
-            if ($pCount > 50) {
-                return redirect()->to($redirectUrl)->with('error', 'Persempit pencarian (maksimal 50 produk per PDF)');
-            }
-
-            if ($pCount === 0) {
-                return redirect()->to($redirectUrl)->with('error', 'Tidak ada produk yang ditemukan untuk diekspor');
-            }
-
-            $rows = array_map(function ($r) {
-                return ['id_produk_supplier' => $r['id_produk']];
-            }, $pRows);
-        }
-
-        $items = [];
-        foreach ($rows as $row) {
-            $data = $this->buildDetailData((int)$row['id_produk_supplier']);
-            if (!empty($data)) {
-                $items[] = $data;
-            }
-        }
-
-        if (empty($items)) {
-            return redirect()->to($redirectUrl)->with('error', 'Tidak ada produk yang dapat diekspor');
-        }
-
-        $filename = 'katalog-produk-' . date('Ymd') . '.pdf';
-        $this->renderPdf($items, $filename);
-    }
-
-    private function buildDetailData(int $id): array
-    {
-        $supplierProductModel = new SupplierProductModel();
-        $produkSupplier = $supplierProductModel->find($id);
-
-        $supplierModel = new SupplierModel();
-        $historyModel = new SupplierExportHistoryModel();
-
-        if ($produkSupplier) {
-            $supplier = $supplierModel->find($produkSupplier['id_supplier']);
-            $histories = $historyModel->where('id_supplier', $produkSupplier['id_supplier'])
-                ->orderBy('tahun', 'DESC')
-                ->orderBy('nilai_ekspor_usd', 'DESC')
-                ->findAll();
-
-            $years = [];
-            $totalNilai = 0.0;
-            foreach ($histories as $h) {
-                if (!empty($h['tahun']) && !in_array((int)$h['tahun'], $years, true)) {
-                    $years[] = (int)$h['tahun'];
-                }
-                if (isset($h['nilai_ekspor_usd']) && is_numeric($h['nilai_ekspor_usd'])) {
-                    $totalNilai += (float)$h['nilai_ekspor_usd'];
-                }
-            }
-            rsort($years);
-
-            $fotos = SupplierProductModel::photos($produkSupplier);
-            $defaultImg = 'assets/img/logo.png';
-            $foto = !empty($fotos) ? $fotos[0] : $defaultImg;
-
-            $product = [
-                'id_produk'           => $produkSupplier['id_produk_supplier'],
-                'nama_produk_id'      => $produkSupplier['nama_produk'],
-                'nama_produk_en'      => $supplier['nama_perusahaan'] ?? '',
-                'nama_kategori_id'    => 'Produk Supplier',
-                'nama_kategori_en'    => 'Supplier Product',
-                'foto_produk'         => $foto,
-                'deskripsi_produk_id' => $produkSupplier['spesifikasi'] ?? '-',
-                'deskripsi_produk_en' => $produkSupplier['spesifikasi'] ?? '-',
-            ];
-        } else {
-            // Fallback jika id berasal dari tb_produk
-            $productModel = new ProductModel();
-            $product = $productModel->select('tb_produk.*, tb_kategori_produk.nama_kategori_id, tb_kategori_produk.nama_kategori_en')
-                ->join('tb_kategori_produk', 'tb_kategori_produk.id_kategori_produk = tb_produk.id_kategori_produk', 'left')
-                ->where('tb_produk.id_produk', $id)
-                ->first();
-
-            if (!$product) {
-                return [];
-            }
-
-            $fotos = [];
-            $legacyUrl = SupplierProductModel::photoUrl($product, 1);
-            if ($legacyUrl !== null) {
-                $fotos[] = $legacyUrl;
-            }
-
-            $produkSupplier = null;   // array|null: data produk dari tb_produk_supplier
-            $supplier       = null;   // array|null: data perusahaan dari tb_supplier
-            $histories      = [];     // array: baris tb_history_export_supplier
-            $years          = [];     // array tahun yang tersedia
-            $totalNilai     = 0.0;
-        }
-
-        return [
-            'product'        => $product,
-            'produkSupplier' => $produkSupplier,
-            'supplier'       => $supplier,
-            'histories'      => $histories,
-            'years'          => $years,
-            'totalNilai'     => $totalNilai,
-            'fotos'          => $fotos,
-        ];
-    }
-
-    private function renderPdf(array $items, string $filename)
-    {
         ini_set('memory_limit', '512M');
         set_time_limit(120);
 
-        // Siapkan logo aplikasi sebagai data URI
-        $logoPath = FCPATH . 'assets/img/logo.png';
-        $logoData = null;
-        if (is_file($logoPath)) {
-            $rawLogo = @file_get_contents($logoPath);
-            if ($rawLogo !== false) {
-                $logoData = 'data:image/png;base64,' . base64_encode($rawLogo);
-            }
-        }
+        // Logo base64
+        $logoData = $this->getBase64Logo();
 
-        // Siapkan base64 gambar dan sanitasi HTML deskripsi per item produk
-        foreach ($items as &$item) {
-            $supplierProdId = (int)($item['produkSupplier']['id_produk_supplier'] ?? ($item['product']['id_produk'] ?? 0));
-            $fotoFile = $item['product']['foto_produk'] ?? null;
-            $item['imageData'] = $this->pdfImageData($supplierProdId, $fotoFile);
-            $item['deskripsi_id_sanitized'] = $this->sanitizeHtml($item['product']['deskripsi_produk_id'] ?? '');
-            $item['deskripsi_en_sanitized'] = $this->sanitizeHtml($item['product']['deskripsi_produk_en'] ?? '');
-        }
-        unset($item);
+        // Siapkan foto produk base64
+        $productImageData = $this->resolveBase64Image($detailData['product']['foto_raw'] ?? null);
+
+        $html = view('sales/produk/pdf_detail', [
+            'data'             => $detailData,
+            'logoData'         => $logoData,
+            'productImageData' => $productImageData,
+            'tanggal'          => date('d F Y'),
+        ]);
 
         $options = new Options();
         $options->set('defaultFont', 'DejaVu Sans');
@@ -275,124 +118,426 @@ class Produk extends BaseController
 
         $dompdf = new Dompdf($options);
         $dompdf->setPaper('A4', 'portrait');
-
-        $html = view('sales/produk/pdf_template', [
-            'items'    => $items,
-            'tanggal'  => date('d F Y'),
-            'logoData' => $logoData,
-        ]);
-
         $dompdf->loadHtml($html);
         $dompdf->render();
 
+        $this->addPageNumbersToCanvas($dompdf);
+
+        $rawName = $detailData['product']['nama_produk'] ?? ('item-' . $id);
+        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $rawName), '-'));
+        if (empty($slug)) {
+            $slug = 'produk';
+        }
+        $filename = 'produk-' . $slug . '-' . date('Ymd') . '.pdf';
+
+        $dompdf->stream($filename, ['Attachment' => true]);
+        exit;
+    }
+
+    /**
+     * Export PDF daftar produk sesuai pencarian saat ini.
+     * Route: GET /sales/produk/pdf
+     */
+    public function exportPdf()
+    {
+        $q = trim((string)($this->request->getGet('q') ?? ''));
+
+        $items = $this->fetchProducts($q);
+        if (empty($items)) {
+            $redirectUrl = base_url('sales/produk') . ($q !== '' ? '?q=' . urlencode($q) : '');
+            return redirect()->to($redirectUrl)->with('error', 'Tidak ada data produk yang ditemukan untuk diekspor');
+        }
+
+        ini_set('memory_limit', '512M');
+        set_time_limit(180);
+
+        $logoData = $this->getBase64Logo();
+
+        $html = view('sales/produk/pdf_list', [
+            'items'    => $items,
+            'q'        => $q,
+            'logoData' => $logoData,
+            'tanggal'  => date('d F Y'),
+        ]);
+
+        $options = new Options();
+        $options->set('defaultFont', 'DejaVu Sans');
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', false);
+        $options->set('chroot', FCPATH);
+
+        $dompdf = new Dompdf($options);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->loadHtml($html);
+        $dompdf->render();
+
+        $this->addPageNumbersToCanvas($dompdf);
+
+        $filename = 'daftar-produk-sales-' . date('Ymd') . '.pdf';
+        $dompdf->stream($filename, ['Attachment' => true]);
+        exit;
+    }
+
+    /**
+     * Mengambil seluruh daftar produk terpadu sesuai kata kunci pencarian.
+     */
+    private function fetchProducts(string $q): array
+    {
+        $items = [];
+        $db = \Config\Database::connect();
+
+        // 1. Ambil data Supplier Produk (10 baris) - diletakkan di awal / halaman pertama
+        $spBuilder = $db->table('tb_supplier_produk');
+        if ($q !== '') {
+            $spBuilder->groupStart()
+                ->like('nama_produk', $q)
+                ->orLike('nama_perusahaan', $q)
+                ->orLike('lokasi', $q)
+                ->orLike('jenis_usaha', $q)
+                ->orLike('spesifikasi_kapasitas', $q)
+                ->orLike('legalitas', $q)
+                ->orLike('sertifikasi', $q)
+            ->groupEnd();
+        }
+
+        $spRows = $spBuilder->orderBy('id_supplier_produk', 'ASC')->get()->getResultArray();
+        foreach ($spRows as $r) {
+            $photoUrl = SupplierProdukModel::extractPhotoUrl($r['foto_produk'] ?? null);
+            $items[] = [
+                'id'               => 'sp-' . $r['id_supplier_produk'],
+                'raw_id'           => (int)$r['id_supplier_produk'],
+                'source'           => 'supplier',
+                'nama_produk'      => $r['nama_produk'] ?: 'Produk Supplier',
+                'nama_perusahaan'  => $r['nama_perusahaan'] ?: '-',
+                'lokasi'           => $r['lokasi'] ?: '-',
+                'kapasitas'        => $r['spesifikasi_kapasitas'] ?: '-',
+                'kategori'         => $r['jenis_usaha'] ?: 'Supplier',
+                'foto_url'         => $photoUrl,
+                'has_photo'        => !empty($photoUrl),
+                'komisi'           => $r['komisi'] ?: null,
+                'harga_moq'        => $r['harga_moq'] ?: null,
+                'negara_tujuan'    => null,
+                'nilai_ekspor_usd' => null,
+            ];
+        }
+
+        // 2. Ambil data ECP (117 baris)
+        $builder = $db->table('tb_ecp_ekspor');
+        if ($q !== '') {
+            $builder->groupStart()
+                ->like('produk_ekspor', $q)
+                ->orLike('produk_dipasarkan', $q)
+                ->orLike('nama_perusahaan', $q)
+                ->orLike('domisili', $q)
+                ->orLike('wilayah_ecp', $q)
+                ->orLike('kategori_produk', $q)
+                ->orLike('merk_dagang', $q)
+                ->orLike('negara_tujuan', $q)
+            ->groupEnd();
+        }
+
+        $ecpRows = $builder->orderBy('id_ecp', 'ASC')
+                           ->get()
+                           ->getResultArray();
+
+        foreach ($ecpRows as $r) {
+            $namaProduk = !empty($r['produk_ekspor']) ? $r['produk_ekspor'] : (!empty($r['produk_dipasarkan']) ? $r['produk_dipasarkan'] : 'Produk Ekspor');
+            $items[] = [
+                'id'               => 'ecp-' . $r['id_ecp'],
+                'raw_id'           => (int)$r['id_ecp'],
+                'source'           => 'ecp',
+                'nama_produk'      => $namaProduk,
+                'nama_perusahaan'  => $r['nama_perusahaan'] ?: '-',
+                'lokasi'           => !empty($r['domisili']) ? $r['domisili'] : (!empty($r['wilayah_ecp']) ? $r['wilayah_ecp'] : '-'),
+                'kapasitas'        => !empty($r['kapasitas_produksi']) ? $r['kapasitas_produksi'] : (!empty($r['kuantitas_ekspor']) ? 'Ekspor: ' . $r['kuantitas_ekspor'] : '-'),
+                'kategori'         => $r['kategori_produk'] ?: 'Umum',
+                'foto_url'         => null,
+                'has_photo'        => false,
+                'komisi'           => null,
+                'harga_moq'        => null,
+                'negara_tujuan'    => $r['negara_tujuan'] ?? null,
+                'nilai_ekspor_usd' => isset($r['nilai_ekspor_usd']) ? (float)$r['nilai_ekspor_usd'] : null,
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * Membangun data terstruktur untuk halaman detail produk (3 tab).
+     */
+    private function buildDetailData(string $idStr): array
+    {
+        $db = \Config\Database::connect();
+        $source = 'ecp';
+        $rawId = 0;
+
+        $idStr = trim($idStr);
+        if (str_starts_with($idStr, 'sp-')) {
+            $source = 'supplier';
+            $rawId = (int)substr($idStr, 3);
+        } elseif (str_starts_with($idStr, 'ecp-')) {
+            $source = 'ecp';
+            $rawId = (int)substr($idStr, 4);
+        } elseif (is_numeric($idStr)) {
+            $numericId = (int)$idStr;
+            // Cek di tb_ecp_ekspor dahulu
+            $checkEcp = $db->table('tb_ecp_ekspor')->where('id_ecp', $numericId)->countAllResults();
+            if ($checkEcp > 0) {
+                $source = 'ecp';
+                $rawId = $numericId;
+            } else {
+                $checkSp = $db->table('tb_supplier_produk')->where('id_supplier_produk', $numericId)->countAllResults();
+                if ($checkSp > 0) {
+                    $source = 'supplier';
+                    $rawId = $numericId;
+                } else {
+                    $source = 'ecp';
+                    $rawId = $numericId;
+                }
+            }
+        } else {
+            return [];
+        }
+
+        if ($source === 'ecp') {
+            $ecp = $db->table('tb_ecp_ekspor')->where('id_ecp', $rawId)->get()->getRowArray();
+            if (!$ecp) {
+                return [];
+            }
+
+            $namaPerusahaan = $ecp['nama_perusahaan'];
+
+            // Cari profil supplier tambahan jika ada
+            $kunci = strtolower(trim(preg_replace('/[^a-z0-9]/i', '', $namaPerusahaan)));
+            $supplierExtra = $db->table('tb_supplier')->where('nama_kunci', $kunci)->get()->getRowArray();
+
+            $company = [
+                'nama_perusahaan'  => $namaPerusahaan,
+                'domisili'         => $ecp['domisili'] ?: ($supplierExtra['domisili_usaha'] ?? '-'),
+                'wilayah_ecp'      => $ecp['wilayah_ecp'] ?: '-',
+                'lokasi_pabrik'    => $supplierExtra['lokasi_pabrik_gudang'] ?? '-',
+                'nama_pic'         => $ecp['nama_peserta'] ?: ($supplierExtra['nama_kontak'] ?? '-'),
+                'email'            => $ecp['email'] ?: ($supplierExtra['email'] ?? '-'),
+                'no_hp'            => $ecp['no_hp'] ?: ($supplierExtra['no_hp'] ?? '-'),
+                'website'          => $ecp['website'] ?: ($supplierExtra['website'] ?? '-'),
+                'instagram'        => $ecp['instagram'] ?: ($supplierExtra['instagram'] ?? '-'),
+                'jenis_perusahaan' => $ecp['jenis_perusahaan'] ?: ($supplierExtra['jenis_perusahaan'] ?? '-'),
+                'omset'            => $ecp['omset'] ?: '-',
+                'jumlah_pegawai'   => $supplierExtra['jumlah_pegawai'] ?? '-',
+                'legalitas'        => $supplierExtra['legalitas'] ?? '-',
+                'sertifikasi'      => $supplierExtra['sertifikasi'] ?? '-',
+            ];
+
+            $namaProduk = !empty($ecp['produk_ekspor']) ? $ecp['produk_ekspor'] : (!empty($ecp['produk_dipasarkan']) ? $ecp['produk_dipasarkan'] : 'Produk Ekspor');
+
+            $product = [
+                'id'                 => 'ecp-' . $ecp['id_ecp'],
+                'nama_produk'        => $namaProduk,
+                'produk_dipasarkan'  => $ecp['produk_dipasarkan'] ?: '-',
+                'kategori_produk'    => $ecp['kategori_produk'] ?: 'Umum',
+                'merk_dagang'        => $ecp['merk_dagang'] ?: '-',
+                'kapasitas_produksi' => $ecp['kapasitas_produksi'] ?: ($supplierExtra['kapasitas_produksi'] ?? '-'),
+                'deskripsi'          => !empty($ecp['produk_dipasarkan']) ? $ecp['produk_dipasarkan'] : $namaProduk,
+                'kuantitas_ekspor'   => $ecp['kuantitas_ekspor'] ?: '-',
+                'nilai_ekspor_usd'   => $ecp['nilai_ekspor_usd'] !== null ? (float)$ecp['nilai_ekspor_usd'] : null,
+                'foto_url'           => null,
+                'foto_raw'           => null,
+                'keunggulan'         => $supplierExtra['keunggulan_produk'] ?? '-',
+            ];
+
+            // Riwayat Ekspor untuk perusahaan ini
+            $histRows = $db->table('tb_ecp_ekspor')
+                           ->where('nama_perusahaan', $namaPerusahaan)
+                           ->orderBy('id_ecp', 'ASC')
+                           ->get()
+                           ->getResultArray();
+
+            $histories = [];
+            $totalNilai = 0.0;
+
+            foreach ($histRows as $h) {
+                $usd = $h['nilai_ekspor_usd'] !== null ? (float)$h['nilai_ekspor_usd'] : 0.0;
+                $totalNilai += $usd;
+
+                $histories[] = [
+                    'tahun'            => $h['tahun'] ?? '-',
+                    'produk'           => !empty($h['produk_ekspor']) ? $h['produk_ekspor'] : ($h['produk_dipasarkan'] ?: '-'),
+                    'negara_tujuan'    => $h['negara_tujuan'] ?: '-',
+                    'jenis_ekspor'     => $h['jenis_ekspor'] ?: '-',
+                    'kuantitas'        => $h['kuantitas_ekspor'] ?: '-',
+                    'nilai_ekspor_usd' => $usd,
+                    'nilai_ekspor_raw' => $h['nilai_ekspor_raw'] ?: null,
+                ];
+            }
+
+            return [
+                'source'     => 'ecp',
+                'company'    => $company,
+                'product'    => $product,
+                'histories'  => $histories,
+                'totalNilai' => $totalNilai,
+            ];
+        }
+
+        // SOURCE: SUPPLIER (tb_supplier_produk)
+        $sp = $db->table('tb_supplier_produk')->where('id_supplier_produk', $rawId)->get()->getRowArray();
+        if (!$sp) {
+            return [];
+        }
+
+        $namaPerusahaan = $sp['nama_perusahaan'];
+        $kunci = strtolower(trim(preg_replace('/[^a-z0-9]/i', '', $namaPerusahaan)));
+        $supplierExtra = $db->table('tb_supplier')->where('nama_kunci', $kunci)->get()->getRowArray();
+
+        $company = [
+            'nama_perusahaan'  => $namaPerusahaan,
+            'domisili'         => $sp['lokasi'] ?: ($supplierExtra['domisili_usaha'] ?? '-'),
+            'wilayah_ecp'      => $sp['lokasi'] ?: '-',
+            'lokasi_pabrik'    => $supplierExtra['lokasi_pabrik_gudang'] ?? '-',
+            'nama_pic'         => $sp['nama_pic'] ?: ($supplierExtra['nama_kontak'] ?? '-'),
+            'email'            => $sp['email_perusahaan'] ?: ($sp['email_pengirim'] ?: ($supplierExtra['email'] ?? '-')),
+            'no_hp'            => $sp['no_hp'] ?: ($supplierExtra['no_hp'] ?? '-'),
+            'website'          => $sp['website'] ?: ($supplierExtra['website'] ?? '-'),
+            'instagram'        => $sp['instagram'] ?: ($supplierExtra['instagram'] ?? '-'),
+            'jenis_perusahaan' => $sp['jenis_usaha'] ?: ($supplierExtra['jenis_perusahaan'] ?? '-'),
+            'omset'            => '-',
+            'jumlah_pegawai'   => $supplierExtra['jumlah_pegawai'] ?? '-',
+            'legalitas'        => $sp['legalitas'] ?: ($supplierExtra['legalitas'] ?? '-'),
+            'sertifikasi'      => $sp['sertifikasi'] ?: ($supplierExtra['sertifikasi'] ?? '-'),
+        ];
+
+        $photoUrl = SupplierProdukModel::extractPhotoUrl($sp['foto_produk'] ?? null);
+
+        $product = [
+            'id'                 => 'sp-' . $sp['id_supplier_produk'],
+            'nama_produk'        => $sp['nama_produk'] ?: 'Produk Supplier',
+            'produk_dipasarkan'  => $sp['nama_produk'] ?: '-',
+            'kategori_produk'    => $sp['jenis_usaha'] ?: 'Supplier',
+            'merk_dagang'        => '-',
+            'kapasitas_produksi' => $sp['spesifikasi_kapasitas'] ?: '-',
+            'deskripsi'          => $sp['spesifikasi_kapasitas'] ?: '-',
+            'kuantitas_ekspor'   => '-',
+            'nilai_ekspor_usd'   => null,
+            'foto_url'           => $photoUrl,
+            'foto_raw'           => $sp['foto_produk'] ?? null,
+            'legalitas'          => $sp['legalitas'] ?: '-',
+            'sertifikasi'        => $sp['sertifikasi'] ?: '-',
+            'harga_moq'          => $sp['harga_moq'] ?: '-',
+            'komisi'             => $sp['komisi'] ?: '-',
+            'pernah_ekspor'      => $sp['pernah_ekspor'] ?: '-',
+            'keunggulan'         => $supplierExtra['keunggulan_produk'] ?? '-',
+        ];
+
+        // Cari histori ekspor dari tb_history_export_supplier / tb_ecp_ekspor
+        $histories = [];
+        $totalNilai = 0.0;
+
+        if (!empty($supplierExtra['id_supplier'])) {
+            $hRows = $db->table('tb_history_export_supplier')
+                        ->where('id_supplier', (int)$supplierExtra['id_supplier'])
+                        ->get()
+                        ->getResultArray();
+            foreach ($hRows as $h) {
+                $usd = $h['nilai_ekspor_usd'] !== null ? (float)$h['nilai_ekspor_usd'] : 0.0;
+                $totalNilai += $usd;
+                $histories[] = [
+                    'tahun'            => $h['tahun_ekspor'] ?? ($h['tahun'] ?? '-'),
+                    'produk'           => $h['produk'] ?: '-',
+                    'negara_tujuan'    => $h['negara_tujuan'] ?: '-',
+                    'jenis_ekspor'     => $h['jenis_ekspor'] ?: '-',
+                    'kuantitas'        => $h['kuantitas'] ?: '-',
+                    'nilai_ekspor_usd' => $usd,
+                    'nilai_ekspor_raw' => $h['nilai_ekspor_asli'] ?: null,
+                ];
+            }
+        }
+
+        return [
+            'source'     => 'supplier',
+            'company'    => $company,
+            'product'    => $product,
+            'histories'  => $histories,
+            'totalNilai' => $totalNilai,
+        ];
+    }
+
+    /**
+     * Mengambil logo resmi Indonesian Exporter sebagai data URI base64.
+     */
+    private function getBase64Logo(): ?string
+    {
+        $logoPath = FCPATH . 'assets/img/logo.png';
+        if (is_file($logoPath)) {
+            $raw = @file_get_contents($logoPath);
+            if ($raw !== false && !empty($raw)) {
+                return 'data:image/png;base64,' . base64_encode($raw);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Mengubah URL/path gambar produk menjadi base64 data URI untuk Dompdf.
+     */
+    private function resolveBase64Image(?string $fotoRaw): ?string
+    {
+        if (empty($fotoRaw)) {
+            return null;
+        }
+
+        $fotoRaw = trim($fotoRaw);
+
+        // Jika file lokal ada
+        $cleanPath = ltrim($fotoRaw, '/\\');
+        $localCandidates = [
+            FCPATH . $cleanPath,
+            FCPATH . 'assets/img/produk/' . $cleanPath,
+            FCPATH . 'uploads/supplier/' . $cleanPath,
+        ];
+
+        foreach ($localCandidates as $loc) {
+            if (is_file($loc)) {
+                $raw = @file_get_contents($loc);
+                if ($raw !== false && !empty($raw)) {
+                    $mime = mime_content_type($loc) ?: 'image/jpeg';
+                    return 'data:' . $mime . ';base64,' . base64_encode($raw);
+                }
+            }
+        }
+
+        // Jika Google Drive / URL eksternal
+        $thumbUrl = SupplierProdukModel::extractPhotoUrl($fotoRaw);
+        if ($thumbUrl) {
+            $ctx = stream_context_create([
+                'http' => [
+                    'timeout' => 3,
+                    'header'  => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\r\n",
+                ],
+                'ssl' => [
+                    'verify_peer'      => false,
+                    'verify_peer_name' => false,
+                ]
+            ]);
+            $raw = @file_get_contents($thumbUrl, false, $ctx);
+            if ($raw !== false && !empty($raw)) {
+                return 'data:image/jpeg;base64,' . base64_encode($raw);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Menambahkan penomoran halaman pada canvas Dompdf.
+     */
+    private function addPageNumbersToCanvas(Dompdf $dompdf): void
+    {
         $canvas = $dompdf->getCanvas();
         $fontMetrics = $dompdf->getFontMetrics();
         $font = $fontMetrics->getFont('DejaVu Sans', 'normal');
         $w = $canvas->get_width();
         $h = $canvas->get_height();
-        $canvas->page_text($w / 2 - 50, $h - 28, "Halaman {PAGE_NUM} dari {PAGE_COUNT}", $font, 9, [0.4, 0.45, 0.5]);
-
-        $dompdf->stream($filename, ['Attachment' => false]);
-        exit;
-    }
-
-    private function pdfImageData(int $supplierProductId = 0, ?string $legacyFile = null): ?string
-    {
-        $path = null;
-
-        // Pakai HANYA file lokal uploads/supplier/{id}_1.jpg
-        if ($supplierProductId > 0) {
-            $supplierLocal = FCPATH . 'uploads/supplier/' . $supplierProductId . '_1.jpg';
-            if (is_file($supplierLocal)) {
-                $path = $supplierLocal;
-            }
-        }
-
-        // Fallback untuk produk lokal non-supplier (tb_produk) jika berupa file lokal di disk
-        if ($path === null && $legacyFile !== null && trim($legacyFile) !== '') {
-            $legacyTrimmed = trim($legacyFile);
-            if (!str_starts_with($legacyTrimmed, 'http://') && !str_starts_with($legacyTrimmed, 'https://')) {
-                if (is_file(FCPATH . 'assets/img/produk/' . $legacyTrimmed)) {
-                    $path = FCPATH . 'assets/img/produk/' . $legacyTrimmed;
-                } elseif (is_file(FCPATH . ltrim($legacyTrimmed, '/\\'))) {
-                    $path = FCPATH . ltrim($legacyTrimmed, '/\\');
-                }
-            }
-        }
-
-        if ($path === null || !is_file($path)) {
-            return null;
-        }
-
-        try {
-            $raw = @file_get_contents($path);
-            if ($raw === false || empty($raw)) {
-                return null;
-            }
-
-            $src = @imagecreatefromstring($raw);
-            if (!$src) {
-                return null;
-            }
-
-            $origWidth = imagesx($src);
-            $origHeight = imagesy($src);
-
-            if ($origWidth <= 0 || $origHeight <= 0) {
-                imagedestroy($src);
-                return null;
-            }
-
-            $maxWidth = 800;
-            if ($origWidth > $maxWidth) {
-                $newWidth = $maxWidth;
-                $newHeight = (int)round(($origHeight / $origWidth) * $maxWidth);
-            } else {
-                $newWidth = $origWidth;
-                $newHeight = $origHeight;
-            }
-
-            $dst = imagecreatetruecolor($newWidth, $newHeight);
-            if (!$dst) {
-                imagedestroy($src);
-                return null;
-            }
-
-            // Latar putih untuk transparansi PNG/WebP/GIF
-            $white = imagecolorallocate($dst, 255, 255, 255);
-            imagefill($dst, 0, 0, $white);
-
-            imagecopyresampled($dst, $src, 0, 0, 0, 0, $newWidth, $newHeight, $origWidth, $origHeight);
-
-            ob_start();
-            imagejpeg($dst, null, 80);
-            $jpegData = ob_get_clean();
-
-            imagedestroy($src);
-            imagedestroy($dst);
-
-            if (!$jpegData) {
-                return null;
-            }
-
-            return 'data:image/jpeg;base64,' . base64_encode($jpegData);
-        } catch (\Throwable $e) {
-            return null;
-        }
-    }
-
-    private function sanitizeHtml(?string $html): string
-    {
-        if ($html === null || trim($html) === '') {
-            return '';
-        }
-
-        $whitelist = '<p><br><ul><ol><li><strong><b><em><i><h3><h4><table><thead><tbody><tr><th><td>';
-        $cleaned = strip_tags($html, $whitelist);
-
-        // Hapus atribut style, class, dan on*
-        $cleaned = preg_replace('/\s*(?:style|class|on[a-z]+)\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $cleaned);
-
-        return trim($cleaned ?? '');
+        $canvas->page_text($w / 2 - 50, $h - 25, "Halaman {PAGE_NUM} dari {PAGE_COUNT}", $font, 9, [0.4, 0.45, 0.5]);
     }
 }

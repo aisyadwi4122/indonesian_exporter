@@ -24,8 +24,10 @@ $routes->group('sales', ['filter' => 'salesauth'], function ($routes) {
     $routes->get('dashboard', 'Sales\Dashboard::index');
     $routes->get('produk', 'Sales\Produk::index');
     $routes->get('produk/pdf', 'Sales\Produk::exportPdf');
-    $routes->get('produk/(:num)/pdf', 'Sales\Produk::detailPdf/$1');
-    $routes->get('produk/(:num)', 'Sales\Produk::detail/$1');
+    $routes->get('produk/detail/(:any)/pdf', 'Sales\Produk::detailPdf/$1');
+    $routes->get('produk/detail/(:any)', 'Sales\Produk::detail/$1');
+    $routes->get('produk/(:any)/pdf', 'Sales\Produk::detailPdf/$1');
+    $routes->get('produk/(:any)', 'Sales\Produk::detail/$1');
 });
 
 $routes->group('sales', ['filter' => 'role:sales'], function ($r) {
