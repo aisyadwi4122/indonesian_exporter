@@ -143,11 +143,43 @@ body {
 }
 </style>
 
-<!-- Header: Nama Produk, Nama Perusahaan, Tombol Kembali & Download PDF -->
+<!-- Header Title & Back Button (Produk Hero) -->
 <div class="produk-hero mb-4">
-    <div class="produk-breadcrumb">
-        <strong>SALES</strong> / <a href="<?= base_url('sales/produk') ?>" class="text-white text-decoration-none">PRODUK</a> / <span style="opacity: 0.9;"><?= esc(strtoupper($product['nama_produk'])) ?></span>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+        <div class="produk-breadcrumb mb-0">
+            <strong>SALES</strong> / <a href="<?= base_url('sales/produk' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="text-white text-decoration-none">PRODUK</a> / <span style="opacity: 0.85;"><?= esc(strtoupper($product['nama_produk'] ?? 'DETAIL PRODUK')) ?></span>
+        </div>
+
+        <!-- BADGE & KONTROL MODE -->
+        <div class="d-flex align-items-center gap-2">
+            <?php if ($is_internal): ?>
+                <span class="badge bg-success text-white shadow-sm" style="font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px;">
+                    <i class="fa-solid fa-shield-halved me-1"></i> Mode: Internal
+                </span>
+                <?php if ($account_tipe === 'internal'): ?>
+                    <a href="<?= base_url('sales/produk/detail/' . esc($id) . '?mode=eksternal') ?>" 
+                       class="btn btn-sm btn-outline-light shadow-sm" 
+                       style="font-size: 12px; border-radius: 6px; padding: 4px 10px;"
+                       title="Lihat detail dalam mode eksternal">
+                        <i class="fa-solid fa-eye me-1"></i> Pratinjau Eksternal
+                    </a>
+                <?php endif; ?>
+            <?php else: ?>
+                <span class="badge text-white shadow-sm" style="background-color: #ea580c; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px;">
+                    <i class="fa-solid fa-globe me-1"></i> Mode: Eksternal<?= $is_preview ? ' (Pratinjau)' : '' ?>
+                </span>
+                <?php if ($account_tipe === 'internal'): ?>
+                    <a href="<?= base_url('sales/produk/detail/' . esc($id)) ?>" 
+                       class="btn btn-sm btn-light text-dark fw-semibold shadow-sm" 
+                       style="font-size: 12px; border-radius: 6px; padding: 4px 10px;"
+                       title="Kembali ke mode internal">
+                        <i class="fa-solid fa-arrow-rotate-left me-1"></i> Kembali ke Internal
+                    </a>
+                <?php endif; ?>
+            <?php endif; ?>
+        </div>
     </div>
+
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div>
             <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
@@ -166,13 +198,39 @@ body {
             </p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <a href="<?= base_url('sales/produk') ?>" class="btn btn-sales-secondary shadow-sm">
+            <?php if ($account_tipe === 'internal' && !$is_preview): ?>
+                <div class="dropdown d-inline-block">
+                    <button class="btn btn-sales-primary shadow-sm dropdown-toggle" type="button" id="pdfDropdownDetail" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-file-pdf me-1"></i> Cetak PDF
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="pdfDropdownDetail" style="min-width: 290px;">
+                        <li>
+                            <a class="dropdown-item py-2" href="<?= base_url('sales/produk/detail/' . esc($id) . '/pdf?tipe_pdf=eksternal') ?>" target="_blank">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span class="fw-bold text-dark"><i class="fa-solid fa-file-pdf text-success me-2"></i>PDF Eksternal</span>
+                                    <span class="badge bg-success" style="font-size: 10px;">Default</span>
+                                </div>
+                                <small class="text-muted d-block mt-1">Aman dikirim ke buyer (tanpa data supplier & komisi)</small>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item py-2" href="<?= base_url('sales/produk/detail/' . esc($id) . '/pdf?tipe_pdf=internal') ?>" target="_blank">
+                                <div class="fw-bold text-dark"><i class="fa-solid fa-file-shield text-warning me-2"></i>PDF Internal</div>
+                                <small class="text-muted d-block mt-1">Lengkap dengan data supplier, legalitas & komisi</small>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            <?php else: ?>
+                <a href="<?= base_url('sales/produk/detail/' . esc($id) . '/pdf' . ($is_preview ? '?mode=eksternal' : '')) ?>" 
+                   target="_blank" 
+                   class="btn btn-sales-primary shadow-sm">
+                    <i class="fa-solid fa-file-pdf me-1"></i> Cetak PDF
+                </a>
+            <?php endif; ?>
+            <a href="<?= base_url('sales/produk' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sales-secondary shadow-sm">
                 <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar
-            </a>
-            <a href="<?= base_url('sales/produk/detail/' . $id . '/pdf') ?>" 
-               target="_blank" 
-               class="btn btn-sales-primary shadow-sm">
-                <i class="fa-solid fa-file-pdf me-1"></i> Download PDF
             </a>
         </div>
     </div>
@@ -235,7 +293,6 @@ body {
             </h5>
             <span class="badge bg-success-subtle text-success border border-success-subtle">Kategori: <?= esc($product['kategori_produk']) ?></span>
         </div>
-
         <div class="row g-4">
             <!-- Kolom Kiri: Gambar Produk -->
             <div class="col-md-5 col-lg-4 text-center">

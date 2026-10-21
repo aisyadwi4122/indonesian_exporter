@@ -22,12 +22,27 @@ class Produk extends BaseController
      */
     public function index()
     {
+        $modeInfo = $this->resolveSalesMode();
+        $isInternal = $modeInfo['is_internal'];
+        $isPreview = $modeInfo['is_preview'];
+        $accountTipe = $modeInfo['account_tipe'];
+
         $q = trim((string)($this->request->getGet('q') ?? ''));
         $page = max(1, (int)($this->request->getGet('page') ?? 1));
         $perPage = 16; // 4 baris x 4 kolom
 
-        // Ambil seluruh produk (127 produk: 117 ECP + 10 Supplier) sesuai kata kunci pencarian
-        $allItems = $this->fetchProducts($q);
+        // Ambil seluruh produk (127 produk: 10 Supplier di awal + 117 ECP) sesuai kata kunci pencarian
+        $allItems = $this->fetchProducts($q, $isInternal);
+
+        // Jika mode eksternal, samarkan nama perusahaan & sembunyikan komisi
+        if (!$isInternal) {
+            foreach ($allItems as &$it) {
+                $it['nama_perusahaan'] = 'PT Indonesian Exporter Partner';
+                $it['komisi'] = null;
+            }
+            unset($it);
+        }
+
         $totalRows = count($allItems);
         $totalPages = max(1, (int)ceil($totalRows / $perPage));
         if ($page > $totalPages) {
@@ -37,22 +52,25 @@ class Produk extends BaseController
         $items = array_slice($allItems, $offset, $perPage);
 
         $data = [
-            'title'      => 'Katalog Produk Sales - Indonesian Exporter',
-            'page_title' => 'Katalog Produk',
-            'activeMenu' => 'produk',
-            'q'          => $q,
-            'page'       => $page,
-            'perPage'    => $perPage,
-            'totalRows'  => $totalRows,
-            'totalPages' => $totalPages,
-            'items'      => $items,
+            'title'        => 'Katalog Produk Sales - Indonesian Exporter',
+            'page_title'   => 'Katalog Produk',
+            'activeMenu'   => 'produk',
+            'q'            => $q,
+            'page'         => $page,
+            'perPage'      => $perPage,
+            'totalRows'    => $totalRows,
+            'totalPages'   => $totalPages,
+            'items'        => $items,
+            'is_internal'  => $isInternal,
+            'is_preview'   => $isPreview,
+            'account_tipe' => $accountTipe,
         ];
 
         return view('sales/produk/index', $data);
     }
 
     /**
-     * Menampilkan detail 1 produk (3 tab: Perusahaan, Produk, Riwayat Ekspor).
+     * Menampilkan detail 1 produk (3 tab: 1. Data Produk, 2. Data Perusahaan, 3. Data History Ekspor).
      * Route: GET /sales/produk/detail/{id} dan GET /sales/produk/{id}
      */
     public function detail($id = null)
@@ -61,19 +79,38 @@ class Produk extends BaseController
             throw PageNotFoundException::forPageNotFound('ID produk tidak valid');
         }
 
+        $modeInfo = $this->resolveSalesMode();
+        $isInternal = $modeInfo['is_internal'];
+        $isPreview = $modeInfo['is_preview'];
+        $accountTipe = $modeInfo['account_tipe'];
+
         $detailData = $this->buildDetailData((string)$id);
         if (empty($detailData)) {
             throw PageNotFoundException::forPageNotFound('Data produk tidak ditemukan');
+        }
+
+        if (!$isInternal) {
+            $detailData['company']['nama_perusahaan'] = 'PT Indonesian Exporter Partner';
+            $detailData['company']['nama_pic'] = 'Tim Sales Indonesian Exporter';
+            $detailData['company']['no_hp'] = '-';
+            $detailData['company']['email'] = 'sales@indonesian-exporter.com';
+            $detailData['company']['website'] = 'indonesian-exporter.com';
+            $detailData['company']['instagram'] = '@indonesian.exporter';
+            $detailData['company']['lokasi_pabrik'] = '-';
+            $detailData['product']['komisi'] = '-';
         }
 
         $namaProduk = $detailData['product']['nama_produk'] ?? 'Detail Produk';
         $namaPerusahaan = $detailData['company']['nama_perusahaan'] ?? '';
 
         $data = array_merge([
-            'title'      => esc($namaProduk) . ' - ' . esc($namaPerusahaan) . ' | Area Sales',
-            'page_title' => 'Detail Produk',
-            'activeMenu' => 'produk',
-            'id'         => (string)$id,
+            'title'        => esc($namaProduk) . ' - ' . esc($namaPerusahaan) . ' | Area Sales',
+            'page_title'   => 'Detail Produk',
+            'activeMenu'   => 'produk',
+            'id'           => (string)$id,
+            'is_internal'  => $isInternal,
+            'is_preview'   => $isPreview,
+            'account_tipe' => $accountTipe,
         ], $detailData);
 
         return view('sales/produk/detail', $data);
@@ -89,9 +126,33 @@ class Produk extends BaseController
             throw PageNotFoundException::forPageNotFound('ID produk tidak valid');
         }
 
+        $modeInfo = $this->resolveSalesMode();
+        $accountTipe = $modeInfo['account_tipe'];
+        $isPreview = $modeInfo['is_preview'];
+
+        $pdfType = strtolower(trim((string)$this->request->getGet('tipe_pdf')));
+        $isPdfInternal = false;
+
+        if ($accountTipe === 'internal' && !$isPreview && $pdfType === 'internal') {
+            $isPdfInternal = true;
+        } else {
+            $isPdfInternal = false;
+        }
+
         $detailData = $this->buildDetailData((string)$id);
         if (empty($detailData)) {
             throw PageNotFoundException::forPageNotFound('Data produk tidak ditemukan');
+        }
+
+        if (!$isPdfInternal) {
+            $detailData['company']['nama_perusahaan'] = 'PT Indonesian Exporter Partner';
+            $detailData['company']['nama_pic'] = 'Tim Sales Indonesian Exporter';
+            $detailData['company']['no_hp'] = '-';
+            $detailData['company']['email'] = 'sales@indonesian-exporter.com';
+            $detailData['company']['website'] = 'indonesian-exporter.com';
+            $detailData['company']['instagram'] = '@indonesian.exporter';
+            $detailData['company']['lokasi_pabrik'] = '-';
+            $detailData['product']['komisi'] = '-';
         }
 
         ini_set('memory_limit', '512M');
@@ -108,6 +169,7 @@ class Produk extends BaseController
             'logoData'         => $logoData,
             'productImageData' => $productImageData,
             'tanggal'          => date('d F Y'),
+            'is_internal'      => $isPdfInternal,
         ]);
 
         $options = new Options();
@@ -128,7 +190,7 @@ class Produk extends BaseController
         if (empty($slug)) {
             $slug = 'produk';
         }
-        $filename = 'produk-' . $slug . '-' . date('Ymd') . '.pdf';
+        $filename = 'produk-' . $slug . ($isPdfInternal ? '-internal' : '') . '-' . date('Ymd') . '.pdf';
 
         $dompdf->stream($filename, ['Attachment' => true]);
         exit;
@@ -140,12 +202,33 @@ class Produk extends BaseController
      */
     public function exportPdf()
     {
+        $modeInfo = $this->resolveSalesMode();
+        $accountTipe = $modeInfo['account_tipe'];
+        $isPreview = $modeInfo['is_preview'];
+
+        $pdfType = strtolower(trim((string)$this->request->getGet('tipe_pdf')));
+        $isPdfInternal = false;
+
+        if ($accountTipe === 'internal' && !$isPreview && $pdfType === 'internal') {
+            $isPdfInternal = true;
+        } else {
+            $isPdfInternal = false;
+        }
+
         $q = trim((string)($this->request->getGet('q') ?? ''));
 
-        $items = $this->fetchProducts($q);
+        $items = $this->fetchProducts($q, $isPdfInternal);
         if (empty($items)) {
             $redirectUrl = base_url('sales/produk') . ($q !== '' ? '?q=' . urlencode($q) : '');
             return redirect()->to($redirectUrl)->with('error', 'Tidak ada data produk yang ditemukan untuk diekspor');
+        }
+
+        if (!$isPdfInternal) {
+            foreach ($items as &$it) {
+                $it['nama_perusahaan'] = 'PT Indonesian Exporter Partner';
+                $it['komisi'] = null;
+            }
+            unset($it);
         }
 
         ini_set('memory_limit', '512M');
@@ -154,10 +237,11 @@ class Produk extends BaseController
         $logoData = $this->getBase64Logo();
 
         $html = view('sales/produk/pdf_list', [
-            'items'    => $items,
-            'q'        => $q,
-            'logoData' => $logoData,
-            'tanggal'  => date('d F Y'),
+            'items'       => $items,
+            'q'           => $q,
+            'logoData'    => $logoData,
+            'tanggal'     => date('d F Y'),
+            'is_internal' => $isPdfInternal,
         ]);
 
         $options = new Options();
@@ -173,15 +257,69 @@ class Produk extends BaseController
 
         $this->addPageNumbersToCanvas($dompdf);
 
-        $filename = 'daftar-produk-sales-' . date('Ymd') . '.pdf';
+        $filename = 'daftar-produk-sales-' . ($isPdfInternal ? 'internal-' : '') . date('Ymd') . '.pdf';
         $dompdf->stream($filename, ['Attachment' => true]);
         exit;
     }
 
     /**
-     * Mengambil seluruh daftar produk terpadu sesuai kata kunci pencarian.
+     * Menentukan hak akses akun Sales dari database (bukan hanya session)
+     * dan menentukan mode aktif (internal vs eksternal) serta status pratinjau.
+     *
+     * @return array{account_tipe: string, is_internal: bool, is_preview: bool}
      */
-    private function fetchProducts(string $q): array
+    private function resolveSalesMode(): array
+    {
+        $salesId = session()->get('sales_id') ?? session()->get('user_id');
+        $username = session()->get('username');
+
+        $accountTipeAkses = 'eksternal'; // Nilai selain 'internal' atau jika akun tidak ditemukan dianggap eksternal
+
+        if (!empty($salesId) || !empty($username)) {
+            $salesModel = new \App\Models\SalesModel();
+            $user = null;
+            if (!empty($salesId)) {
+                $user = $salesModel->find($salesId);
+            }
+            if (!$user && !empty($username)) {
+                $user = $salesModel->where('username', $username)->first();
+            }
+
+            if ($user && isset($user['tipe_akses']) && strtolower(trim((string)$user['tipe_akses'])) === 'internal') {
+                $accountTipeAkses = 'internal';
+            }
+        }
+
+        $requestedMode = strtolower(trim((string)$this->request->getGet('mode')));
+        $isInternal = false;
+        $isPreview = false;
+
+        if ($accountTipeAkses === 'internal') {
+            if ($requestedMode === 'eksternal') {
+                $isInternal = false;
+                $isPreview = true;
+            } else {
+                $isInternal = true;
+                $isPreview = false;
+            }
+        } else {
+            // Akun eksternal: ?mode=internal diabaikan sepenuhnya
+            $isInternal = false;
+            $isPreview = false;
+        }
+
+        return [
+            'account_tipe' => $accountTipeAkses,
+            'is_internal'  => $isInternal,
+            'is_preview'   => $isPreview,
+        ];
+    }
+
+    /**
+     * Mengambil seluruh daftar produk terpadu sesuai kata kunci pencarian.
+     * Urutan: 10 produk Supplier di awal, lalu 117 produk ECP.
+     */
+    private function fetchProducts(string $q, bool $isInternal = true): array
     {
         $items = [];
         $db = \Config\Database::connect();
@@ -191,22 +329,26 @@ class Produk extends BaseController
         if ($q !== '') {
             $spBuilder->groupStart()
                 ->like('nama_produk', $q)
-                ->orLike('nama_perusahaan', $q)
                 ->orLike('lokasi', $q)
                 ->orLike('jenis_usaha', $q)
-                ->orLike('spesifikasi_kapasitas', $q)
-                ->orLike('legalitas', $q)
-                ->orLike('sertifikasi', $q)
-            ->groupEnd();
+                ->orLike('spesifikasi_kapasitas', $q);
+            if ($isInternal) {
+                $spBuilder->orLike('nama_perusahaan', $q)
+                    ->orLike('legalitas', $q)
+                    ->orLike('sertifikasi', $q);
+            }
+            $spBuilder->groupEnd();
         }
 
         $spRows = $spBuilder->orderBy('id_supplier_produk', 'ASC')->get()->getResultArray();
         foreach ($spRows as $r) {
             $photoUrl = SupplierProdukModel::extractPhotoUrl($r['foto_produk'] ?? null);
+            $idSupplierProd = (int)$r['id_supplier_produk'];
             $items[] = [
-                'id'               => 'sp-' . $r['id_supplier_produk'],
-                'raw_id'           => (int)$r['id_supplier_produk'],
+                'id'               => 'sp-' . $idSupplierProd,
+                'raw_id'           => $idSupplierProd,
                 'source'           => 'supplier',
+                'kode_produk'      => SupplierProductModel::getKodeProduk($idSupplierProd),
                 'nama_produk'      => $r['nama_produk'] ?: 'Produk Supplier',
                 'nama_perusahaan'  => $r['nama_perusahaan'] ?: '-',
                 'lokasi'           => $r['lokasi'] ?: '-',
@@ -227,13 +369,15 @@ class Produk extends BaseController
             $builder->groupStart()
                 ->like('produk_ekspor', $q)
                 ->orLike('produk_dipasarkan', $q)
-                ->orLike('nama_perusahaan', $q)
                 ->orLike('domisili', $q)
                 ->orLike('wilayah_ecp', $q)
                 ->orLike('kategori_produk', $q)
                 ->orLike('merk_dagang', $q)
-                ->orLike('negara_tujuan', $q)
-            ->groupEnd();
+                ->orLike('negara_tujuan', $q);
+            if ($isInternal) {
+                $builder->orLike('nama_perusahaan', $q);
+            }
+            $builder->groupEnd();
         }
 
         $ecpRows = $builder->orderBy('id_ecp', 'ASC')
@@ -242,10 +386,12 @@ class Produk extends BaseController
 
         foreach ($ecpRows as $r) {
             $namaProduk = !empty($r['produk_ekspor']) ? $r['produk_ekspor'] : (!empty($r['produk_dipasarkan']) ? $r['produk_dipasarkan'] : 'Produk Ekspor');
+            $idEcp = (int)$r['id_ecp'];
             $items[] = [
-                'id'               => 'ecp-' . $r['id_ecp'],
-                'raw_id'           => (int)$r['id_ecp'],
+                'id'               => 'ecp-' . $idEcp,
+                'raw_id'           => $idEcp,
                 'source'           => 'ecp',
+                'kode_produk'      => 'ECP-' . str_pad((string)$idEcp, 4, '0', STR_PAD_LEFT),
                 'nama_produk'      => $namaProduk,
                 'nama_perusahaan'  => $r['nama_perusahaan'] ?: '-',
                 'lokasi'           => !empty($r['domisili']) ? $r['domisili'] : (!empty($r['wilayah_ecp']) ? $r['wilayah_ecp'] : '-'),
@@ -281,7 +427,6 @@ class Produk extends BaseController
             $rawId = (int)substr($idStr, 4);
         } elseif (is_numeric($idStr)) {
             $numericId = (int)$idStr;
-            // Cek di tb_ecp_ekspor dahulu
             $checkEcp = $db->table('tb_ecp_ekspor')->where('id_ecp', $numericId)->countAllResults();
             if ($checkEcp > 0) {
                 $source = 'ecp';
@@ -333,6 +478,7 @@ class Produk extends BaseController
 
             $product = [
                 'id'                 => 'ecp-' . $ecp['id_ecp'],
+                'kode_produk'        => 'ECP-' . str_pad((string)$ecp['id_ecp'], 4, '0', STR_PAD_LEFT),
                 'nama_produk'        => $namaProduk,
                 'produk_dipasarkan'  => $ecp['produk_dipasarkan'] ?: '-',
                 'kategori_produk'    => $ecp['kategori_produk'] ?: 'Umum',
@@ -411,6 +557,7 @@ class Produk extends BaseController
 
         $product = [
             'id'                 => 'sp-' . $sp['id_supplier_produk'],
+            'kode_produk'        => SupplierProductModel::getKodeProduk((int)$sp['id_supplier_produk']),
             'nama_produk'        => $sp['nama_produk'] ?: 'Produk Supplier',
             'produk_dipasarkan'  => $sp['nama_produk'] ?: '-',
             'kategori_produk'    => $sp['jenis_usaha'] ?: 'Supplier',
@@ -429,7 +576,7 @@ class Produk extends BaseController
             'keunggulan'         => $supplierExtra['keunggulan_produk'] ?? '-',
         ];
 
-        // Cari histori ekspor dari tb_history_export_supplier / tb_ecp_ekspor
+        // Cari histori ekspor dari tb_history_export_supplier
         $histories = [];
         $totalNilai = 0.0;
 

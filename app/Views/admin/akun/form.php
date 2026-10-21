@@ -94,7 +94,7 @@
                                     <?php 
                                         $selectedSupplier = old('id_supplier', $is_edit ? ($account['id_supplier'] ?? '') : ''); 
                                     ?>
-                                    <select class="form-select" id="id_supplier" name="id_supplier">
+                                    <select class="form-select" id="id_supplier" name="id_supplier" <?= $showSupplierSection ? 'required' : 'disabled' ?>>
                                         <option value="">-- Pilih Perusahaan Supplier --</option>
                                         <?php foreach ($suppliers as $sup) : ?>
                                             <option value="<?= esc($sup['id_supplier']) ?>" <?= (string)$selectedSupplier === (string)$sup['id_supplier'] ? 'selected' : '' ?>>
@@ -104,6 +104,26 @@
                                     </select>
                                 <?php endif; ?>
                                 <div class="form-text">Akun supplier ini akan terhubung dengan data perusahaan yang dipilih.</div>
+                            </div>
+
+                            <!-- TIPE AKSES (Hanya untuk tipe Sales) -->
+                            <?php 
+                                $isSalesAccount = $is_edit ? ($account['tipe'] === 'sales') : ($selectedTipe === 'sales');
+                                $selectedAkses = old('tipe_akses', $is_edit ? ($account['tipe_akses'] ?? '') : '');
+                            ?>
+                            <div class="mb-3" id="tipe_akses_wrapper" style="<?= $isSalesAccount ? '' : 'display: none;' ?>">
+                                <label for="tipe_akses" class="form-label fw-bold">
+                                    Tipe Akses <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="tipe_akses" name="tipe_akses" <?= $isSalesAccount ? 'required' : 'disabled' ?>>
+                                    <option value="" <?= ($selectedAkses === '' || $selectedAkses === null) ? 'selected' : '' ?>>-- Pilih Tipe Akses --</option>
+                                    <option value="internal" <?= $selectedAkses === 'internal' ? 'selected' : '' ?>>Internal</option>
+                                    <option value="eksternal" <?= $selectedAkses === 'eksternal' ? 'selected' : '' ?>>Eksternal</option>
+                                </select>
+                                <div class="form-text">
+                                    <strong>Internal:</strong> Akses penuh melihat identitas supplier dan komisi.<br>
+                                    <strong>Eksternal:</strong> Akses terbatas tanpa identitas supplier dan tanpa komisi (aman untuk sales pihak luar/buyer).
+                                </div>
                             </div>
 
                             <!-- NAMA LENGKAP -->
@@ -240,17 +260,31 @@ function toggleSupplierField() {
     var supplierRadio = document.getElementById('tipe_supplier');
     var supplierWrapper = document.getElementById('supplier_wrapper');
     var supplierSelect = document.getElementById('id_supplier');
+    var tipeAksesWrapper = document.getElementById('tipe_akses_wrapper');
+    var tipeAksesSelect = document.getElementById('tipe_akses');
     
-    if (supplierRadio && supplierWrapper) {
+    if (supplierRadio) {
         if (supplierRadio.checked) {
-            supplierWrapper.style.display = 'block';
+            if (supplierWrapper) supplierWrapper.style.display = 'block';
             if (supplierSelect) {
+                supplierSelect.removeAttribute('disabled');
                 supplierSelect.setAttribute('required', 'required');
             }
+            if (tipeAksesWrapper) tipeAksesWrapper.style.display = 'none';
+            if (tipeAksesSelect) {
+                tipeAksesSelect.setAttribute('disabled', 'disabled');
+                tipeAksesSelect.removeAttribute('required');
+            }
         } else {
-            supplierWrapper.style.display = 'none';
+            if (supplierWrapper) supplierWrapper.style.display = 'none';
             if (supplierSelect) {
+                supplierSelect.setAttribute('disabled', 'disabled');
                 supplierSelect.removeAttribute('required');
+            }
+            if (tipeAksesWrapper) tipeAksesWrapper.style.display = 'block';
+            if (tipeAksesSelect) {
+                tipeAksesSelect.removeAttribute('disabled');
+                tipeAksesSelect.setAttribute('required', 'required');
             }
         }
     }

@@ -92,19 +92,79 @@ body {
 
 <!-- Hero Section -->
 <div class="produk-hero mb-4">
-    <div class="produk-breadcrumb"><strong>SALES</strong> / PRODUK</div>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+        <div class="produk-breadcrumb mb-0"><strong>SALES</strong> / PRODUK</div>
+        
+        <!-- BADGE & KONTROL MODE -->
+        <div class="d-flex align-items-center gap-2">
+            <?php if ($is_internal): ?>
+                <span class="badge bg-success text-white shadow-sm" style="font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px;">
+                    <i class="fa-solid fa-shield-halved me-1"></i> Mode: Internal
+                </span>
+                <?php if ($account_tipe === 'internal'): ?>
+                    <a href="<?= base_url('sales/produk?mode=eksternal' . (!empty($q) ? '&q=' . urlencode($q) : '')) ?>" 
+                       class="btn btn-sm btn-outline-light shadow-sm" 
+                       style="font-size: 12px; border-radius: 6px; padding: 4px 10px;"
+                       title="Lihat tampilan katalog dalam mode eksternal">
+                        <i class="fa-solid fa-eye me-1"></i> Pratinjau Eksternal
+                    </a>
+                <?php endif; ?>
+            <?php else: ?>
+                <span class="badge text-white shadow-sm" style="background-color: #ea580c; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px;">
+                    <i class="fa-solid fa-globe me-1"></i> Mode: Eksternal<?= $is_preview ? ' (Pratinjau)' : '' ?>
+                </span>
+                <?php if ($account_tipe === 'internal'): ?>
+                    <a href="<?= base_url('sales/produk' . (!empty($q) ? '?q=' . urlencode($q) : '')) ?>" 
+                       class="btn btn-sm btn-light text-dark fw-semibold shadow-sm" 
+                       style="font-size: 12px; border-radius: 6px; padding: 4px 10px;"
+                       title="Kembali ke mode internal">
+                        <i class="fa-solid fa-arrow-rotate-left me-1"></i> Kembali ke Internal
+                    </a>
+                <?php endif; ?>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div>
             <h2 class="fw-bold mb-1" style="font-size: 24px;">Katalog Produk</h2>
             <p class="mb-0" style="font-size: 14px;">Katalog data produk ekspor dan supplier (area sales read-only).</p>
         </div>
         <div>
-            <a href="<?= base_url('sales/produk/pdf') . (!empty($q) ? '?q=' . urlencode($q) : '') ?>" 
-               id="btnExportPdf"
-               class="btn btn-sales-primary shadow-sm" 
-               target="_blank">
-                <i class="fa-solid fa-file-pdf me-1"></i> Export PDF
-            </a>
+            <?php if ($account_tipe === 'internal' && !$is_preview): ?>
+                <!-- Dua pilihan PDF untuk akun internal: Eksternal (default) & Internal -->
+                <div class="dropdown d-inline-block">
+                    <button class="btn btn-sales-primary shadow-sm dropdown-toggle" type="button" id="pdfDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-file-pdf me-1"></i> Export PDF
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="pdfDropdown" style="min-width: 290px;">
+                        <li>
+                            <a class="dropdown-item py-2" id="btnExportPdfEksternal" href="<?= base_url('sales/produk/pdf?tipe_pdf=eksternal' . (!empty($q) ? '&q=' . urlencode($q) : '')) ?>" target="_blank">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span class="fw-bold text-dark"><i class="fa-solid fa-file-pdf text-success me-2"></i>PDF Eksternal</span>
+                                    <span class="badge bg-success" style="font-size: 10px;">Default</span>
+                                </div>
+                                <small class="text-muted d-block mt-1">Aman dikirim ke buyer (tanpa data supplier & komisi)</small>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item py-2" id="btnExportPdfInternal" href="<?= base_url('sales/produk/pdf?tipe_pdf=internal' . (!empty($q) ? '&q=' . urlencode($q) : '')) ?>" target="_blank">
+                                <div class="fw-bold text-dark"><i class="fa-solid fa-file-shield text-warning me-2"></i>PDF Internal</div>
+                                <small class="text-muted d-block mt-1">Lengkap dengan data supplier, legalitas & komisi</small>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            <?php else: ?>
+                <!-- Akun eksternal atau dalam pratinjau: HANYA PDF Eksternal -->
+                <a href="<?= base_url('sales/produk/pdf' . (!empty($q) ? '?q=' . urlencode($q) : '')) ?>" 
+                   id="btnExportPdf"
+                   class="btn btn-sales-primary shadow-sm" 
+                   target="_blank">
+                    <i class="fa-solid fa-file-pdf me-1"></i> Export PDF
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -112,6 +172,9 @@ body {
 <!-- Kotak Pencarian Produk -->
 <div class="sales-card mb-4" style="padding: 16px 20px;">
     <form method="GET" action="<?= base_url('sales/produk') ?>">
+        <?php if ($is_preview): ?>
+            <input type="hidden" name="mode" value="eksternal">
+        <?php endif; ?>
         <div class="row g-2 align-items-center">
             <div class="col">
                 <div class="input-group">
@@ -119,7 +182,7 @@ body {
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </span>
                     <input type="text" id="searchInput" name="q" class="form-control border-start-0 ps-0" 
-                           placeholder="Cari produk, nama perusahaan, dan lokasi..." 
+                           placeholder="<?= $is_internal ? 'Cari produk, nama perusahaan, dan lokasi...' : 'Cari nama produk, spesifikasi, dan lokasi...' ?>" 
                            value="<?= esc($q ?? '') ?>" 
                            style="border-radius: 0 8px 8px 0; font-size: 14px;"
                            autocomplete="off">
@@ -132,7 +195,7 @@ body {
             </div>
             <?php if (!empty($q)): ?>
             <div class="col-auto">
-                <a href="<?= base_url('sales/produk') ?>" class="btn btn-sales-secondary" style="font-size: 13.5px;">
+                <a href="<?= base_url('sales/produk' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sales-secondary" style="font-size: 13.5px;">
                     <i class="fa-solid fa-xmark me-1"></i> Reset
                 </a>
             </div>
@@ -150,7 +213,7 @@ body {
     <h5 class="fw-semibold text-dark mb-1">Data tidak ditemukan</h5>
     <p class="text-muted mb-3" style="font-size: 14px;">Tidak ada produk yang cocok dengan kriteria pencarian "<strong><?= esc($q) ?></strong>".</p>
     <?php if (!empty($q)): ?>
-    <a href="<?= base_url('sales/produk') ?>" class="btn btn-sm btn-sales-primary">
+    <a href="<?= base_url('sales/produk' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sm btn-sales-primary">
         <i class="fa-solid fa-rotate-left me-1"></i> Tampilkan Semua Data
     </a>
     <?php endif; ?>
@@ -170,8 +233,14 @@ body {
             
             $imgUrl = !empty($item['foto_url']) ? $item['foto_url'] : base_url('assets/img/logo.png');
             $isPlaceholder = empty($item['foto_url']);
+            $detailUrl = base_url('sales/produk/detail/' . $id . ($is_preview ? '?mode=eksternal' : ''));
+            $detailPdfUrl = base_url('sales/produk/detail/' . $id . '/pdf' . ($is_preview ? '?mode=eksternal' : ''));
+            $searchDesc = $is_internal ? ($descShort . ' ' . $perusahaan . ' ' . $lokasi) : ($descShort . ' ' . $lokasi);
         ?>
-        <div class="col">
+        <div class="col product-card-col"
+             data-id="<?= esc($id) ?>"
+             data-title="<?= esc(strtolower($namaProduk)) ?>"
+             data-desc="<?= esc(strtolower($searchDesc)) ?>">
             <div class="sales-card sales-card-hover h-100 d-flex flex-column p-0 overflow-hidden">
                 <!-- Foto Produk / Placeholder Logo (Tanpa badge tahun) -->
                 <div style="height: 170px; background-color: #f8fafc; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(0,0,0,0.06);">
@@ -192,7 +261,9 @@ body {
 
                     <!-- Nama Produk -->
                     <h5 class="fw-bold mb-1 text-dark text-truncate" style="font-size: 14.5px;" title="<?= esc($namaProduk) ?>">
-                        <?= esc($namaProduk) ?>
+                        <a href="<?= $detailUrl ?>" class="text-dark text-decoration-none">
+                            <?= esc($namaProduk) ?>
+                        </a>
                     </h5>
 
                     <!-- Lokasi -->
@@ -211,7 +282,7 @@ body {
                         <span class="text-muted"><i class="fa-solid fa-ship me-1"></i>Ekspor:</span>
                         <span class="fw-bold text-success">$<?= number_format($item['nilai_ekspor_usd'], 0, ',', '.') ?> USD</span>
                     </div>
-                    <?php elseif (!empty($item['komisi'])): ?>
+                    <?php elseif (!empty($item['komisi']) && $is_internal): ?>
                     <div class="p-2 mb-2 rounded bg-light d-flex justify-content-between align-items-center" style="font-size: 11.5px;">
                         <span class="text-muted">Komisi:</span>
                         <span class="fw-bold text-success"><?= esc(mb_substr($item['komisi'], 0, 20)) ?></span>
@@ -220,12 +291,12 @@ body {
 
                     <!-- Tombol Aksi: Detail & PDF -->
                     <div class="d-flex gap-2 pt-2 border-top mt-auto">
-                        <a href="<?= base_url('sales/produk/detail/' . $id) ?>" 
+                        <a href="<?= $detailUrl ?>" 
                            class="btn btn-sm btn-outline-success flex-grow-1 fw-semibold text-center" 
                            style="font-size: 12.5px;">
                             <i class="fa-solid fa-circle-info me-1"></i> Detail
                         </a>
-                        <a href="<?= base_url('sales/produk/detail/' . $id . '/pdf') ?>" 
+                        <a href="<?= $detailPdfUrl ?>" 
                            target="_blank" 
                            class="btn btn-sm btn-outline-danger fw-semibold px-3" 
                            title="Unduh PDF Produk Ini"
@@ -240,7 +311,7 @@ body {
 </div>
 
 <!-- Navigasi Pagination & Info Baris -->
-<div class="sales-card d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 p-3">
+<div class="sales-card d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 p-3 mb-4">
     <div class="text-muted small">
         Menampilkan <strong><?= count($items) > 0 ? (($page - 1) * $perPage + 1) : 0 ?></strong> - 
         <strong><?= min($page * $perPage, $totalRows) ?></strong> dari <strong><?= $totalRows ?></strong> produk
@@ -251,7 +322,7 @@ body {
         <ul class="pagination pagination-sm mb-0">
             <!-- Prev -->
             <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                <a class="page-link" href="<?= base_url('sales/produk?page=' . ($page - 1) . (!empty($q) ? '&q=' . urlencode($q) : '')) ?>">
+                <a class="page-link" href="<?= base_url('sales/produk?page=' . ($page - 1) . (!empty($q) ? '&q=' . urlencode($q) : '') . ($is_preview ? '&mode=eksternal' : '')) ?>">
                     <i class="fa-solid fa-chevron-left"></i>
                 </a>
             </li>
@@ -263,7 +334,7 @@ body {
             ?>
             <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
                 <li class="page-item <?= $i === $page ? 'active' : '' ?>">
-                    <a class="page-link" href="<?= base_url('sales/produk?page=' . $i . (!empty($q) ? '&q=' . urlencode($q) : '')) ?>">
+                    <a class="page-link" href="<?= base_url('sales/produk?page=' . $i . (!empty($q) ? '&q=' . urlencode($q) : '') . ($is_preview ? '&mode=eksternal' : '')) ?>">
                         <?= $i ?>
                     </a>
                 </li>
@@ -271,7 +342,7 @@ body {
 
             <!-- Next -->
             <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                <a class="page-link" href="<?= base_url('sales/produk?page=' . ($page + 1) . (!empty($q) ? '&q=' . urlencode($q) : '')) ?>">
+                <a class="page-link" href="<?= base_url('sales/produk?page=' . ($page + 1) . (!empty($q) ? '&q=' . urlencode($q) : '') . ($is_preview ? '&mode=eksternal' : '')) ?>">
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>
             </li>
@@ -279,7 +350,59 @@ body {
     </nav>
     <?php endif; ?>
 </div>
-
 <?php endif; ?>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('searchInput');
+    const productCards = document.querySelectorAll('.product-card-col');
+    const btnExportPdf = document.getElementById('btnExportPdf');
+    const btnExportPdfEksternal = document.getElementById('btnExportPdfEksternal');
+    const btnExportPdfInternal = document.getElementById('btnExportPdfInternal');
+
+    function updatePdfLink(element, query) {
+        if (!element) return;
+        try {
+            const url = new URL(element.href, window.location.origin);
+            if (query && query.trim() !== '') {
+                url.searchParams.set('q', query.trim());
+            } else {
+                url.searchParams.delete('q');
+            }
+            element.href = url.pathname + url.search;
+        } catch (e) {}
+    }
+
+    function filterProducts(query) {
+        const q = (query || '').trim().toLowerCase();
+        productCards.forEach(function (card) {
+            const title = card.getAttribute('data-title') || '';
+            const desc = card.getAttribute('data-desc') || '';
+
+            if (q === '' || title.indexOf(q) !== -1 || desc.indexOf(q) !== -1) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        updatePdfLink(btnExportPdf, query);
+        updatePdfLink(btnExportPdfEksternal, query);
+        updatePdfLink(btnExportPdfInternal, query);
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            filterProducts(this.value);
+        });
+
+        if (searchInput.value.trim() !== '') {
+            filterProducts(searchInput.value);
+        }
+    }
+});
+</script>
 <?= $this->endSection() ?>

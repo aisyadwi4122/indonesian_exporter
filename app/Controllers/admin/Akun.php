@@ -43,6 +43,11 @@ class Akun extends AdminAuthBase
             $statusFilter = 'all';
         }
 
+        $aksesFilter = strtolower(trim((string)($this->request->getGet('akses') ?? 'all')));
+        if (!in_array($aksesFilter, ['all', 'internal', 'eksternal'], true)) {
+            $aksesFilter = 'all';
+        }
+
         $searchQuery = trim((string)($this->request->getGet('q') ?? ''));
 
         // 1. Ambil data Sales jika tipeFilter 'all' atau 'sales'
@@ -57,6 +62,7 @@ class Akun extends AdminAuthBase
                     'nama'        => $s['nama_sales'] ?? $s['username'],
                     'tipe'        => 'sales',
                     'tipe_label'  => 'Sales',
+                    'tipe_akses'  => $s['tipe_akses'] ?? 'internal',
                     'perusahaan'  => '-',
                     'is_active'   => $isActive,
                     'status_text' => $isActive ? 'Aktif' : 'Nonaktif',
@@ -82,6 +88,7 @@ class Akun extends AdminAuthBase
                     'nama'        => $sp['name'] ?? $sp['username'],
                     'tipe'        => 'supplier',
                     'tipe_label'  => 'Supplier',
+                    'tipe_akses'  => null,
                     'perusahaan'  => !empty($sp['nama_perusahaan']) ? $sp['nama_perusahaan'] : '-',
                     'is_active'   => $isActive,
                     'status_text' => $isActive ? 'Aktif' : 'Nonaktif',
@@ -101,7 +108,14 @@ class Akun extends AdminAuthBase
             }));
         }
 
-        // 5. Filter pencarian kata kunci (username, nama, perusahaan)
+        // 5. Filter tipe akses jika bukan 'all' (hanya relevan untuk akun Sales)
+        if ($aksesFilter !== 'all') {
+            $combined = array_values(array_filter($combined, function ($item) use ($aksesFilter) {
+                return ($item['tipe_akses'] ?? '') === $aksesFilter;
+            }));
+        }
+
+        // 6. Filter pencarian kata kunci (username, nama, perusahaan)
         if ($searchQuery !== '') {
             $qLower = mb_strtolower($searchQuery, 'UTF-8');
             $combined = array_values(array_filter($combined, function ($item) use ($qLower) {
@@ -112,7 +126,7 @@ class Akun extends AdminAuthBase
             }));
         }
 
-        // 6. Urutkan terbaru dulu (created_at DESC, fallback ID DESC)
+        // 7. Urutkan terbaru dulu (created_at DESC, fallback ID DESC)
         usort($combined, function ($a, $b) {
             $tA = !empty($a['created_at']) ? strtotime($a['created_at']) : 0;
             $tB = !empty($b['created_at']) ? strtotime($b['created_at']) : 0;
@@ -122,7 +136,7 @@ class Akun extends AdminAuthBase
             return $tB <=> $tA;
         });
 
-        // 7. Paginasi 10 item per halaman
+        // 8. Paginasi 10 item per halaman
         $perPage     = 10;
         $totalRows   = count($combined);
         $totalPages  = max(1, (int)ceil($totalRows / $perPage));
@@ -139,6 +153,7 @@ class Akun extends AdminAuthBase
             'per_page'      => $perPage,
             'tipe_filter'   => $tipeFilter,
             'status_filter' => $statusFilter,
+            'akses_filter'  => $aksesFilter,
             'search_query'  => $searchQuery,
         ];
 
@@ -234,8 +249,17 @@ class Akun extends AdminAuthBase
             $rules['id_supplier'] = [
                 'rules'  => 'required|is_natural_no_zero',
                 'errors' => [
-                    'required'            => 'Perusahaan Supplier wajib dipilih.',
+                    'required'           => 'Perusahaan Supplier wajib dipilih.',
                     'is_natural_no_zero' => 'Perusahaan Supplier tidak valid.',
+                ],
+            ];
+        } else {
+            // Field wajib "Tipe Akses" untuk akun Sales
+            $rules['tipe_akses'] = [
+                'rules'  => 'required|in_list[internal,eksternal]',
+                'errors' => [
+                    'required' => 'Tipe Akses wajib dipilih untuk akun Sales.',
+                    'in_list'  => 'Tipe Akses harus bernilai Internal atau Eksternal.',
                 ],
             ];
         }
@@ -262,14 +286,17 @@ class Akun extends AdminAuthBase
         $adminUser = session()->get('username') ?? 'admin';
 
         if ($tipe === 'sales') {
+            $tipeAkses = strtolower(trim((string)$this->request->getPost('tipe_akses')));
+            $this->salesModel->setAllowedFields(['nama_sales', 'username', 'password', 'email', 'no_hp', 'wilayah', 'status', 'tipe_akses']);
             $this->salesModel->insert([
                 'nama_sales' => $nama,
                 'username'   => $username,
                 'password'   => password_hash($password, PASSWORD_DEFAULT),
                 'status'     => ($status === 1 ? 'aktif' : 'nonaktif'),
+                'tipe_akses' => $tipeAkses,
             ]);
 
-            log_message('info', "Admin '{$adminUser}' berhasil membuat akun sales baru '{$username}'.");
+            log_message('info', "Admin '{$adminUser}' berhasil membuat akun sales baru '{$username}' dengan tipe akses '{$tipeAkses}'.");
         } else {
             $idSupplier = (int)$this->request->getPost('id_supplier');
             $supplier = $this->supplierModel->find($idSupplier);
@@ -329,6 +356,7 @@ class Akun extends AdminAuthBase
                 'nama'        => $s['nama_sales'] ?? $s['username'],
                 'tipe'        => 'sales',
                 'tipe_label'  => 'Sales',
+                'tipe_akses'  => $s['tipe_akses'] ?? 'internal',
                 'is_active'   => (isset($s['status']) && $s['status'] === 'aktif') ? 1 : 0,
                 'id_supplier' => null,
             ];
@@ -343,6 +371,7 @@ class Akun extends AdminAuthBase
                 'nama'        => $sp['name'] ?? $sp['username'],
                 'tipe'        => 'supplier',
                 'tipe_label'  => 'Supplier',
+                'tipe_akses'  => null,
                 'is_active'   => (int)($sp['is_active'] ?? 1),
                 'id_supplier' => $sp['id_supplier'],
             ];
@@ -397,8 +426,16 @@ class Akun extends AdminAuthBase
             $rules['id_supplier'] = [
                 'rules'  => 'required|is_natural_no_zero',
                 'errors' => [
-                    'required'            => 'Perusahaan Supplier wajib dipilih.',
+                    'required'           => 'Perusahaan Supplier wajib dipilih.',
                     'is_natural_no_zero' => 'Perusahaan Supplier tidak valid.',
+                ],
+            ];
+        } else {
+            $rules['tipe_akses'] = [
+                'rules'  => 'required|in_list[internal,eksternal]',
+                'errors' => [
+                    'required' => 'Tipe Akses wajib dipilih untuk akun Sales.',
+                    'in_list'  => 'Tipe Akses harus bernilai Internal atau Eksternal.',
                 ],
             ];
         }
@@ -435,16 +472,26 @@ class Akun extends AdminAuthBase
                 throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
             }
 
+            $oldTipeAkses = $account['tipe_akses'] ?? 'internal';
+            $newTipeAkses = strtolower(trim((string)$this->request->getPost('tipe_akses')));
+
             $updateData = [
                 'nama_sales' => $nama,
                 'status'     => ($status === 1 ? 'aktif' : 'nonaktif'),
+                'tipe_akses' => $newTipeAkses,
             ];
             if (!empty($password)) {
                 $updateData['password'] = password_hash($password, PASSWORD_DEFAULT);
             }
 
+            $this->salesModel->setAllowedFields(['nama_sales', 'username', 'password', 'email', 'no_hp', 'wilayah', 'status', 'tipe_akses']);
             $this->salesModel->update($id, $updateData);
-            log_message('info', "Admin '{$adminUser}' berhasil memperbarui akun sales '{$account['username']}'.");
+
+            if ($oldTipeAkses !== $newTipeAkses) {
+                log_message('info', "Admin '{$adminUser}' mengubah tipe akses akun sales '{$account['username']}' dari '{$oldTipeAkses}' menjadi '{$newTipeAkses}'.");
+            } else {
+                log_message('info', "Admin '{$adminUser}' berhasil memperbarui akun sales '{$account['username']}'.");
+            }
             session()->setFlashdata('success', "Akun Sales '{$account['username']}' berhasil diperbarui.");
         } else {
             $account = $this->supplierUserModel->find($id);
