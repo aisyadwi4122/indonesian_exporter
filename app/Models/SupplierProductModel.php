@@ -292,5 +292,210 @@ class SupplierProductModel extends Model
 
         return array_values(array_unique($list));
     }
+
+    /**
+     * Menghasilkan kode produk unik standar Indonesian Exporter: IE-XXXX
+     */
+    public static function getKodeProduk(int $id): string
+    {
+        return 'IE-' . str_pad((string)$id, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Menyaring satu tempat: membuang field identitas supplier & data sensitif untuk mode eksternal.
+     * Semua halaman (daftar, detail, PDF) WAJIB memanggil method ini untuk mode eksternal
+     * SEBELUM data dikirim ke view atau template PDF.
+     *
+     * Field yang dibuang (unset):
+     * - Supplier: nama_perusahaan, nama_kunci, nama_kontak, email, no_hp, website, instagram,
+     *             legalitas, link_dokumen_legalitas, link_dokumen_sertifikat, link_foto_usaha.
+     * - Produk: legalitas, komisi.
+     *
+     * Menambahkan:
+     * - kode_produk = 'IE-' . str_pad(id_produk_supplier, 4, '0', STR_PAD_LEFT)
+     */
+    public static function maskForExternal(array $data): array
+    {
+        // 1. Jika data berupa kumpulan baris (list terindeks numerik)
+        if (!empty($data) && array_is_list($data)) {
+            foreach ($data as $idx => $item) {
+                if (is_array($item)) {
+                    $data[$idx] = self::maskForExternal($item);
+                }
+            }
+            return $data;
+        }
+
+        // Tentukan ID produk untuk membuat kode_produk
+        $prodId = (int)(
+            $data['produkSupplier']['id_produk_supplier'] 
+            ?? ($data['product']['id_produk'] 
+            ?? ($data['id_produk_supplier'] 
+            ?? ($data['id_produk'] 
+            ?? ($data['id'] ?? 0))))
+        );
+        $kodeProduk = self::getKodeProduk($prodId);
+        $data['kode_produk'] = $kodeProduk;
+
+        $companyName = (string)(
+            $data['supplier']['nama_perusahaan'] 
+            ?? ($data['nama_perusahaan'] ?? '')
+        );
+
+        // Jika ada sub-array 'product' (struktur detail / item PDF)
+        if (isset($data['product']) && is_array($data['product'])) {
+            $data['product']['kode_produk'] = $kodeProduk;
+            if ($companyName !== '' && trim((string)($data['product']['nama_produk_en'] ?? '')) === trim($companyName)) {
+                $data['product']['nama_produk_en'] = $kodeProduk;
+            }
+            unset(
+                $data['product']['legalitas'],
+                $data['product']['komisi']
+            );
+        }
+
+        // Jika ada sub-array 'produkSupplier'
+        if (isset($data['produkSupplier']) && is_array($data['produkSupplier'])) {
+            $data['produkSupplier']['kode_produk'] = $kodeProduk;
+            unset(
+                $data['produkSupplier']['legalitas'],
+                $data['produkSupplier']['komisi']
+            );
+
+            // Sanitasi jika ada catatan komisi yang terselip di field produk non-komisi (misal harga_exw)
+            foreach ($data['produkSupplier'] as $fld => $val) {
+                if (is_string($val) && preg_match('/\bkomisi\b/i', $val)) {
+                    if (preg_match('/^(\s*sales\s+)?komisi\b/i', $val)) {
+                        $data['produkSupplier'][$fld] = '-';
+                    } else {
+                        $cleanedVal = trim(preg_replace('/\b(sales\s+)?komisi\s*[^,.]*([,.]|$)/i', '', $val));
+                        $data['produkSupplier'][$fld] = ($cleanedVal === '') ? '-' : $cleanedVal;
+                    }
+                }
+            }
+        }
+
+        // Kumpulkan kata kunci nama perusahaan untuk menyaring penyebutan nama di riwayat ekspor / teks bebas
+        $censorPatterns = [];
+        if ($companyName !== '') {
+            $censorPatterns[] = $companyName;
+            // Ambil nama tanpa prefix badan usaha (PT, CV, UD, dll)
+            $cleanComp = trim(preg_replace('/^(PT|CV|UD|PD|Koperasi|Firma)\.?\s+/i', '', $companyName));
+            if (mb_strlen($cleanComp) >= 3) {
+                $censorPatterns[] = $cleanComp;
+            }
+            // Jika ada kata tunggal yang unik (mis. "ARVA" dari "CV ARVA Indonesia")
+            $words = preg_split('/[\s,.-]+/', $cleanComp, -1, PREG_SPLIT_NO_EMPTY);
+            $genericWords = ['indonesia', 'tbk', 'persero', 'group', 'internasional', 'nusantara', 'jaya', 'mandiri', 'sukses', 'abadi', 'makmur', 'utama'];
+            foreach ($words as $w) {
+                if (mb_strlen($w) >= 3 && !in_array(strtolower($w), $genericWords, true)) {
+                    $censorPatterns[] = $w;
+                }
+            }
+        }
+        $namaKunci = (string)($data['supplier']['nama_kunci'] ?? ($data['nama_kunci'] ?? ''));
+        if ($namaKunci !== '' && mb_strlen($namaKunci) >= 3) {
+            $censorPatterns[] = $namaKunci;
+        }
+        $censorPatterns = array_values(array_unique($censorPatterns));
+
+        // Jika ada sub-array 'supplier'
+        if (isset($data['supplier']) && is_array($data['supplier'])) {
+            $data['supplier']['kode_produk'] = $kodeProduk;
+            unset(
+                $data['supplier']['nama_perusahaan'],
+                $data['supplier']['nama_kunci'],
+                $data['supplier']['nama_kontak'],
+                $data['supplier']['email'],
+                $data['supplier']['no_hp'],
+                $data['supplier']['website'],
+                $data['supplier']['instagram'],
+                $data['supplier']['legalitas'],
+                $data['supplier']['link_dokumen_legalitas'],
+                $data['supplier']['link_dokumen_sertifikat'],
+                $data['supplier']['link_foto_usaha']
+            );
+
+            // Bersihkan sisa teks bebas di profil usaha jika memuat nama perusahaan/merek
+            if (!empty($censorPatterns)) {
+                foreach ($data['supplier'] as $fld => $val) {
+                    if (is_string($val) && $val !== '') {
+                        foreach ($censorPatterns as $pat) {
+                            if (stripos($val, $pat) !== false) {
+                                $val = preg_replace('/\b' . preg_quote($pat, '/') . '\b/i', '', $val);
+                                $val = trim(preg_replace('/\s+/', ' ', str_replace(['()', '( )', '[]'], '', $val)));
+                                $val = trim($val, " -:,\t\n\r\0\x0B");
+                                if (str_starts_with($val, '(') && str_ends_with($val, ')')) {
+                                    $val = trim(substr($val, 1, -1));
+                                }
+                            }
+                        }
+                        $data['supplier'][$fld] = $val;
+                    }
+                }
+            }
+        }
+
+        // Sanitasi teks riwayat ekspor agar tidak membocorkan nama perusahaan / nama kunci
+        if (!empty($censorPatterns) && isset($data['histories']) && is_array($data['histories'])) {
+            foreach ($data['histories'] as $hIdx => $h) {
+                if (is_array($h)) {
+                    foreach ($h as $fld => $val) {
+                        if (is_string($val) && $val !== '') {
+                            foreach ($censorPatterns as $pat) {
+                                if (stripos($val, $pat) !== false) {
+                                    $val = preg_replace('/\b' . preg_quote($pat, '/') . '\b/i', '', $val);
+                                    $val = trim(preg_replace('/\s+/', ' ', str_replace(['()', '( )', '[]'], '', $val)));
+                                    $val = trim($val, " -:,\t\n\r\0\x0B");
+                                    if (str_starts_with($val, '(') && str_ends_with($val, ')')) {
+                                        $val = trim(substr($val, 1, -1));
+                                    }
+                                    if ($val === '') {
+                                        $val = $kodeProduk;
+                                    }
+                                }
+                            }
+                            $data['histories'][$hIdx][$fld] = $val;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Bersihkan jika nama_produk_en ada di root dan membocorkan nama perusahaan
+        if ($companyName !== '' && isset($data['nama_produk_en']) && trim((string)$data['nama_produk_en']) === trim($companyName)) {
+            $data['nama_produk_en'] = $kodeProduk;
+        }
+
+        // Sanitasi jika ada catatan komisi yang terselip di field produk non-komisi (misal harga_exw)
+        foreach ($data as $fld => $val) {
+            if ($fld !== 'komisi' && is_string($val) && preg_match('/\bkomisi\b/i', $val)) {
+                if (preg_match('/^(\s*sales\s+)?komisi\b/i', $val)) {
+                    $data[$fld] = '-';
+                } else {
+                    $cleanedVal = trim(preg_replace('/\b(sales\s+)?komisi\s*[^,.]*([,.]|$)/i', '', $val));
+                    $data[$fld] = ($cleanedVal === '') ? '-' : $cleanedVal;
+                }
+            }
+        }
+
+        // Bersihkan forbidden fields di root array
+        unset(
+            $data['nama_perusahaan'],
+            $data['nama_kunci'],
+            $data['nama_kontak'],
+            $data['email'],
+            $data['no_hp'],
+            $data['website'],
+            $data['instagram'],
+            $data['legalitas'],
+            $data['link_dokumen_legalitas'],
+            $data['link_dokumen_sertifikat'],
+            $data['link_foto_usaha'],
+            $data['komisi']
+        );
+
+        return $data;
+    }
 }
 

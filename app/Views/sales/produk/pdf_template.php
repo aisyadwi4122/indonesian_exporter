@@ -188,17 +188,25 @@ foreach ($items as $index => $item):
                     <?= esc($namaId) ?>
                 </h1>
                 <?php if (!empty($namaEn) && $namaEn !== $namaId): ?>
-                    <div style="font-size: 13px; font-style: italic; color: #64748b; margin-bottom: 6px;">
-                        <?= esc($namaEn) ?>
-                    </div>
+                    <?php if (!empty($is_internal)): ?>
+                        <div style="font-size: 13px; font-style: italic; color: #64748b; margin-bottom: 6px;">
+                            <?= esc($namaEn) ?>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
-                <?php if (!empty($kategori)): ?>
-                    <div style="margin-top: 4px;">
+                <div style="margin-top: 4px;">
+                    <?php if (!empty($kategori)): ?>
                         <span class="badge-kategori">
                             Kategori: <?= esc($kategori) ?>
                         </span>
-                    </div>
-                <?php endif; ?>
+                    <?php endif; ?>
+                    <?php $codeToDisplay = $item['kode_produk'] ?? ($product['kode_produk'] ?? ''); ?>
+                    <?php if (!empty($codeToDisplay)): ?>
+                        <span class="badge-kategori" style="background-color: #f1f5f9; color: #334155; margin-left: 4px;">
+                            Kode: <?= esc($codeToDisplay) ?>
+                        </span>
+                    <?php endif; ?>
+                </div>
             </td>
         </tr>
     </table>
@@ -230,11 +238,12 @@ foreach ($items as $index => $item):
             $fields = [
                 'Spesifikasi'        => $produkSupplier['spesifikasi'] ?? null,
                 'Kapasitas Produksi' => $produkSupplier['kapasitas_produksi'] ?? null,
-                'Legalitas'          => $produkSupplier['legalitas'] ?? null,
+                'Legalitas'          => (!empty($is_internal)) ? ($produkSupplier['legalitas'] ?? null) : null,
                 'Sertifikasi'        => $produkSupplier['sertifikasi'] ?? null,
                 'Lokasi Barang'      => $produkSupplier['lokasi_barang'] ?? null,
                 'MOQ'                => $produkSupplier['moq'] ?? null,
                 'Harga EXW'          => $produkSupplier['harga_exw'] ?? null,
+                'Komisi'             => (!empty($is_internal)) ? ($produkSupplier['komisi'] ?? null) : null,
                 'Sudah Ekspor'       => $produkSupplier['sudah_ekspor'] ?? null,
             ];
             foreach ($fields as $label => $val) {
@@ -258,26 +267,55 @@ foreach ($items as $index => $item):
     </div>
     <?php endif; ?>
 
-    <!-- Bagian Data Perusahaan (hanya jika supplier tidak null, sembunyikan jika kosong) -->
-    <!-- DILARANG: Komisi, nama kontak, email, no HP -->
+    <!-- Bagian Data Perusahaan / Profil Usaha -->
     <?php
         $companyInfo = [];
+        $contactInfo = [];
+        $companyTitle = !empty($is_internal) ? 'Data Perusahaan' : 'Profil Usaha';
         if (!empty($supplier)) {
-            $fields = [
-                'Nama Perusahaan'        => $supplier['nama_perusahaan'] ?? null,
-                'Domisili Usaha'         => $supplier['domisili_usaha'] ?? null,
-                'Produk yang Dipasarkan' => $supplier['produk_dipasarkan'] ?? null,
-                'Jenis Perusahaan'       => $supplier['jenis_perusahaan'] ?? null,
-                'Kapasitas Produksi'     => $supplier['kapasitas_produksi'] ?? null,
-                'Jumlah Pegawai'         => $supplier['jumlah_pegawai'] ?? null,
-                'Frekuensi Ekspor'       => $supplier['frekuensi_ekspor'] ?? null,
-                'Pameran Internasional'  => $supplier['pameran_internasional'] ?? null,
-                'Keunggulan Produk'      => $supplier['keunggulan_produk'] ?? null,
-                'Legalitas Usaha'        => $supplier['legalitas'] ?? null,
-                'Sertifikasi Usaha'      => $supplier['sertifikasi'] ?? null,
-                'Pernah Ekspor'          => $supplier['pernah_ekspor'] ?? null,
-                'Kategori Ekspor'        => $supplier['kategori_ekspor'] ?? null,
-            ];
+            if (!empty($is_internal)) {
+                $contactFields = [
+                    'No. HP'      => $supplier['no_hp'] ?? null,
+                    'Email'       => $supplier['email'] ?? null,
+                    'Website'     => $supplier['website'] ?? null,
+                    'Instagram'   => $supplier['instagram'] ?? null,
+                ];
+                foreach ($contactFields as $label => $val) {
+                    if ($val !== null && trim((string)$val) !== '') {
+                        $contactInfo[$label] = trim((string)$val);
+                    }
+                }
+
+                $fields = [
+                    'Nama Perusahaan'        => $supplier['nama_perusahaan'] ?? null,
+                    'Domisili Usaha'         => $supplier['domisili_usaha'] ?? null,
+                    'Produk yang Dipasarkan' => $supplier['produk_dipasarkan'] ?? null,
+                    'Jenis Perusahaan'       => $supplier['jenis_perusahaan'] ?? null,
+                    'Kapasitas Produksi'     => $supplier['kapasitas_produksi'] ?? null,
+                    'Jumlah Pegawai'         => $supplier['jumlah_pegawai'] ?? null,
+                    'Frekuensi Ekspor'       => $supplier['frekuensi_ekspor'] ?? null,
+                    'Pameran Internasional'  => $supplier['pameran_internasional'] ?? null,
+                    'Keunggulan Produk'      => $supplier['keunggulan_produk'] ?? null,
+                    'Legalitas Usaha'        => $supplier['legalitas'] ?? null,
+                    'Sertifikasi Usaha'      => $supplier['sertifikasi'] ?? null,
+                    'Pernah Ekspor'          => $supplier['pernah_ekspor'] ?? null,
+                    'Kategori Ekspor'        => $supplier['kategori_ekspor'] ?? null,
+                ];
+            } else {
+                // Mode eksternal: HANYA field non-identitas
+                $fields = [
+                    'Jenis Perusahaan'       => $supplier['jenis_perusahaan'] ?? null,
+                    'Domisili Usaha'         => $supplier['domisili_usaha'] ?? null,
+                    'Produk yang Dipasarkan' => $supplier['produk_dipasarkan'] ?? null,
+                    'Kapasitas Produksi'     => $supplier['kapasitas_produksi'] ?? null,
+                    'Jumlah Pegawai'         => $supplier['jumlah_pegawai'] ?? null,
+                    'Frekuensi Ekspor'       => $supplier['frekuensi_ekspor'] ?? null,
+                    'Keunggulan Produk'      => $supplier['keunggulan_produk'] ?? null,
+                    'Sertifikasi Usaha'      => $supplier['sertifikasi'] ?? null,
+                    'Pernah Ekspor'          => $supplier['pernah_ekspor'] ?? null,
+                    'Kategori Ekspor'        => $supplier['kategori_ekspor'] ?? null,
+                ];
+            }
             foreach ($fields as $label => $val) {
                 if ($val !== null && trim((string)$val) !== '') {
                     $companyInfo[$label] = trim((string)$val);
@@ -287,7 +325,20 @@ foreach ($items as $index => $item):
     ?>
     <?php if (!empty($companyInfo)): ?>
     <div>
-        <div class="section-title">Data Perusahaan</div>
+        <div class="section-title"><?= esc($companyTitle) ?></div>
+        <?php if (!empty($is_internal) && !empty($contactInfo)): ?>
+            <div style="font-size: 10.5px; font-weight: bold; color: #166534; margin-top: 4px; margin-bottom: 2px;">
+                Informasi Kontak:
+            </div>
+            <table class="info-table" style="margin-bottom: 8px;">
+                <?php foreach ($contactInfo as $label => $val): ?>
+                <tr>
+                    <td class="info-label"><?= esc($label) ?></td>
+                    <td class="info-value"><?= esc($val) ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+        <?php endif; ?>
         <table class="info-table">
             <?php foreach ($companyInfo as $label => $val): ?>
             <tr>

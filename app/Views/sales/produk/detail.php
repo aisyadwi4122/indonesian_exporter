@@ -219,11 +219,84 @@ body {
 }
 </style>
 
+<?php
+// Normalisasi data kontak untuk mode internal (HANYA saat $is_internal === true)
+$rawHp = trim((string)($supplier['no_hp'] ?? ''));
+$normalizedHp = null;
+if ($is_internal && $rawHp !== '') {
+    $digits = preg_replace('/\D+/', '', $rawHp);
+    if ($digits !== '') {
+        if (str_starts_with($digits, '0')) {
+            $digits = '62' . substr($digits, 1);
+        } elseif (str_starts_with($digits, '8')) {
+            $digits = '62' . $digits;
+        }
+        if (strlen($digits) >= 9) {
+            $normalizedHp = $digits;
+        }
+    }
+}
+
+$rawWeb = trim((string)($supplier['website'] ?? ''));
+$webHref = null;
+if ($is_internal && $rawWeb !== '') {
+    if (preg_match('#^https?://#i', $rawWeb)) {
+        $webHref = $rawWeb;
+    } elseif (!preg_match('#^[a-z0-9+.-]+://#i', $rawWeb) && !str_starts_with(strtolower($rawWeb), 'javascript:')) {
+        if (!preg_match('#\s#', $rawWeb)) {
+            $webHref = 'https://' . $rawWeb;
+        }
+    }
+}
+
+$rawIg = trim((string)($supplier['instagram'] ?? ''));
+$igHref = null;
+if ($is_internal && $rawIg !== '') {
+    if (preg_match('#^https?://#i', $rawIg)) {
+        $igHref = $rawIg;
+    } elseif (preg_match('/^@?([a-zA-Z0-9._]+)$/', $rawIg, $mIg)) {
+        $igHref = 'https://instagram.com/' . $mIg[1];
+    }
+}
+?>
+
 <!-- Header Title & Back Button (Produk Hero) -->
 <div class="produk-hero mb-4">
-    <div class="produk-breadcrumb">
-        <strong>SALES</strong> / <a href="<?= base_url('sales/produk') ?>" class="text-white text-decoration-none">PRODUK</a> / <span style="opacity: 0.85;"><?= esc(strtoupper($product['nama_produk_id'] ?? 'DETAIL PRODUK')) ?></span>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+        <div class="produk-breadcrumb mb-0">
+            <strong>SALES</strong> / <a href="<?= base_url('sales/produk' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="text-white text-decoration-none">PRODUK</a> / <span style="opacity: 0.85;"><?= esc(strtoupper($product['nama_produk_id'] ?? 'DETAIL PRODUK')) ?></span>
+        </div>
+
+        <!-- BADGE & KONTROL MODE -->
+        <div class="d-flex align-items-center gap-2">
+            <?php if ($is_internal): ?>
+                <span class="badge bg-success text-white shadow-sm" style="font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px;">
+                    <i class="fa-solid fa-shield-halved me-1"></i> Mode: Internal
+                </span>
+                <?php if ($account_tipe === 'internal'): ?>
+                    <a href="<?= base_url('sales/produk/' . esc($product['id_produk'] ?? '') . '?mode=eksternal') ?>" 
+                       class="btn btn-sm btn-outline-light shadow-sm" 
+                       style="font-size: 12px; border-radius: 6px; padding: 4px 10px;"
+                       title="Lihat detail dalam mode eksternal">
+                        <i class="fa-solid fa-eye me-1"></i> Pratinjau Eksternal
+                    </a>
+                <?php endif; ?>
+            <?php else: ?>
+                <span class="badge text-white shadow-sm" style="background-color: #ea580c; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px;">
+                    <i class="fa-solid fa-globe me-1"></i> Mode: Eksternal<?= $is_preview ? ' (Pratinjau)' : '' ?>
+                </span>
+                <?php if ($account_tipe === 'internal'): ?>
+                    <a href="<?= base_url('sales/produk/' . esc($product['id_produk'] ?? '')) ?>" 
+                       class="btn btn-sm btn-light text-dark fw-semibold shadow-sm" 
+                       style="font-size: 12px; border-radius: 6px; padding: 4px 10px;"
+                       title="Kembali ke mode internal">
+                        <i class="fa-solid fa-arrow-rotate-left me-1"></i> Kembali ke Internal
+                    </a>
+                <?php endif; ?>
+            <?php endif; ?>
+        </div>
     </div>
+
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div>
             <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
@@ -239,19 +312,49 @@ body {
                     <i class="fa-solid fa-tag me-1"></i><?= esc($kategori) ?>
                 </span>
             </div>
-            <?php if (!empty($product['nama_produk_en'])): ?>
+            <?php if ($is_internal && !empty($product['nama_produk_en'])): ?>
                 <p class="mb-0" style="font-size: 14.5px;">
-                    <?= esc($product['nama_produk_en']) ?>
+                    <i class="fa-solid fa-building me-1 text-light opacity-75"></i><?= esc($product['nama_produk_en']) ?>
+                </p>
+            <?php else: ?>
+                <p class="mb-0" style="font-size: 14.5px; opacity: 0.9;">
+                    <i class="fa-solid fa-barcode me-1"></i>Kode Produk: <?= esc($product['kode_produk'] ?? '') ?>
                 </p>
             <?php endif; ?>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <a href="<?= base_url('sales/produk/' . esc($product['id_produk'] ?? '') . '/pdf') ?>" 
-               target="_blank" 
-               class="btn btn-sales-primary shadow-sm">
-                <i class="fa-solid fa-file-pdf me-1"></i> Cetak PDF
-            </a>
-            <a href="<?= base_url('sales/produk') ?>" class="btn btn-sales-secondary shadow-sm">
+            <?php if ($account_tipe === 'internal' && !$is_preview): ?>
+                <div class="dropdown d-inline-block">
+                    <button class="btn btn-sales-primary shadow-sm dropdown-toggle" type="button" id="pdfDropdownDetail" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-file-pdf me-1"></i> Cetak PDF
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="pdfDropdownDetail" style="min-width: 290px;">
+                        <li>
+                            <a class="dropdown-item py-2" href="<?= base_url('sales/produk/' . esc($product['id_produk'] ?? '') . '/pdf?tipe_pdf=eksternal') ?>" target="_blank">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span class="fw-bold text-dark"><i class="fa-solid fa-file-pdf text-success me-2"></i>PDF Eksternal</span>
+                                    <span class="badge bg-success" style="font-size: 10px;">Default</span>
+                                </div>
+                                <small class="text-muted d-block mt-1">Aman dikirim ke buyer (tanpa data supplier & komisi)</small>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item py-2" href="<?= base_url('sales/produk/' . esc($product['id_produk'] ?? '') . '/pdf?tipe_pdf=internal') ?>" target="_blank">
+                                <div class="fw-bold text-dark"><i class="fa-solid fa-file-shield text-warning me-2"></i>PDF Internal</div>
+                                <small class="text-muted d-block mt-1">Lengkap dengan data supplier, legalitas & komisi</small>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            <?php else: ?>
+                <a href="<?= base_url('sales/produk/' . esc($product['id_produk'] ?? '') . '/pdf' . ($is_preview ? '?mode=eksternal' : '')) ?>" 
+                   target="_blank" 
+                   class="btn btn-sales-primary shadow-sm">
+                    <i class="fa-solid fa-file-pdf me-1"></i> Cetak PDF
+                </a>
+            <?php endif; ?>
+            <a href="<?= base_url('sales/produk' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sales-secondary shadow-sm">
                 <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar
             </a>
         </div>
@@ -283,7 +386,11 @@ body {
                 aria-controls="tab-perusahaan" 
                 aria-selected="false" 
                 style="padding: 12px 20px; font-size: 14.5px;">
-            <i class="fa-solid fa-building me-2 text-success"></i>Data Perusahaan
+            <?php if ($is_internal): ?>
+                <i class="fa-solid fa-building me-2 text-success"></i>Data Perusahaan
+            <?php else: ?>
+                <i class="fa-solid fa-briefcase me-2 text-success"></i>Profil Usaha
+            <?php endif; ?>
         </button>
     </li>
     <li class="nav-item" role="presentation">
@@ -384,10 +491,17 @@ body {
                         <div class="col-sm-4 label-col">Nama Produk (Indonesia)</div>
                         <div class="col-sm-8 value-col"><?= esc($product['nama_produk_id'] ?? '-') ?></div>
                     </div>
+                    <?php if ($is_internal): ?>
                     <div class="row info-row">
                         <div class="col-sm-4 label-col">Nama Produk (Inggris)</div>
                         <div class="col-sm-8 value-col"><?= esc($product['nama_produk_en'] ?? '-') ?></div>
                     </div>
+                    <?php else: ?>
+                    <div class="row info-row">
+                        <div class="col-sm-4 label-col">Kode Produk</div>
+                        <div class="col-sm-8 value-col fw-bold text-success"><?= esc($product['kode_produk'] ?? '-') ?></div>
+                    </div>
+                    <?php endif; ?>
                     <div class="row info-row">
                         <div class="col-sm-4 label-col">Kategori Produk</div>
                         <div class="col-sm-8 value-col"><?= esc($kategori) ?></div>
@@ -435,10 +549,12 @@ body {
                         <div class="col-sm-4 label-col">Kapasitas Produksi</div>
                         <div class="col-sm-8 value-col"><?= !empty($produkSupplier['kapasitas_produksi']) ? esc($produkSupplier['kapasitas_produksi']) : '-' ?></div>
                     </div>
+                    <?php if ($is_internal): ?>
                     <div class="row info-row">
                         <div class="col-sm-4 label-col">Legalitas</div>
                         <div class="col-sm-8 value-col"><?= !empty($produkSupplier['legalitas']) ? esc($produkSupplier['legalitas']) : '-' ?></div>
                     </div>
+                    <?php endif; ?>
                     <div class="row info-row">
                         <div class="col-sm-4 label-col">Sertifikasi</div>
                         <div class="col-sm-8 value-col"><?= !empty($produkSupplier['sertifikasi']) ? esc($produkSupplier['sertifikasi']) : '-' ?></div>
@@ -455,6 +571,7 @@ body {
                         <div class="col-sm-4 label-col">Harga EXW</div>
                         <div class="col-sm-8 value-col"><?= !empty($produkSupplier['harga_exw']) ? esc($produkSupplier['harga_exw']) : '-' ?></div>
                     </div>
+                    <?php if ($is_internal): ?>
                     <div class="row info-row">
                         <div class="col-sm-4 label-col">
                             Komisi
@@ -462,6 +579,7 @@ body {
                         </div>
                         <div class="col-sm-8 value-col"><?= !empty($produkSupplier['komisi']) ? esc($produkSupplier['komisi']) : '-' ?></div>
                     </div>
+                    <?php endif; ?>
                     <div class="row info-row">
                         <div class="col-sm-4 label-col">Sudah Ekspor</div>
                         <div class="col-sm-8 value-col"><?= !empty($produkSupplier['sudah_ekspor']) ? esc($produkSupplier['sudah_ekspor']) : '-' ?></div>
@@ -471,13 +589,18 @@ body {
         </div>
     </div>
 
-    <!-- ================= TAB 2: DATA PERUSAHAAN ================= -->
+    <!-- ================= TAB 2: DATA PERUSAHAAN / PROFIL USAHA ================= -->
     <div class="tab-pane fade" id="tab-perusahaan" role="tabpanel" aria-labelledby="tab-perusahaan-btn">
         <div class="sales-card mb-4">
             <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom flex-wrap gap-2">
                 <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 17px;">
-                    <i class="fa-solid fa-building text-success"></i>
-                    <?= esc(!empty($supplier['nama_perusahaan']) ? $supplier['nama_perusahaan'] : 'Belum ada data perusahaan') ?>
+                    <?php if ($is_internal): ?>
+                        <i class="fa-solid fa-building text-success"></i>
+                        <?= esc(!empty($supplier['nama_perusahaan']) ? $supplier['nama_perusahaan'] : 'Belum ada data perusahaan') ?>
+                    <?php else: ?>
+                        <i class="fa-solid fa-briefcase text-success"></i>
+                        Profil Usaha Rekanan (<?= esc($product['kode_produk'] ?? '') ?>)
+                    <?php endif; ?>
                 </h5>
                 <?php if (!empty($supplier['jenis_perusahaan'])): ?>
                     <span class="badge bg-light text-dark border"><?= esc($supplier['jenis_perusahaan']) ?></span>
@@ -487,129 +610,238 @@ body {
             <?php if (empty($supplier)): ?>
                 <div class="alert alert-light border py-2 px-3 mb-4 d-flex align-items-center gap-2" style="background-color: #f8fafc; font-size: 13.5px; color: #64748b; border-color: #e2e8f0 !important;">
                     <i class="fa-solid fa-circle-info text-secondary"></i>
-                    <span>Data perusahaan belum tersedia untuk produk ini.</span>
+                    <span>Data profil usaha belum tersedia untuk produk ini.</span>
                 </div>
             <?php endif; ?>
 
-            <!-- Bagian 1: 2 Kolom di Desktop -->
-            <div class="row g-4 mb-4">
-                <div class="col-md-6">
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Domisili Usaha</div>
-                        <div class="col-7 value-col"><?= esc(!empty($supplier['domisili_usaha']) ? $supplier['domisili_usaha'] : '-') ?></div>
-                    </div>
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Produk yang Dipasarkan</div>
-                        <div class="col-7 value-col"><?= esc(!empty($supplier['produk_dipasarkan']) ? $supplier['produk_dipasarkan'] : '-') ?></div>
-                    </div>
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Jenis Perusahaan</div>
-                        <div class="col-7 value-col"><?= esc(!empty($supplier['jenis_perusahaan']) ? $supplier['jenis_perusahaan'] : '-') ?></div>
+            <?php if ($is_internal): ?>
+                <!-- ================= MODE INTERNAL: LENGKAP ================= -->
+                <!-- Kartu Informasi Kontak Supplier (HANYA MODE INTERNAL) -->
+                <div class="card border-0 mb-4 shadow-sm" style="background: rgba(240, 253, 244, 0.7); border: 1px solid #bbf7d0 !important; border-radius: 10px;">
+                    <div class="card-body p-3">
+                        <h6 class="fw-bold mb-3 text-success d-flex align-items-center gap-2" style="font-size: 15px;">
+                            <i class="fa-solid fa-address-book"></i>Informasi Kontak
+                        </h6>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="row info-row">
+                                    <div class="col-5 label-col">No. HP</div>
+                                    <div class="col-7 value-col"><?= !empty($rawHp) ? esc($rawHp) : '-' ?></div>
+                                </div>
+                                <div class="row info-row">
+                                    <div class="col-5 label-col">Email</div>
+                                    <div class="col-7 value-col">
+                                        <?php if (!empty($supplier['email'])): ?>
+                                            <a href="mailto:<?= esc($supplier['email']) ?>" class="text-success text-decoration-none">
+                                                <i class="fa-solid fa-envelope me-1"></i><?= esc($supplier['email']) ?>
+                                            </a>
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row info-row">
+                                    <div class="col-5 label-col">Website</div>
+                                    <div class="col-7 value-col">
+                                        <?php if (!empty($rawWeb)): ?>
+                                            <?php if (!empty($webHref)): ?>
+                                                <a href="<?= esc($webHref) ?>" target="_blank" rel="noopener noreferrer" class="text-success text-decoration-none">
+                                                    <i class="fa-solid fa-globe me-1"></i><?= esc($rawWeb) ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <?= esc($rawWeb) ?>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div class="row info-row">
+                                    <div class="col-5 label-col">Instagram</div>
+                                    <div class="col-7 value-col">
+                                        <?php if (!empty($rawIg)): ?>
+                                            <?php if (!empty($igHref)): ?>
+                                                <a href="<?= esc($igHref) ?>" target="_blank" rel="noopener noreferrer" class="text-success text-decoration-none">
+                                                    <i class="fa-brands fa-instagram me-1"></i><?= esc($rawIg) ?>
+                                                </a>
+                                            <?php else: ?>
+                                                <?= esc($rawIg) ?>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Kapasitas Produksi</div>
-                        <div class="col-7 value-col"><?= esc(!empty($supplier['kapasitas_produksi']) ? $supplier['kapasitas_produksi'] : '-') ?></div>
-                    </div>
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Jumlah Pegawai</div>
-                        <div class="col-7 value-col"><?= esc(!empty($supplier['jumlah_pegawai']) ? $supplier['jumlah_pegawai'] : '-') ?></div>
-                    </div>
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Frekuensi Ekspor</div>
-                        <div class="col-7 value-col"><?= esc(!empty($supplier['frekuensi_ekspor']) ? $supplier['frekuensi_ekspor'] : '-') ?></div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Bagian 2: Informasi Tambahan -->
-            <h6 class="fw-bold mb-3 pb-2 border-bottom text-dark d-flex align-items-center gap-2" style="font-size: 15px;">
-                <i class="fa-solid fa-list-check text-success"></i>Informasi Tambahan
-            </h6>
-            <div class="row g-4 mb-4">
-                <div class="col-md-6">
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Pameran Internasional</div>
-                        <div class="col-7 value-col"><?= esc(!empty($supplier['pameran_internasional']) ? $supplier['pameran_internasional'] : '-') ?></div>
-                    </div>
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Keunggulan Produk</div>
-                        <div class="col-7 value-col"><?= esc(!empty($supplier['keunggulan_produk']) ? $supplier['keunggulan_produk'] : '-') ?></div>
-                    </div>
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Legalitas</div>
-                        <div class="col-7 value-col"><?= esc(!empty($supplier['legalitas']) ? $supplier['legalitas'] : '-') ?></div>
-                    </div>
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Sertifikasi</div>
-                        <div class="col-7 value-col"><?= esc(!empty($supplier['sertifikasi']) ? $supplier['sertifikasi'] : '-') ?></div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Pernah Ekspor</div>
-                        <div class="col-7 value-col"><?= esc(!empty($supplier['pernah_ekspor']) ? $supplier['pernah_ekspor'] : '-') ?></div>
-                    </div>
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Kategori Ekspor</div>
-                        <div class="col-7 value-col"><?= esc(!empty($supplier['kategori_ekspor']) ? $supplier['kategori_ekspor'] : '-') ?></div>
-                    </div>
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Link Foto Usaha</div>
-                        <div class="col-7 value-col">
-                            <?php if (!empty($supplier['link_foto_usaha'])): ?>
-                                <?php
-                                    $links = array_filter(array_map('trim', explode(',', $supplier['link_foto_usaha'])));
-                                ?>
-                                <?php foreach ($links as $idx => $link): ?>
-                                    <a href="<?= esc($link) ?>" target="_blank" rel="noopener" class="text-success text-decoration-none d-inline-block me-2 mb-1">
-                                        <i class="fa-solid fa-arrow-up-right-from-square me-1"></i><?= count($links) > 1 ? 'Link ' . ($idx + 1) : 'Buka Link' ?>
-                                    </a>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                -
-                            <?php endif; ?>
+                <!-- Bagian 1: 2 Kolom di Desktop -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Domisili Usaha</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['domisili_usaha']) ? $supplier['domisili_usaha'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Produk yang Dipasarkan</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['produk_dipasarkan']) ? $supplier['produk_dipasarkan'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Jenis Perusahaan</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['jenis_perusahaan']) ? $supplier['jenis_perusahaan'] : '-') ?></div>
                         </div>
                     </div>
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Link Dokumen Legalitas</div>
-                        <div class="col-7 value-col">
-                            <?php if (!empty($supplier['link_dokumen_legalitas'])): ?>
-                                <?php
-                                    $links = array_filter(array_map('trim', explode(',', $supplier['link_dokumen_legalitas'])));
-                                ?>
-                                <?php foreach ($links as $idx => $link): ?>
-                                    <a href="<?= esc($link) ?>" target="_blank" rel="noopener" class="text-success text-decoration-none d-inline-block me-2 mb-1">
-                                        <i class="fa-solid fa-arrow-up-right-from-square me-1"></i><?= count($links) > 1 ? 'Dokumen ' . ($idx + 1) : 'Buka Dokumen' ?>
-                                    </a>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                -
-                            <?php endif; ?>
+                    <div class="col-md-6">
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Kapasitas Produksi</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['kapasitas_produksi']) ? $supplier['kapasitas_produksi'] : '-') ?></div>
                         </div>
-                    </div>
-                    <div class="row info-row">
-                        <div class="col-5 label-col">Link Dokumen Sertifikat</div>
-                        <div class="col-7 value-col">
-                            <?php if (!empty($supplier['link_dokumen_sertifikat'])): ?>
-                                <?php
-                                    $links = array_filter(array_map('trim', explode(',', $supplier['link_dokumen_sertifikat'])));
-                                ?>
-                                <?php foreach ($links as $idx => $link): ?>
-                                    <a href="<?= esc($link) ?>" target="_blank" rel="noopener" class="text-success text-decoration-none d-inline-block me-2 mb-1">
-                                        <i class="fa-solid fa-arrow-up-right-from-square me-1"></i><?= count($links) > 1 ? 'Sertifikat ' . ($idx + 1) : 'Buka Sertifikat' ?>
-                                    </a>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                -
-                            <?php endif; ?>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Jumlah Pegawai</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['jumlah_pegawai']) ? $supplier['jumlah_pegawai'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Frekuensi Ekspor</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['frekuensi_ekspor']) ? $supplier['frekuensi_ekspor'] : '-') ?></div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Bagian 3: Ekspor Terakhir -->
+                <!-- Bagian 2: Informasi Tambahan -->
+                <h6 class="fw-bold mb-3 pb-2 border-bottom text-dark d-flex align-items-center gap-2" style="font-size: 15px;">
+                    <i class="fa-solid fa-list-check text-success"></i>Informasi Tambahan
+                </h6>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Pameran Internasional</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['pameran_internasional']) ? $supplier['pameran_internasional'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Keunggulan Produk</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['keunggulan_produk']) ? $supplier['keunggulan_produk'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Legalitas</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['legalitas']) ? $supplier['legalitas'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Sertifikasi</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['sertifikasi']) ? $supplier['sertifikasi'] : '-') ?></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Pernah Ekspor</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['pernah_ekspor']) ? $supplier['pernah_ekspor'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Kategori Ekspor</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['kategori_ekspor']) ? $supplier['kategori_ekspor'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Link Foto Usaha</div>
+                            <div class="col-7 value-col">
+                                <?php if (!empty($supplier['link_foto_usaha'])): ?>
+                                    <?php $links = array_filter(array_map('trim', explode(',', $supplier['link_foto_usaha']))); ?>
+                                    <?php foreach ($links as $idx => $link): ?>
+                                        <a href="<?= esc($link) ?>" target="_blank" rel="noopener" class="text-success text-decoration-none d-inline-block me-2 mb-1">
+                                            <i class="fa-solid fa-arrow-up-right-from-square me-1"></i><?= count($links) > 1 ? 'Link ' . ($idx + 1) : 'Buka Link' ?>
+                                        </a>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Link Dokumen Legalitas</div>
+                            <div class="col-7 value-col">
+                                <?php if (!empty($supplier['link_dokumen_legalitas'])): ?>
+                                    <?php $links = array_filter(array_map('trim', explode(',', $supplier['link_dokumen_legalitas']))); ?>
+                                    <?php foreach ($links as $idx => $link): ?>
+                                        <a href="<?= esc($link) ?>" target="_blank" rel="noopener" class="text-success text-decoration-none d-inline-block me-2 mb-1">
+                                            <i class="fa-solid fa-arrow-up-right-from-square me-1"></i><?= count($links) > 1 ? 'Dokumen ' . ($idx + 1) : 'Buka Dokumen' ?>
+                                        </a>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Link Dokumen Sertifikat</div>
+                            <div class="col-7 value-col">
+                                <?php if (!empty($supplier['link_dokumen_sertifikat'])): ?>
+                                    <?php $links = array_filter(array_map('trim', explode(',', $supplier['link_dokumen_sertifikat']))); ?>
+                                    <?php foreach ($links as $idx => $link): ?>
+                                        <a href="<?= esc($link) ?>" target="_blank" rel="noopener" class="text-success text-decoration-none d-inline-block me-2 mb-1">
+                                            <i class="fa-solid fa-arrow-up-right-from-square me-1"></i><?= count($links) > 1 ? 'Sertifikat ' . ($idx + 1) : 'Buka Sertifikat' ?>
+                                        </a>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php else: ?>
+                <!-- ================= MODE EKSTERNAL: HANYA FIELD NON-IDENTITAS ================= -->
+                <!-- Field non-identitas: jenis perusahaan, kapasitas produksi, jumlah pegawai, frekuensi ekspor, produk dipasarkan, keunggulan produk, sertifikasi, pernah ekspor, kategori ekspor, domisili usaha -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Jenis Perusahaan</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['jenis_perusahaan']) ? $supplier['jenis_perusahaan'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Domisili Usaha</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['domisili_usaha']) ? $supplier['domisili_usaha'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Produk yang Dipasarkan</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['produk_dipasarkan']) ? $supplier['produk_dipasarkan'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Kapasitas Produksi</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['kapasitas_produksi']) ? $supplier['kapasitas_produksi'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Jumlah Pegawai</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['jumlah_pegawai']) ? $supplier['jumlah_pegawai'] : '-') ?></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Frekuensi Ekspor</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['frekuensi_ekspor']) ? $supplier['frekuensi_ekspor'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Pernah Ekspor</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['pernah_ekspor']) ? $supplier['pernah_ekspor'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Kategori Ekspor</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['kategori_ekspor']) ? $supplier['kategori_ekspor'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Keunggulan Produk</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['keunggulan_produk']) ? $supplier['keunggulan_produk'] : '-') ?></div>
+                        </div>
+                        <div class="row info-row">
+                            <div class="col-5 label-col">Sertifikasi</div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['sertifikasi']) ? $supplier['sertifikasi'] : '-') ?></div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Bagian 3: Ringkasan Ekspor Terakhir (tampil di kedua mode) -->
             <h6 class="fw-bold mb-3 pb-2 border-bottom text-dark d-flex align-items-center gap-2" style="font-size: 15px;">
                 <i class="fa-solid fa-plane-departure text-success"></i>Ekspor Terakhir
             </h6>

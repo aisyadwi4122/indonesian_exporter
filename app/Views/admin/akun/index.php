@@ -90,19 +90,19 @@
                 <ul class="nav nav-pills">
                     <li class="nav-item">
                         <a class="nav-link <?= $tipe_filter === 'all' ? 'active' : '' ?>" 
-                           href="<?= base_url('admin/akun/index?tipe=all' . ($status_filter !== 'all' ? '&status=' . esc($status_filter) : '') . ($search_query !== '' ? '&q=' . urlencode($search_query) : '')) ?>">
+                           href="<?= base_url('admin/akun/index?tipe=all' . ($status_filter !== 'all' ? '&status=' . esc($status_filter) : '') . (($akses_filter ?? 'all') !== 'all' ? '&akses=' . esc($akses_filter) : '') . ($search_query !== '' ? '&q=' . urlencode($search_query) : '')) ?>">
                             <i class="fa-solid fa-users me-1"></i> Semua
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link <?= $tipe_filter === 'sales' ? 'active' : '' ?>" 
-                           href="<?= base_url('admin/akun/index?tipe=sales' . ($status_filter !== 'all' ? '&status=' . esc($status_filter) : '') . ($search_query !== '' ? '&q=' . urlencode($search_query) : '')) ?>">
+                           href="<?= base_url('admin/akun/index?tipe=sales' . ($status_filter !== 'all' ? '&status=' . esc($status_filter) : '') . (($akses_filter ?? 'all') !== 'all' ? '&akses=' . esc($akses_filter) : '') . ($search_query !== '' ? '&q=' . urlencode($search_query) : '')) ?>">
                             <i class="fa-solid fa-user-tie me-1"></i> Sales
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link <?= $tipe_filter === 'supplier' ? 'active' : '' ?>" 
-                           href="<?= base_url('admin/akun/index?tipe=supplier' . ($status_filter !== 'all' ? '&status=' . esc($status_filter) : '') . ($search_query !== '' ? '&q=' . urlencode($search_query) : '')) ?>">
+                           href="<?= base_url('admin/akun/index?tipe=supplier' . ($status_filter !== 'all' ? '&status=' . esc($status_filter) : '') . (($akses_filter ?? 'all') !== 'all' ? '&akses=' . esc($akses_filter) : '') . ($search_query !== '' ? '&q=' . urlencode($search_query) : '')) ?>">
                             <i class="fa-solid fa-truck-field me-1"></i> Supplier
                         </a>
                     </li>
@@ -120,6 +120,13 @@
                         </select>
                     </div>
                     <div class="col-auto">
+                        <select name="akses" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="all" <?= ($akses_filter ?? 'all') === 'all' ? 'selected' : '' ?>>Semua Akses</option>
+                            <option value="internal" <?= ($akses_filter ?? '') === 'internal' ? 'selected' : '' ?>>Akses Internal</option>
+                            <option value="eksternal" <?= ($akses_filter ?? '') === 'eksternal' ? 'selected' : '' ?>>Akses Eksternal</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
                         <div class="input-group input-group-sm">
                             <input type="text" 
                                    name="q" 
@@ -129,7 +136,7 @@
                             <button class="btn btn-primary text-white" type="submit" title="Cari">
                                 <i class="fa-solid fa-magnifying-glass"></i>
                             </button>
-                            <?php if ($search_query !== '' || $status_filter !== 'all') : ?>
+                            <?php if ($search_query !== '' || $status_filter !== 'all' || ($akses_filter ?? 'all') !== 'all') : ?>
                                 <a href="<?= base_url('admin/akun/index?tipe=' . esc($tipe_filter)) ?>" class="btn btn-outline-secondary" title="Reset Filter">
                                     <i class="fa-solid fa-rotate-left"></i>
                                 </a>
@@ -149,17 +156,18 @@
                                 <th class="cell" style="width: 50px;">No</th>
                                 <th class="cell">Username</th>
                                 <th class="cell">Nama</th>
-                                <th class="cell text-center" style="width: 100px;">Tipe</th>
+                                <th class="cell text-center" style="width: 90px;">Tipe</th>
+                                <th class="cell text-center" style="width: 110px;">Tipe Akses</th>
                                 <th class="cell">Perusahaan</th>
-                                <th class="cell text-center" style="width: 100px;">Status</th>
+                                <th class="cell text-center" style="width: 90px;">Status</th>
                                 <th class="cell">Dibuat</th>
-                                <th class="cell text-center" style="width: 200px;">Aksi</th>
+                                <th class="cell text-center" style="width: 180px;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($akun_list)) : ?>
                                 <tr>
-                                    <td colspan="8" class="text-center py-4 text-muted">
+                                    <td colspan="9" class="text-center py-4 text-muted">
                                         <i class="fa-solid fa-circle-info me-1"></i> Tidak ada data akun yang ditemukan.
                                     </td>
                                 </tr>
@@ -183,6 +191,17 @@
                                                 <span class="badge bg-primary"><i class="fa-solid fa-truck-field me-1"></i>Supplier</span>
                                             <?php endif; ?>
                                         </td>
+                                        <td class="cell align-middle text-center">
+                                            <?php if ($row['tipe'] === 'sales') : ?>
+                                                <?php if (($row['tipe_akses'] ?? '') === 'eksternal') : ?>
+                                                    <span class="badge" style="background-color: #ea580c; color: #fff;">Eksternal</span>
+                                                <?php else : ?>
+                                                    <span class="badge bg-success">Internal</span>
+                                                <?php endif; ?>
+                                            <?php else : ?>
+                                                <span class="text-muted">-</span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="cell align-middle">
                                             <?= esc($row['perusahaan']) ?>
                                         </td>
@@ -199,8 +218,8 @@
                                         <td class="cell align-middle text-center">
                                             <div class="d-inline-flex gap-2">
                                                 <a href="<?= base_url('admin/akun/edit/' . esc($row['tipe']) . '/' . esc($row['id'])) ?>" 
-                                                   class="btn btn-sm btn-primary text-white" 
-                                                   title="Edit Akun">
+                                                    class="btn btn-sm btn-primary text-white" 
+                                                    title="Edit Akun">
                                                     <i class="fa-solid fa-pen-to-square"></i> Edit
                                                 </a>
                                                 <form action="<?= base_url('admin/akun/toggle/' . esc($row['tipe']) . '/' . esc($row['id'])) ?>" 
@@ -236,10 +255,11 @@
                     <nav aria-label="Page navigation">
                         <ul class="pagination pagination-sm mb-0">
                             <?php
-                                $buildUrl = function($pageNum) use ($tipe_filter, $status_filter, $search_query) {
+                                $buildUrl = function($pageNum) use ($tipe_filter, $status_filter, $akses_filter, $search_query) {
                                     $p = ['page' => $pageNum];
                                     if ($tipe_filter !== 'all') $p['tipe'] = $tipe_filter;
                                     if ($status_filter !== 'all') $p['status'] = $status_filter;
+                                    if (!empty($akses_filter) && $akses_filter !== 'all') $p['akses'] = $akses_filter;
                                     if ($search_query !== '') $p['q'] = $search_query;
                                     return base_url('admin/akun/index') . '?' . http_build_query($p);
                                 };

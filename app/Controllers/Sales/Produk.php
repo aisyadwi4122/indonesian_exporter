@@ -17,6 +17,11 @@ class Produk extends BaseController
 
     public function index()
     {
+        $modeInfo = $this->resolveSalesMode();
+        $isInternal = $modeInfo['is_internal'];
+        $isPreview = $modeInfo['is_preview'];
+        $accountTipe = $modeInfo['account_tipe'];
+
         $supplierProductModel = new SupplierProductModel();
         $q = trim((string)($this->request->getGet('q') ?? ''));
 
@@ -25,33 +30,57 @@ class Produk extends BaseController
             tb_produk_supplier.id_produk_supplier as id_produk,
             tb_produk_supplier.nama_produk as nama_produk_id,
             tb_supplier.nama_perusahaan,
+            tb_supplier.nama_kontak,
+            tb_supplier.no_hp,
             tb_supplier.jenis_perusahaan,
             tb_supplier.domisili_usaha
         ')->join('tb_supplier', 'tb_supplier.id_supplier = tb_produk_supplier.id_supplier', 'left');
 
         if ($q !== '') {
-            $builder->groupStart()
-                ->like('tb_produk_supplier.nama_produk', $q)
-                ->orLike('tb_supplier.nama_perusahaan', $q)
-                ->orLike('tb_produk_supplier.spesifikasi', $q)
-                ->orLike('tb_produk_supplier.lokasi_barang', $q)
-                ->orLike('tb_supplier.domisili_usaha', $q)
-            ->groupEnd();
+            if ($isInternal) {
+                // Mode Internal: pencarian menyeluruh seperti sekarang
+                $builder->groupStart()
+                    ->like('tb_produk_supplier.nama_produk', $q)
+                    ->orLike('tb_supplier.nama_perusahaan', $q)
+                    ->orLike('tb_produk_supplier.spesifikasi', $q)
+                    ->orLike('tb_produk_supplier.lokasi_barang', $q)
+                    ->orLike('tb_supplier.domisili_usaha', $q)
+                ->groupEnd();
+            } else {
+                // Mode Eksternal: HANYA mencocokkan nama_produk, spesifikasi (deskripsi), dan lokasi_barang.
+                // TIDAK BOLEH mencocokkan nama perusahaan, nama kontak, atau produk_dipasarkan.
+                $builder->groupStart()
+                    ->like('tb_produk_supplier.nama_produk', $q)
+                    ->orLike('tb_produk_supplier.spesifikasi', $q)
+                    ->orLike('tb_produk_supplier.lokasi_barang', $q)
+                ->groupEnd();
+            }
         }
 
+        // Pengurutan tidak boleh memakai nama perusahaan di mode eksternal
         $products = $builder->orderBy('tb_produk_supplier.id_produk_supplier', 'DESC')->findAll();
 
         foreach ($products as &$p) {
             $p['foto_url'] = SupplierProductModel::photoUrl($p, 1);
+            $idProd = (int)($p['id_produk_supplier'] ?? ($p['id_produk'] ?? 0));
+            $p['kode_produk'] = SupplierProductModel::getKodeProduk($idProd);
         }
         unset($p);
 
+        // PENYARINGAN SATU TEMPAT: Mode eksternal WAJIB memanggil maskForExternal sebelum data dikirim ke view
+        if (!$isInternal) {
+            $products = SupplierProductModel::maskForExternal($products);
+        }
+
         $data = [
-            'title'      => 'Produk Sales - Indonesian Exporter',
-            'page_title' => 'Produk',
-            'activeMenu' => 'produk',
-            'products'   => $products,
-            'q'          => $q,
+            'title'        => 'Produk Sales - Indonesian Exporter',
+            'page_title'   => 'Produk',
+            'activeMenu'   => 'produk',
+            'products'     => $products,
+            'q'            => $q,
+            'is_internal'  => $isInternal,
+            'is_preview'   => $isPreview,
+            'account_tipe' => $accountTipe,
         ];
 
         return view('sales/produk/index', $data);
@@ -63,15 +92,30 @@ class Produk extends BaseController
             throw PageNotFoundException::forPageNotFound();
         }
 
+        $modeInfo = $this->resolveSalesMode();
+        $isInternal = $modeInfo['is_internal'];
+        $isPreview = $modeInfo['is_preview'];
+        $accountTipe = $modeInfo['account_tipe'];
+
         $detailData = $this->buildDetailData((int)$id);
         if (empty($detailData)) {
             throw PageNotFoundException::forPageNotFound('Produk tidak ditemukan');
         }
 
+        // PENYARINGAN SATU TEMPAT: Mode eksternal WAJIB memanggil maskForExternal sebelum data dikirim ke view
+        if (!$isInternal) {
+            $detailData = SupplierProductModel::maskForExternal($detailData);
+        }
+
+        $productTitle = $detailData['product']['nama_produk_id'] ?? 'Detail Produk';
+
         $data = array_merge([
-            'title'      => ($detailData['product']['nama_produk_id'] ?? 'Detail Produk') . ' - Area Sales',
-            'page_title' => 'Detail Produk',
-            'activeMenu' => 'produk',
+            'title'        => $productTitle . ' - Area Sales',
+            'page_title'   => 'Detail Produk',
+            'activeMenu'   => 'produk',
+            'is_internal'  => $isInternal,
+            'is_preview'   => $isPreview,
+            'account_tipe' => $accountTipe,
         ], $detailData);
 
         return view('sales/produk/detail', $data);
@@ -83,9 +127,29 @@ class Produk extends BaseController
             throw PageNotFoundException::forPageNotFound();
         }
 
+        $modeInfo = $this->resolveSalesMode();
+        $accountTipe = $modeInfo['account_tipe'];
+        $isPreview = $modeInfo['is_preview'];
+
+        // Tentukan mode PDF:
+        // Akun internal mendapat dua pilihan: "PDF Eksternal (aman dikirim ke buyer)" sebagai default dan "PDF Internal";
+        // Akun eksternal HANYA mendapat PDF Eksternal dan parameter lain diabaikan.
+        $pdfType = strtolower(trim((string)$this->request->getGet('tipe_pdf')));
+        $isPdfInternal = false;
+
+        if ($accountTipe === 'internal' && !$isPreview && $pdfType === 'internal') {
+            $isPdfInternal = true;
+        } else {
+            $isPdfInternal = false;
+        }
+
         $detailData = $this->buildDetailData((int)$id);
         if (empty($detailData)) {
             throw PageNotFoundException::forPageNotFound('Produk tidak ditemukan');
+        }
+
+        if (!$isPdfInternal) {
+            $detailData = SupplierProductModel::maskForExternal($detailData);
         }
 
         $rawSlug = $detailData['product']['nama_produk_id'] ?? ('item-' . $id);
@@ -94,12 +158,32 @@ class Produk extends BaseController
             $slug = (string)$id;
         }
 
-        $filename = 'produk-' . $slug . '-' . date('Ymd') . '.pdf';
-        $this->renderPdf([$detailData], $filename);
+        // Nama file PDF eksternal tidak boleh memuat nama perusahaan
+        if ($isPdfInternal) {
+            $filename = 'produk-' . $slug . '-internal-' . date('Ymd') . '.pdf';
+        } else {
+            $kodeProduk = SupplierProductModel::getKodeProduk((int)$id);
+            $filename = 'produk-' . strtolower($kodeProduk) . '-' . $slug . '-' . date('Ymd') . '.pdf';
+        }
+
+        $this->renderPdf([$detailData], $filename, $isPdfInternal);
     }
 
     public function exportPdf()
     {
+        $modeInfo = $this->resolveSalesMode();
+        $accountTipe = $modeInfo['account_tipe'];
+        $isPreview = $modeInfo['is_preview'];
+
+        $pdfType = strtolower(trim((string)$this->request->getGet('tipe_pdf')));
+        $isPdfInternal = false;
+
+        if ($accountTipe === 'internal' && !$isPreview && $pdfType === 'internal') {
+            $isPdfInternal = true;
+        } else {
+            $isPdfInternal = false;
+        }
+
         $supplierProductModel = new SupplierProductModel();
         $q = trim((string)($this->request->getGet('q') ?? ''));
 
@@ -108,19 +192,35 @@ class Produk extends BaseController
         ')->join('tb_supplier', 'tb_supplier.id_supplier = tb_produk_supplier.id_supplier', 'left');
 
         if ($q !== '') {
-            $builder->groupStart()
-                ->like('tb_produk_supplier.nama_produk', $q)
-                ->orLike('tb_supplier.nama_perusahaan', $q)
-                ->orLike('tb_produk_supplier.spesifikasi', $q)
-                ->orLike('tb_produk_supplier.lokasi_barang', $q)
-                ->orLike('tb_supplier.domisili_usaha', $q)
-            ->groupEnd();
+            if ($isPdfInternal) {
+                $builder->groupStart()
+                    ->like('tb_produk_supplier.nama_produk', $q)
+                    ->orLike('tb_supplier.nama_perusahaan', $q)
+                    ->orLike('tb_produk_supplier.spesifikasi', $q)
+                    ->orLike('tb_produk_supplier.lokasi_barang', $q)
+                    ->orLike('tb_supplier.domisili_usaha', $q)
+                ->groupEnd();
+            } else {
+                // Mode eksternal: HANYA nama_produk, spesifikasi, dan lokasi_barang
+                $builder->groupStart()
+                    ->like('tb_produk_supplier.nama_produk', $q)
+                    ->orLike('tb_produk_supplier.spesifikasi', $q)
+                    ->orLike('tb_produk_supplier.lokasi_barang', $q)
+                ->groupEnd();
+            }
         }
 
         $rows = $builder->orderBy('tb_produk_supplier.id_produk_supplier', 'DESC')->findAll();
         $count = count($rows);
 
-        $redirectUrl = base_url('sales/produk') . ($q !== '' ? '?q=' . urlencode($q) : '');
+        $redirectQuery = [];
+        if ($q !== '') {
+            $redirectQuery['q'] = $q;
+        }
+        if ($isPreview) {
+            $redirectQuery['mode'] = 'eksternal';
+        }
+        $redirectUrl = base_url('sales/produk') . (!empty($redirectQuery) ? '?' . http_build_query($redirectQuery) : '');
 
         if ($count > 50) {
             return redirect()->to($redirectUrl)->with('error', 'Persempit pencarian (maksimal 50 produk per PDF)');
@@ -153,6 +253,9 @@ class Produk extends BaseController
         foreach ($rows as $row) {
             $data = $this->buildDetailData((int)$row['id_produk_supplier']);
             if (!empty($data)) {
+                if (!$isPdfInternal) {
+                    $data = SupplierProductModel::maskForExternal($data);
+                }
                 $items[] = $data;
             }
         }
@@ -161,8 +264,66 @@ class Produk extends BaseController
             return redirect()->to($redirectUrl)->with('error', 'Tidak ada produk yang dapat diekspor');
         }
 
-        $filename = 'katalog-produk-' . date('Ymd') . '.pdf';
-        $this->renderPdf($items, $filename);
+        if ($isPdfInternal) {
+            $filename = 'katalog-produk-internal-' . date('Ymd') . '.pdf';
+        } else {
+            $filename = 'katalog-produk-' . date('Ymd') . '.pdf';
+        }
+
+        $this->renderPdf($items, $filename, $isPdfInternal);
+    }
+
+    /**
+     * Menentukan hak akses akun Sales dari database (bukan hanya session)
+     * dan menentukan mode aktif (internal vs eksternal) serta status pratinjau.
+     *
+     * @return array{account_tipe: string, is_internal: bool, is_preview: bool}
+     */
+    private function resolveSalesMode(): array
+    {
+        $salesId = session()->get('sales_id') ?? session()->get('user_id');
+        $username = session()->get('username');
+
+        $accountTipeAkses = 'eksternal'; // Nilai selain 'internal' atau jika akun tidak ditemukan dianggap eksternal
+
+        if (!empty($salesId) || !empty($username)) {
+            $salesModel = new \App\Models\SalesModel();
+            $user = null;
+            if (!empty($salesId)) {
+                $user = $salesModel->find($salesId);
+            }
+            if (!$user && !empty($username)) {
+                $user = $salesModel->where('username', $username)->first();
+            }
+
+            if ($user && isset($user['tipe_akses']) && strtolower(trim((string)$user['tipe_akses'])) === 'internal') {
+                $accountTipeAkses = 'internal';
+            }
+        }
+
+        $requestedMode = strtolower(trim((string)$this->request->getGet('mode')));
+        $isInternal = false;
+        $isPreview = false;
+
+        if ($accountTipeAkses === 'internal') {
+            if ($requestedMode === 'eksternal') {
+                $isInternal = false;
+                $isPreview = true;
+            } else {
+                $isInternal = true;
+                $isPreview = false;
+            }
+        } else {
+            // Akun eksternal: ?mode=internal diabaikan sepenuhnya
+            $isInternal = false;
+            $isPreview = false;
+        }
+
+        return [
+            'account_tipe' => $accountTipeAkses,
+            'is_internal'  => $isInternal,
+            'is_preview'   => $isPreview,
+        ];
     }
 
     private function buildDetailData(int $id): array
@@ -196,8 +357,15 @@ class Produk extends BaseController
             $defaultImg = 'assets/img/logo.png';
             $foto = !empty($fotos) ? $fotos[0] : $defaultImg;
 
+            $kodeProduk = SupplierProductModel::getKodeProduk((int)$produkSupplier['id_produk_supplier']);
+            $produkSupplier['kode_produk'] = $kodeProduk;
+            if ($supplier) {
+                $supplier['kode_produk'] = $kodeProduk;
+            }
+
             $product = [
                 'id_produk'           => $produkSupplier['id_produk_supplier'],
+                'kode_produk'         => $kodeProduk,
                 'nama_produk_id'      => $produkSupplier['nama_produk'],
                 'nama_produk_en'      => $supplier['nama_perusahaan'] ?? '',
                 'nama_kategori_id'    => 'Produk Supplier',
@@ -217,6 +385,9 @@ class Produk extends BaseController
             if (!$product) {
                 return [];
             }
+
+            $kodeProduk = SupplierProductModel::getKodeProduk($id);
+            $product['kode_produk'] = $kodeProduk;
 
             $fotos = [];
             $legacyUrl = SupplierProductModel::photoUrl($product, 1);
@@ -242,7 +413,7 @@ class Produk extends BaseController
         ];
     }
 
-    private function renderPdf(array $items, string $filename)
+    private function renderPdf(array $items, string $filename, bool $isInternal = false)
     {
         ini_set('memory_limit', '512M');
         set_time_limit(120);
@@ -277,9 +448,10 @@ class Produk extends BaseController
         $dompdf->setPaper('A4', 'portrait');
 
         $html = view('sales/produk/pdf_template', [
-            'items'    => $items,
-            'tanggal'  => date('d F Y'),
-            'logoData' => $logoData,
+            'items'       => $items,
+            'tanggal'     => date('d F Y'),
+            'logoData'    => $logoData,
+            'is_internal' => $isInternal,
         ]);
 
         $dompdf->loadHtml($html);
