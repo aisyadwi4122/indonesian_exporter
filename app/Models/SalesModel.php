@@ -20,6 +20,7 @@ class SalesModel extends Model
         'no_hp',
         'wilayah',
         'status',
+        'tipe_akses',
         'created_at',
         'updated_at'
     ];
