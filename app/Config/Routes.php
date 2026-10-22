@@ -159,6 +159,15 @@ $routes->get('admin/meta/edit/(:num)', 'admin\MetaController::edit/$1');
 $routes->post('admin/meta/proses_edit/(:num)', 'admin\MetaController::proses_edit/$1');
 $routes->get('admin/meta/delete/(:any)', 'admin\MetaController::delete/$1');
 
+// ADMIN PRODUK SALES
+$routes->get('admin/produk_sales', 'admin\ProdukSales::index');
+$routes->get('admin/produk_sales/index', 'admin\ProdukSales::index');
+$routes->get('admin/produk_sales/tambah', 'admin\ProdukSales::tambah');
+$routes->post('admin/produk_sales/proses_tambah', 'admin\ProdukSales::proses_tambah');
+$routes->get('admin/produk_sales/edit/(:num)', 'admin\ProdukSales::edit/$1');
+$routes->post('admin/produk_sales/proses_edit/(:num)', 'admin\ProdukSales::proses_edit/$1');
+$routes->post('admin/produk_sales/delete/(:num)', 'admin\ProdukSales::delete/$1');
+
 // ADMIN MANAJEMEN AKUN (SALES & SUPPLIER)
 $routes->get('admin/akun', 'admin\Akun::index');
 $routes->get('admin/akun/index', 'admin\Akun::index');

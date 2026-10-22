@@ -73,6 +73,15 @@
                 </li><!--//nav-item-->
 
                 <li class="nav-item">
+                    <a class="nav-link <?= (strpos(current_url(), 'admin/produk_sales') !== false ? 'active' : '') ?>" href="<?= base_url('admin/produk_sales/index') ?>">
+                        <span class="nav-icon">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                        </span>
+                        <span class="nav-link-text">Produk Sales</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
                     <!--//Bootstrap Icons: https://icons.getbootstrap.com/ -->
                     <a class="nav-link <?= (current_url() == base_url('admin/kategoriAktivitas/index') ? 'active' : '') ?>" href="<?= base_url('admin/kategoriAktivitas/index') ?>">
                         <span class="nav-icon">
