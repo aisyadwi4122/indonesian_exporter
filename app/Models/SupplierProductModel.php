@@ -260,11 +260,14 @@ class SupplierProductModel extends Model
                 }
             }
 
-            // Prioritas (3): file lokal di assets/img/produk atau uploads
+            // Prioritas (3): file lokal di assets/img/produk, uploads/produk_sales, atau uploads
             $trimmed = trim($colVal);
             if (!str_starts_with($trimmed, 'http://') && !str_starts_with($trimmed, 'https://')) {
                 if (is_file(FCPATH . 'assets/img/produk/' . $trimmed)) {
                     return function_exists('base_url') ? base_url('assets/img/produk/' . $trimmed) : ('/assets/img/produk/' . $trimmed);
+                }
+                if (is_file(FCPATH . 'uploads/produk_sales/' . $trimmed)) {
+                    return function_exists('base_url') ? base_url('uploads/produk_sales/' . $trimmed) : ('/uploads/produk_sales/' . $trimmed);
                 }
                 $cleanPath = ltrim($trimmed, '/\\');
                 if (is_file(FCPATH . $cleanPath)) {

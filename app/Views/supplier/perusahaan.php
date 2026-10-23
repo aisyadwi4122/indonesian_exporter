@@ -115,7 +115,7 @@
                 <select class="form-select" id="jenis_perusahaan" name="jenis_perusahaan">
                     <?php 
                         $currentJenis = old('jenis_perusahaan', $perusahaan['jenis_perusahaan'] ?? '');
-                        $jenisOptions = ['PT', 'CV', 'UD', 'Koperasi', 'Perorangan', 'Firma', 'Lainnya'];
+                        $jenisOptions = ['Produsen','Trader'];
                     ?>
                     <option value="">-- Pilih Jenis --</option>
                     <?php foreach ($jenisOptions as $opt) : ?>
