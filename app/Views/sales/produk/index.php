@@ -5,7 +5,7 @@
 <style>
 :root {
   --produk-overlay: rgba(0, 0, 0, 0.45);
-  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(255, 255, 255, 0.35);
   --glass-blur: 10px;
 }
@@ -25,18 +25,6 @@ body {
   }
 }
 
-.sales-topbar {
-  background: rgba(255, 255, 255, 0.80) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-}
-
-.sales-sidebar {
-  background: rgba(255, 255, 255, 0.88) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-}
-
 .sales-card {
   background: var(--glass-bg) !important;
   border: 1px solid var(--glass-border) !important;
@@ -44,24 +32,19 @@ body {
   -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
   color: #1e293b !important;
+  border-radius: 12px;
 }
 
-.sales-card table {
-  --bs-table-bg: transparent !important;
-  --bs-table-striped-bg: rgba(0, 0, 0, 0.03) !important;
-  background-color: transparent !important;
+.sales-card-hover {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
-.sales-card .form-control,
-.sales-card .form-select,
-.sales-card .input-group-text {
-  background: rgba(255, 255, 255, 0.92) !important;
+.sales-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16) !important;
 }
 
-.sales-card .btn-sales-secondary {
-  background: rgba(255, 255, 255, 0.92) !important;
-}
-
+/* Pagination */
 .pagination .page-link {
   background: rgba(255, 255, 255, 0.9) !important;
   border-color: rgba(226, 232, 240, 0.8) !important;
@@ -74,7 +57,7 @@ body {
   color: #ffffff !important;
 }
 
-/* Produk Hero & Breadcrumb */
+/* Hero */
 .produk-hero {
   color: #ffffff !important;
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
@@ -118,38 +101,9 @@ body {
     background: rgba(255, 255, 255, 0.96) !important;
   }
 }
-
-/* Tombol Info Komisi */
-.btn-komisi-has {
-  color: #16a34a !important;
-  border: 1px solid #16a34a !important;
-  background-color: #f0fdf4 !important;
-  font-weight: 500;
-  transition: all 0.15s ease-in-out;
-}
-.btn-komisi-has:hover,
-.btn-komisi-has:focus {
-  color: #ffffff !important;
-  background-color: #16a34a !important;
-  border-color: #16a34a !important;
-  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.25);
-}
-.btn-komisi-none {
-  color: #dc2626 !important;
-  border: 1px solid #dc2626 !important;
-  background-color: #fef2f2 !important;
-  font-weight: 500;
-  transition: all 0.15s ease-in-out;
-}
-.btn-komisi-none:hover,
-.btn-komisi-none:focus {
-  color: #ffffff !important;
-  background-color: #dc2626 !important;
-  border-color: #dc2626 !important;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);
-}
 </style>
 
+<!-- Hero Section -->
 <div class="produk-hero mb-4">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
         <div class="produk-breadcrumb mb-0"><strong>SALES</strong> / PRODUK</div>
@@ -186,8 +140,8 @@ body {
 
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div>
-            <h2 class="fw-bold mb-1" style="font-size: 24px;">Produk</h2>
-            <p class="mb-0" style="font-size: 14px;">Daftar katalog produk ekspor (hanya lihat).</p>
+            <h2 class="fw-bold mb-1" style="font-size: 24px;">Katalog Produk</h2>
+            <p class="mb-0" style="font-size: 14px;">Katalog data produk ekspor dan supplier (area sales read-only).</p>
         </div>
         <div>
             <?php if ($account_tipe === 'internal' && !$is_preview): ?>
@@ -230,40 +184,54 @@ body {
 
 <!-- Kotak Pencarian Produk -->
 <div class="sales-card mb-4" style="padding: 16px 20px;">
-    <form method="GET" action="<?= base_url('sales/produk') ?>" class="row g-2 align-items-center">
+    <form method="GET" action="<?= base_url('sales/produk') ?>">
         <?php if ($is_preview): ?>
             <input type="hidden" name="mode" value="eksternal">
         <?php endif; ?>
-        <div class="col">
-            <div class="input-group">
-                <span class="input-group-text bg-white border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </span>
-                <input type="text" id="searchInput" name="q" class="form-control border-start-0 ps-0" 
-                       placeholder="<?= $is_internal ? 'Cari produk, supplier, lokasi...' : 'Cari nama produk, spesifikasi, lokasi...' ?>" 
-                       value="<?= esc($q ?? '') ?>" 
-                       style="border-radius: 0 8px 8px 0; font-size: 14px;"
-                       autocomplete="off">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="searchInput" name="q" class="form-control border-start-0 ps-0" 
+                           placeholder="<?= $is_internal ? 'Cari produk, nama perusahaan, dan lokasi...' : 'Cari nama produk, spesifikasi, dan lokasi...' ?>" 
+                           value="<?= esc($q ?? '') ?>" 
+                           style="border-radius: 0 8px 8px 0; font-size: 14px;"
+                           autocomplete="off">
+                </div>
             </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sales-primary" style="font-size: 13.5px;">
+                    <i class="fa-solid fa-magnifying-glass me-1"></i> Cari
+                </button>
+            </div>
+            <?php if (!empty($q)): ?>
+            <div class="col-auto">
+                <a href="<?= base_url('sales/produk' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sales-secondary" style="font-size: 13.5px;">
+                    <i class="fa-solid fa-xmark me-1"></i> Reset
+                </a>
+            </div>
+            <?php endif; ?>
         </div>
-        <?php if (!empty($q)): ?>
-        <div class="col-auto">
-            <a href="<?= base_url('sales/produk' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sales-secondary" style="font-size: 13.5px;">
-                <i class="fa-solid fa-xmark me-1"></i> Reset
-            </a>
-        </div>
-        <?php endif; ?>
     </form>
 </div>
 
-<!-- Pesan Jika Produk Tidak Ditemukan -->
-<div id="emptyState" class="sales-card text-center py-5" style="display: <?= empty($products) ? 'block' : 'none' ?>;">
+<!-- Pesan Jika Data Kosong -->
+<?php if (empty($items)): ?>
+<div class="sales-card text-center py-5">
     <div class="mb-3">
         <i class="fa-solid fa-box-open text-muted" style="font-size: 48px;"></i>
     </div>
-    <h5 class="fw-semibold text-dark mb-1">Produk tidak ditemukan</h5>
-    <p class="text-muted mb-0" style="font-size: 14px;">Coba gunakan kata kunci pencarian yang lain.</p>
+    <h5 class="fw-semibold text-dark mb-1">Data tidak ditemukan</h5>
+    <p class="text-muted mb-3" style="font-size: 14px;">Tidak ada produk yang cocok dengan kriteria pencarian "<strong><?= esc($q) ?></strong>".</p>
+    <?php if (!empty($q)): ?>
+    <a href="<?= base_url('sales/produk' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sm btn-sales-primary">
+        <i class="fa-solid fa-rotate-left me-1"></i> Tampilkan Semua Data
+    </a>
+    <?php endif; ?>
 </div>
+<?php else: ?>
 
 <!-- Daftar Kartu Produk -->
 <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4" id="productsGrid">
@@ -285,26 +253,6 @@ body {
                 $detailUrl = base_url('sales/produk/' . $idProduk . ($is_preview ? '?mode=eksternal' : ''));
                 $detailPdfUrl = base_url('sales/produk/' . $idProduk . '/pdf' . ($is_preview ? '?mode=eksternal' : ''));
                 $searchDesc = $is_internal ? ($descClean . ' ' . $supplier . ' ' . $lokasi) : ($descClean . ' ' . $lokasi . ' ' . $kodeProduk);
-
-                // Format Komisi untuk Mode Eksternal
-                $rawKomisi = $p['komisi'] ?? null;
-                $cleanKomisi = ($rawKomisi !== null) ? trim((string)$rawKomisi) : '';
-                $hasKomisi = false;
-                $formattedKomisi = '';
-
-                if ($cleanKomisi !== '' && $cleanKomisi !== '0' && $cleanKomisi !== '0.0' && $cleanKomisi !== '0%') {
-                    $hasKomisi = true;
-                    if (is_numeric($cleanKomisi)) {
-                        $num = (float)$cleanKomisi;
-                        if ($num > 0 && $num <= 1) {
-                            $formattedKomisi = ($num * 100) . '%';
-                        } else {
-                            $formattedKomisi = $num . '%';
-                        }
-                    } else {
-                        $formattedKomisi = $cleanKomisi;
-                    }
-                }
             ?>
             <div class="col product-card-col" 
                  data-id="<?= $idProduk ?>"
@@ -361,18 +309,6 @@ body {
                             <?= esc($descShort) ?>
                         </p>
                         
-                        <!-- Tombol Info Komisi (Mode Eksternal) -->
-                        <?php if (!$is_internal): ?>
-                            <button type="button" 
-                                    class="btn btn-sm <?= $hasKomisi ? 'btn-komisi-has' : 'btn-komisi-none' ?> w-100 mb-2 btn-info-komisi"
-                                    data-kode="<?= esc($kodeProduk, 'attr') ?>"
-                                    data-nama="<?= esc($nama, 'attr') ?>"
-                                    <?= $hasKomisi ? 'data-komisi="' . esc($formattedKomisi, 'attr') . '"' : '' ?>
-                                    title="Informasi Komisi">
-                                <i class="fa-solid fa-coins me-1"></i> Info Komisi
-                            </button>
-                        <?php endif; ?>
-
                         <!-- Aksi Kartu Produk (Hanya Lihat & Unduh) -->
                         <div class="pt-2 border-top d-flex gap-2">
                             <a href="<?= $detailUrl ?>" 
@@ -394,60 +330,13 @@ body {
     <?php endif; ?>
 </div>
 
-<!-- Modal Informasi Komisi (Satu Popup Bersama Seluruh Halaman) -->
-<div class="modal fade" id="modalKomisi" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="modalKomisiTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content shadow border-0" style="border-radius: 12px; overflow: hidden; background: #ffffff;">
-            <div class="modal-header border-bottom py-3 px-4 bg-light">
-                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="modalKomisiTitle" style="font-size: 16.5px;">
-                    <i class="fa-solid fa-coins text-success"></i> Informasi Komisi
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-            </div>
-            <div class="modal-body p-4 text-start">
-                <div class="mb-3 pb-2 border-bottom">
-                    <span class="text-muted d-block small mb-1" style="font-size: 12px;">Kode Produk</span>
-                    <span id="modalKomisiKode" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold" style="font-size: 13px;"></span>
-                </div>
-                <div class="mb-3 pb-2 border-bottom">
-                    <span class="text-muted d-block small mb-1" style="font-size: 12px;">Nama Produk</span>
-                    <h6 id="modalKomisiNama" class="fw-bold text-dark mb-0 text-break" style="font-size: 15px; line-height: 1.4; word-break: break-word;"></h6>
-                </div>
-                <div>
-                    <!-- Status jika ada data komisi -->
-                    <div id="modalKomisiRowFilled" style="display: none;">
-                        <span class="text-muted d-block small mb-1" style="font-size: 12px;">Komisi</span>
-                        <div class="p-3 rounded border text-break" style="background-color: #f0fdf4; border-color: #bbf7d0 !important; color: #15803d; font-size: 14px; font-weight: 600; white-space: pre-line; word-break: break-word;">
-                            <i class="fa-solid fa-circle-check me-1 text-success"></i> <span id="modalKomisiValue"></span>
-                        </div>
-                    </div>
-                    <!-- Status jika tidak ada data komisi -->
-                    <div id="modalKomisiRowEmpty" style="display: none;">
-                        <span class="text-muted d-block small mb-1" style="font-size: 12px;">Status Komisi</span>
-                        <div class="p-3 rounded border" style="background-color: #fef2f2; border-color: #fecaca !important; color: #b91c1c; font-size: 14px; font-weight: 500;">
-                            <i class="fa-solid fa-circle-info me-1 text-danger"></i> Status komisi: Belum dibahas
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer border-top py-2 px-4 bg-light d-flex justify-content-end">
-                <button type="button" class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal" style="border-radius: 6px;">Tutup</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // -------------------------------------------------------------
-    // FITUR PENCARIAN REAL-TIME & SINKRONISASI EXPORT PDF
-    // -------------------------------------------------------------
     const searchInput = document.getElementById('searchInput');
     const productCards = document.querySelectorAll('.product-card-col');
-    const emptyState = document.getElementById('emptyState');
     const btnExportPdf = document.getElementById('btnExportPdf');
     const btnExportPdfEksternal = document.getElementById('btnExportPdfEksternal');
     const btnExportPdfInternal = document.getElementById('btnExportPdfInternal');
@@ -462,32 +351,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 url.searchParams.delete('q');
             }
             element.href = url.pathname + url.search;
-        } catch (e) {
-            // Fallback string manipulation
-        }
+        } catch (e) {}
     }
 
     function filterProducts(query) {
         const q = (query || '').trim().toLowerCase();
-        let visibleCount = 0;
-
         productCards.forEach(function (card) {
             const title = card.getAttribute('data-title') || '';
             const desc = card.getAttribute('data-desc') || '';
 
             if (q === '' || title.indexOf(q) !== -1 || desc.indexOf(q) !== -1) {
                 card.style.display = '';
-                visibleCount++;
             } else {
                 card.style.display = 'none';
             }
         });
-
-        if (visibleCount === 0) {
-            emptyState.style.display = 'block';
-        } else {
-            emptyState.style.display = 'none';
-        }
 
         updatePdfLink(btnExportPdf, query);
         updatePdfLink(btnExportPdfEksternal, query);
@@ -499,7 +377,6 @@ document.addEventListener('DOMContentLoaded', function () {
             filterProducts(this.value);
         });
 
-        // Trigger pencarian awal jika terdapat nilai pencarian dari URL
         if (searchInput.value.trim() !== '') {
             filterProducts(searchInput.value);
         }
