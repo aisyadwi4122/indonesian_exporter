@@ -461,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 url.searchParams.delete('q');
             }
-            element.href = url.pathname + url.search;
+            element.href = url.href;
         } catch (e) {
             // Fallback string manipulation
         }
@@ -483,10 +483,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        if (visibleCount === 0) {
-            emptyState.style.display = 'block';
-        } else {
-            emptyState.style.display = 'none';
+        if (emptyState) {
+            emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
         }
 
         updatePdfLink(btnExportPdf, query);
