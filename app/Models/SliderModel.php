@@ -13,11 +13,11 @@ class SliderModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
+        'foto_slider', 'alt_foto_slider_id', 'alt_foto_slider_en',
         'foto_slider1', 'alt_foto_slider1_id', 'alt_foto_slider1_en',
         'foto_slider2', 'alt_foto_slider2_id', 'alt_foto_slider2_en',
         'foto_slider3', 'alt_foto_slider3_id', 'alt_foto_slider3_en',
         'caption_slider_id', 'caption_slider_en'
-
     ];
 
     protected bool $allowEmptyInserts = false;

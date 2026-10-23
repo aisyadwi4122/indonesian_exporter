@@ -132,9 +132,11 @@ class Slider extends BaseController
                 return redirect()->back()->withInput();
             }
 
-            // Hapus file lama jika ada
-            if (!empty($sliderData['foto_slider']) && file_exists('assets/img/slider/' . $sliderData['foto_slider'])) {
-                unlink('assets/img/slider/' . $sliderData['foto_slider']);
+            // Hapus file lama jika ada (hanya hapus file hasil upload, jangan hapus file bawaan di assets/img)
+            $defaultAssets = ['default.jpg', 'slide1.png', 'slide2.png', 'slide2.jpg', 'slider3.jpg'];
+            $oldFilePath = 'assets/img/slider/' . $sliderData['foto_slider'];
+            if (!empty($sliderData['foto_slider']) && !in_array($sliderData['foto_slider'], $defaultAssets) && file_exists($oldFilePath)) {
+                unlink($oldFilePath);
             }
 
             // Simpan dengan nama unik
@@ -187,9 +189,10 @@ class Slider extends BaseController
             return redirect()->to(base_url('admin/slider/index'));
         }
 
-        // Hapus file gambar jika ada
+        // Hapus file gambar jika ada (hanya hapus file hasil upload, jangan hapus file bawaan di assets/img)
+        $defaultAssets = ['default.jpg', 'slide1.png', 'slide2.png', 'slide2.jpg', 'slider3.jpg'];
         $filePath = 'assets/img/slider/' . $data['foto_slider'];
-        if (!empty($data['foto_slider']) && file_exists($filePath)) {
+        if (!empty($data['foto_slider']) && !in_array($data['foto_slider'], $defaultAssets) && file_exists($filePath)) {
             unlink($filePath);
         }
 
