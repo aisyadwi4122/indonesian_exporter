@@ -69,7 +69,15 @@ class Produk extends BaseController
 
         // PENYARINGAN SATU TEMPAT: Mode eksternal WAJIB memanggil maskForExternal sebelum data dikirim ke view
         if (!$isInternal) {
+            $komisiMap = array_column($products, 'komisi', 'id_produk_supplier');
             $products = SupplierProductModel::maskForExternal($products);
+            foreach ($products as &$p) {
+                $prodId = $p['id_produk_supplier'] ?? ($p['id_produk'] ?? 0);
+                if (isset($komisiMap[$prodId])) {
+                    $p['komisi'] = $komisiMap[$prodId];
+                }
+            }
+            unset($p);
         }
 
         $data = [

@@ -105,6 +105,13 @@ class Slider extends BaseController
     public function proses_edit($id_slider)
     {
         $sliderModel = new SliderModel();
+        $sliderModel->setAllowedFields([
+            'foto_slider',
+            'alt_foto_slider_id',
+            'alt_foto_slider_en',
+            'caption_slider_id',
+            'caption_slider_en'
+        ]);
 
         // Validasi keberadaan slider
         $sliderData = $sliderModel->find($id_slider);
@@ -116,6 +123,8 @@ class Slider extends BaseController
         $dataToUpdate = [];
         $allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
         $maxSize = 2048 * 1024; // Maksimal 2MB
+        $fileUploaded = false;
+        $oldFileName = $sliderData['foto_slider'] ?? null;
 
         // Validasi dan proses unggahan file foto
         $file = $this->request->getFile('file_foto_slider');
@@ -132,15 +141,11 @@ class Slider extends BaseController
                 return redirect()->back()->withInput();
             }
 
-            // Hapus file lama jika ada
-            if (!empty($sliderData['foto_slider']) && file_exists('assets/img/slider/' . $sliderData['foto_slider'])) {
-                unlink('assets/img/slider/' . $sliderData['foto_slider']);
-            }
-
             // Simpan dengan nama unik
             $newFileName = time() . '_' . $file->getRandomName();
-            $file->move('assets/img/slider', $newFileName);
+            $file->move(FCPATH . 'assets/img/slider', $newFileName);
             $dataToUpdate['foto_slider'] = $newFileName; // Simpan di kolom 'foto_slider'
+            $fileUploaded = true;
         }
 
         // Menambahkan hanya jika ada input baru
@@ -165,9 +170,20 @@ class Slider extends BaseController
         }
 
         // Update hanya jika ada perubahan
-        $sliderModel->update($id_slider, $dataToUpdate);
-        session()->setFlashdata('success', 'Slider berhasil diperbarui.');
-        return redirect()->to(base_url('admin/slider/index'));
+        if ($sliderModel->update($id_slider, $dataToUpdate)) {
+            // Hapus file lama jika ada upload baru dan update database berhasil
+            if ($fileUploaded && !empty($oldFileName)) {
+                $oldFilePath = FCPATH . 'assets/img/slider/' . $oldFileName;
+                if (is_file($oldFilePath)) {
+                    @unlink($oldFilePath);
+                }
+            }
+            session()->setFlashdata('success', 'Slider berhasil diperbarui.');
+            return redirect()->to(base_url('admin/slider/index'));
+        }
+
+        session()->setFlashdata('error', 'Gagal memperbarui data slider.');
+        return redirect()->back()->withInput();
     }
 
 
