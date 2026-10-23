@@ -101,6 +101,31 @@ body {
     background: rgba(255, 255, 255, 0.96) !important;
   }
 }
+
+.btn-komisi-has {
+  background-color: #f0fdf4 !important;
+  border: 1px solid #86efac !important;
+  color: #15803d !important;
+  font-size: 12px;
+  font-weight: 600;
+}
+.btn-komisi-has:hover {
+  background-color: #dcfce7 !important;
+  border-color: #4ade80 !important;
+  color: #166534 !important;
+}
+.btn-komisi-none {
+  background-color: #fef2f2 !important;
+  border: 1px solid #fca5a5 !important;
+  color: #b91c1c !important;
+  font-size: 12px;
+  font-weight: 500;
+}
+.btn-komisi-none:hover {
+  background-color: #fee2e2 !important;
+  border-color: #f87171 !important;
+  color: #991b1b !important;
+}
 </style>
 
 <!-- Hero Section -->
@@ -233,101 +258,213 @@ body {
 </div>
 <?php else: ?>
 
-<!-- Daftar Kartu Produk -->
-<div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4" id="productsGrid">
-    <?php if (!empty($products)): ?>
-        <?php foreach ($products as $p): ?>
-            <?php
-                $idProduk = $p['id_produk_supplier'] ?? ($p['id_produk'] ?? 0);
-                $kodeProduk = $p['kode_produk'] ?? ('IE-' . str_pad((string)$idProduk, 4, '0', STR_PAD_LEFT));
-                $nama = !empty($p['nama_produk']) ? $p['nama_produk'] : (!empty($p['nama_produk_id']) ? $p['nama_produk_id'] : ($p['nama_produk_en'] ?? 'Produk'));
-                $descRaw = !empty($p['spesifikasi']) ? $p['spesifikasi'] : (!empty($p['deskripsi_produk_id']) ? $p['deskripsi_produk_id'] : ($p['deskripsi_produk_en'] ?? ''));
-                $descClean = trim(strip_tags($descRaw));
-                $descShort = mb_strlen($descClean) > 110 ? mb_substr($descClean, 0, 110) . '...' : $descClean;
-                $supplier = $is_internal ? (!empty($p['nama_perusahaan']) ? $p['nama_perusahaan'] : '') : '';
-                $lokasi = !empty($p['lokasi_barang']) ? $p['lokasi_barang'] : (!empty($p['domisili_usaha']) ? $p['domisili_usaha'] : '');
+<!-- Grid Kartu Produk (4 Kolom) -->
+<div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 mb-4" id="productsGrid">
+    <?php foreach ($items as $item): ?>
+        <?php
+            $id = $item['id'];
+            $kodeProduk = $item['kode_produk'] ?? ('IE-' . str_pad((string)($item['raw_id'] ?? 0), 4, '0', STR_PAD_LEFT));
+            $namaProduk = !empty($item['nama_produk']) ? $item['nama_produk'] : 'Produk Ekspor';
+            $perusahaan = !empty($item['nama_perusahaan']) ? $item['nama_perusahaan'] : '-';
+            $lokasi = !empty($item['lokasi']) ? $item['lokasi'] : '-';
+            $kapasitas = !empty($item['kapasitas']) ? $item['kapasitas'] : '-';
+            $descShort = mb_strlen($kapasitas) > 85 ? mb_substr($kapasitas, 0, 85) . '...' : $kapasitas;
+            
+            $imgUrl = !empty($item['foto_url']) ? $item['foto_url'] : base_url('assets/img/logo.png');
+            $isPlaceholder = empty($item['foto_url']);
+            $detailUrl = base_url('sales/produk/detail/' . $id . ($is_preview ? '?mode=eksternal' : ''));
+            $detailPdfUrl = base_url('sales/produk/detail/' . $id . '/pdf' . ($is_preview ? '?mode=eksternal' : ''));
+            $searchDesc = $is_internal ? ($descShort . ' ' . $perusahaan . ' ' . $lokasi) : ($descShort . ' ' . $lokasi . ' ' . $kodeProduk);
 
-                $imgUrl = !empty($p['foto_url']) ? $p['foto_url'] : base_url('assets/img/logo.png');
-                $isPlaceholder = empty($p['foto_url']);
-                
-                $detailUrl = base_url('sales/produk/' . $idProduk . ($is_preview ? '?mode=eksternal' : ''));
-                $detailPdfUrl = base_url('sales/produk/' . $idProduk . '/pdf' . ($is_preview ? '?mode=eksternal' : ''));
-                $searchDesc = $is_internal ? ($descClean . ' ' . $supplier . ' ' . $lokasi) : ($descClean . ' ' . $lokasi . ' ' . $kodeProduk);
-            ?>
-            <div class="col product-card-col" 
-                 data-id="<?= $idProduk ?>"
-                 data-title="<?= esc(strtolower($nama)) ?>"
-                 data-desc="<?= esc(strtolower($searchDesc)) ?>">
-                <div class="sales-card h-100 d-flex flex-column p-0 overflow-hidden" style="border-radius: 10px; transition: transform 0.15s ease, box-shadow 0.15s ease;">
-                    <div style="height: 180px; background-color: #f1f5f9; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                        <img src="<?= esc($imgUrl) ?>" 
-                             alt="<?= esc($nama) ?>" 
-                             loading="lazy"
-                             referrerpolicy="no-referrer"
-                             style="width: 100%; height: 100%; object-fit: <?= $isPlaceholder ? 'contain' : 'cover' ?>; padding: <?= $isPlaceholder ? '20px' : '0' ?>;"
-                             onerror="this.onerror=null; this.src='<?= base_url('assets/img/logo.png') ?>'; this.style.objectFit='contain'; this.style.padding='20px';">
+            // Format Komisi untuk Mode Eksternal
+            $rawKomisi = $item['komisi'] ?? null;
+            $cleanKomisi = ($rawKomisi !== null) ? trim((string)$rawKomisi) : '';
+            $hasKomisi = false;
+            $formattedKomisi = '';
+
+            if ($cleanKomisi !== '' && $cleanKomisi !== '0' && $cleanKomisi !== '0.0' && $cleanKomisi !== '0%') {
+                $hasKomisi = true;
+                if (is_numeric($cleanKomisi)) {
+                    $num = (float)$cleanKomisi;
+                    if ($num > 0 && $num <= 1) {
+                        $formattedKomisi = ($num * 100) . '%';
+                    } else {
+                        $formattedKomisi = $num . '%';
+                    }
+                } else {
+                    $formattedKomisi = $cleanKomisi;
+                }
+            }
+        ?>
+        <div class="col product-card-col"
+             data-id="<?= esc($id) ?>"
+             data-title="<?= esc(strtolower($namaProduk)) ?>"
+             data-desc="<?= esc(strtolower($searchDesc)) ?>">
+            <div class="sales-card sales-card-hover h-100 d-flex flex-column p-0 overflow-hidden">
+                <!-- Foto Produk / Placeholder Logo (Tanpa badge tahun) -->
+                <div style="height: 170px; background-color: #f8fafc; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(0,0,0,0.06);">
+                    <img src="<?= esc($imgUrl) ?>" 
+                         alt="<?= esc($namaProduk) ?>" 
+                         loading="lazy"
+                         referrerpolicy="no-referrer"
+                         style="width: 100%; height: 100%; object-fit: <?= $isPlaceholder ? 'contain' : 'cover' ?>; padding: <?= $isPlaceholder ? '26px' : '0' ?>;"
+                         onerror="this.onerror=null; this.src='<?= base_url('assets/img/logo.png') ?>'; this.style.objectFit='contain'; this.style.padding='26px';">
+                </div>
+
+                <!-- Konten Kartu -->
+                <div class="p-3 d-flex flex-column flex-grow-1">
+                    <!-- Nama Perusahaan / Kode Produk -->
+                    <div class="mb-1 text-truncate" style="font-size: 12px; font-weight: 600; color: #16a34a;" title="<?= esc($perusahaan) ?>">
+                        <i class="fa-solid fa-building me-1"></i><?= esc($perusahaan) ?>
+                        <span class="text-muted fw-normal ms-1">(<?= esc($kodeProduk) ?>)</span>
                     </div>
-                    <div class="p-3 d-flex flex-column flex-grow-1">
-                        <?php if ($is_internal): ?>
-                            <?php if (!empty($supplier)): ?>
-                            <div class="mb-1 text-truncate" style="font-size: 11.5px; font-weight: 600; color: #16a34a;" title="<?= esc($supplier) ?>">
-                                <i class="fa-solid fa-building me-1"></i><?= esc($supplier) ?>
-                                <span class="text-muted fw-normal ms-1">(<?= esc($kodeProduk) ?>)</span>
-                            </div>
-                            <?php if (!empty($p['no_hp'])): ?>
-                            <div class="mb-1 text-truncate text-muted" style="font-size: 11px;" title="<?= esc($p['no_hp']) ?>">
-                                <i class="fa-solid fa-phone me-1 text-success"></i><?= esc($p['no_hp']) ?>
-                            </div>
-                            <?php endif; ?>
-                            <?php else: ?>
-                            <div class="mb-1 text-truncate" style="font-size: 11.5px; font-weight: 600; color: #16a34a;" title="<?= esc($kodeProduk) ?>">
-                                <i class="fa-solid fa-tag me-1"></i><?= esc($kodeProduk) ?>
-                            </div>
-                            <?php if (!empty($p['no_hp'])): ?>
-                            <div class="mb-1 text-truncate text-muted" style="font-size: 11px;" title="<?= esc($p['no_hp']) ?>">
-                                <i class="fa-solid fa-phone me-1 text-success"></i><?= esc($p['no_hp']) ?>
-                            </div>
-                            <?php endif; ?>
-                            <?php endif; ?>
-                        <?php else: ?>
-                            <div class="mb-1 text-truncate" style="font-size: 11.5px; font-weight: 600; color: #16a34a;" title="<?= esc($kodeProduk) ?>">
-                                <i class="fa-solid fa-tag me-1"></i><?= esc($kodeProduk) ?>
-                            </div>
-                        <?php endif; ?>
 
-                        <h5 class="fw-bold mb-2 text-dark" style="font-size: 15.5px; line-height: 1.35;" title="<?= esc($nama) ?>">
-                            <a href="<?= $detailUrl ?>" class="text-dark text-decoration-none">
-                                <?= esc($nama) ?>
-                            </a>
-                        </h5>
-                        <?php if (!empty($lokasi)): ?>
-                        <div class="text-muted mb-2 small text-truncate" style="font-size: 12px;">
-                            <i class="fa-solid fa-location-dot me-1 text-secondary"></i><?= esc($lokasi) ?>
+                    <!-- Nama Produk -->
+                    <h5 class="fw-bold mb-1 text-dark text-truncate" style="font-size: 14.5px;" title="<?= esc($namaProduk) ?>">
+                        <a href="<?= $detailUrl ?>" class="text-dark text-decoration-none">
+                            <?= esc($namaProduk) ?>
+                        </a>
+                    </h5>
+
+                    <!-- Lokasi -->
+                    <div class="text-muted mb-2 small text-truncate" style="font-size: 12px;" title="<?= esc($lokasi) ?>">
+                        <i class="fa-solid fa-location-dot me-1 text-secondary"></i><?= esc($lokasi) ?>
+                    </div>
+
+                    <!-- Kapasitas / Keterangan -->
+                    <p class="text-muted mb-2 small flex-grow-1" style="font-size: 12px; line-height: 1.45;">
+                        <span class="text-dark fw-medium">Kapasitas/Ket:</span> <?= esc($descShort) ?>
+                    </p>
+
+                    <!-- Info Nilai / Komisi Internal -->
+                    <?php if (!empty($item['nilai_ekspor_usd'])): ?>
+                    <div class="p-2 mb-2 rounded bg-light d-flex justify-content-between align-items-center" style="font-size: 11.5px;">
+                        <span class="text-muted"><i class="fa-solid fa-ship me-1"></i>Ekspor:</span>
+                        <span class="fw-bold text-success">$<?= number_format($item['nilai_ekspor_usd'], 0, ',', '.') ?> USD</span>
+                    </div>
+                    <?php elseif (!empty($item['komisi']) && $is_internal): ?>
+                    <div class="p-2 mb-2 rounded bg-light d-flex justify-content-between align-items-center" style="font-size: 11.5px;">
+                        <span class="text-muted">Komisi:</span>
+                        <span class="fw-bold text-success"><?= esc(mb_substr($item['komisi'], 0, 20)) ?></span>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- Tombol Info Komisi (Mode Eksternal) -->
+                    <?php if (!$is_internal): ?>
+                        <button type="button" 
+                                class="btn btn-sm <?= $hasKomisi ? 'btn-komisi-has' : 'btn-komisi-none' ?> w-100 mb-2 btn-info-komisi"
+                                data-kode="<?= esc($kodeProduk, 'attr') ?>"
+                                data-nama="<?= esc($namaProduk, 'attr') ?>"
+                                <?= $hasKomisi ? 'data-komisi="' . esc($formattedKomisi, 'attr') . '"' : '' ?>
+                                title="Informasi Komisi">
+                            <i class="fa-solid fa-coins me-1"></i> Info Komisi
+                        </button>
+                    <?php endif; ?>
+
+                    <!-- Tombol Aksi: Detail & PDF -->
+                    <div class="d-flex gap-2 pt-2 border-top mt-auto">
+                        <a href="<?= $detailUrl ?>" 
+                           class="btn btn-sm btn-outline-success flex-grow-1 fw-semibold text-center" 
+                           style="font-size: 12.5px;">
+                            <i class="fa-solid fa-circle-info me-1"></i> Detail
+                        </a>
+                        <a href="<?= $detailPdfUrl ?>" 
+                           target="_blank" 
+                           class="btn btn-sm btn-outline-danger fw-semibold px-3" 
+                           title="Unduh PDF Produk Ini"
+                           style="font-size: 12.5px;">
+                            <i class="fa-solid fa-file-pdf me-1"></i> PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endforeach; ?>
+</div>
+
+<!-- Navigasi Pagination & Info Baris -->
+<div class="sales-card d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 p-3 mb-4">
+    <div class="text-muted small">
+        Menampilkan <strong><?= count($items) > 0 ? (($page - 1) * $perPage + 1) : 0 ?></strong> - 
+        <strong><?= min($page * $perPage, $totalRows) ?></strong> dari <strong><?= $totalRows ?></strong> produk
+    </div>
+
+    <?php if ($totalPages > 1): ?>
+    <nav aria-label="Page navigation">
+        <ul class="pagination pagination-sm mb-0">
+            <!-- Prev -->
+            <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                <a class="page-link" href="<?= base_url('sales/produk?page=' . ($page - 1) . (!empty($q) ? '&q=' . urlencode($q) : '') . ($is_preview ? '&mode=eksternal' : '')) ?>">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+            </li>
+
+            <!-- Halaman -->
+            <?php
+                $startPage = max(1, $page - 2);
+                $endPage = min($totalPages, $page + 2);
+            ?>
+            <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                <li class="page-item <?= $i === $page ? 'active' : '' ?>">
+                    <a class="page-link" href="<?= base_url('sales/produk?page=' . $i . (!empty($q) ? '&q=' . urlencode($q) : '') . ($is_preview ? '&mode=eksternal' : '')) ?>">
+                        <?= $i ?>
+                    </a>
+                </li>
+            <?php endfor; ?>
+
+            <!-- Next -->
+            <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+                <a class="page-link" href="<?= base_url('sales/produk?page=' . ($page + 1) . (!empty($q) ? '&q=' . urlencode($q) : '') . ($is_preview ? '&mode=eksternal' : '')) ?>">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
+
+<!-- Modal Informasi Komisi (Satu Popup Bersama Seluruh Halaman) -->
+<div class="modal fade" id="modalKomisi" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="modalKomisiTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow border-0" style="border-radius: 12px; overflow: hidden; background: #ffffff;">
+            <div class="modal-header border-bottom py-3 px-4 bg-light">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="modalKomisiTitle" style="font-size: 16.5px;">
+                    <i class="fa-solid fa-coins text-success"></i> Informasi Komisi
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body p-4 text-start">
+                <div class="mb-3 pb-2 border-bottom">
+                    <span class="text-muted d-block small mb-1" style="font-size: 12px;">Kode Produk</span>
+                    <span id="modalKomisiKode" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold" style="font-size: 13px;"></span>
+                </div>
+                <div class="mb-3 pb-2 border-bottom">
+                    <span class="text-muted d-block small mb-1" style="font-size: 12px;">Nama Produk</span>
+                    <h6 id="modalKomisiNama" class="fw-bold text-dark mb-0 text-break" style="font-size: 15px; line-height: 1.4; word-break: break-word;"></h6>
+                </div>
+                <div>
+                    <!-- Status jika ada data komisi -->
+                    <div id="modalKomisiRowFilled" style="display: none;">
+                        <span class="text-muted d-block small mb-1" style="font-size: 12px;">Komisi</span>
+                        <div class="p-3 rounded border text-break" style="background-color: #f0fdf4; border-color: #bbf7d0 !important; color: #15803d; font-size: 14px; font-weight: 600; white-space: pre-line; word-break: break-word;">
+                            <i class="fa-solid fa-circle-check me-1 text-success"></i> <span id="modalKomisiValue"></span>
                         </div>
-                        <?php endif; ?>
-                        <p class="text-muted mb-3 flex-grow-1" style="font-size: 13px; line-height: 1.5;">
-                            <?= esc($descShort) ?>
-                        </p>
-                        
-                        <!-- Aksi Kartu Produk (Hanya Lihat & Unduh) -->
-                        <div class="pt-2 border-top d-flex gap-2">
-                            <a href="<?= $detailUrl ?>" 
-                               class="btn btn-sm btn-outline-success flex-grow-1"
-                               title="Detail">
-                                <i class="fa-solid fa-eye me-1"></i> Detail
-                            </a>
-                            <a href="<?= $detailPdfUrl ?>" 
-                               target="_blank"
-                               class="btn btn-sm btn-outline-danger"
-                               title="Export PDF">
-                                <i class="fa-solid fa-file-pdf me-1"></i> PDF
-                            </a>
+                    </div>
+                    <!-- Status jika tidak ada data komisi -->
+                    <div id="modalKomisiRowEmpty" style="display: none;">
+                        <span class="text-muted d-block small mb-1" style="font-size: 12px;">Status Komisi</span>
+                        <div class="p-3 rounded border" style="background-color: #fef2f2; border-color: #fecaca !important; color: #b91c1c; font-size: 14px; font-weight: 500;">
+                            <i class="fa-solid fa-circle-info me-1 text-danger"></i> Status komisi: Belum dibahas
                         </div>
                     </div>
                 </div>
             </div>
-        <?php endforeach; ?>
-    <?php endif; ?>
+            <div class="modal-footer border-top py-2 px-4 bg-light d-flex justify-content-end">
+                <button type="button" class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal" style="border-radius: 6px;">Tutup</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <?= $this->endSection() ?>

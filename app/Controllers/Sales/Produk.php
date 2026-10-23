@@ -34,25 +34,12 @@ class Produk extends BaseController
         // Ambil seluruh produk (127 produk: 10 Supplier di awal + 117 ECP) sesuai kata kunci pencarian
         $allItems = $this->fetchProducts($q, $isInternal);
 
-        // Jika mode eksternal, samarkan nama perusahaan & sembunyikan komisi
+        // Jika mode eksternal, samarkan nama perusahaan
         if (!$isInternal) {
-<<<<<<< HEAD
-            $komisiMap = array_column($products, 'komisi', 'id_produk_supplier');
-            $products = SupplierProductModel::maskForExternal($products);
-            foreach ($products as &$p) {
-                $prodId = $p['id_produk_supplier'] ?? ($p['id_produk'] ?? 0);
-                if (isset($komisiMap[$prodId])) {
-                    $p['komisi'] = $komisiMap[$prodId];
-                }
-            }
-            unset($p);
-=======
             foreach ($allItems as &$it) {
                 $it['nama_perusahaan'] = 'PT Indonesian Exporter Partner';
-                $it['komisi'] = null;
             }
             unset($it);
->>>>>>> 0f0f67a875448aefeb56fcb6704b2d6918ef7410
         }
 
         $totalRows = count($allItems);
@@ -73,6 +60,7 @@ class Produk extends BaseController
             'totalRows'    => $totalRows,
             'totalPages'   => $totalPages,
             'items'        => $items,
+            'products'     => $items,
             'is_internal'  => $isInternal,
             'is_preview'   => $isPreview,
             'account_tipe' => $accountTipe,
