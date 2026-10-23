@@ -31,10 +31,22 @@ class ProdukSales extends AdminAuthBase
         }
 
         $searchQuery = trim((string)($this->request->getGet('q') ?? ''));
+        $page = (int)($this->request->getGet('page') ?? 1);
+        if ($page < 1) {
+            $page = 1;
+        }
+        $perPage = 10;
 
-        // Ambil data produk terpaginasi (10 per halaman)
-        $products = $this->productModel->getAdminList(['q' => $searchQuery])->paginate(10, 'default');
-        $pager    = $this->productModel->pager;
+        // Ambil data produk terpadu 127 produk (10 Supplier IE di awal + 117 ECP)
+        $allItems  = $this->productModel->getUnifiedProducts($searchQuery);
+        $totalRows = count($allItems);
+
+        // Potong data sesuai halaman aktif
+        $products = array_slice($allItems, ($page - 1) * $perPage, $perPage);
+
+        // Inisialisasi pager CI4 agar links('default', 'pager_rapi') berjalan normal
+        $pager = \Config\Services::pager();
+        $pager->store('default', $page, $perPage, $totalRows);
 
         return view('admin/produk_sales/index', [
             'products'     => $products,
@@ -160,6 +172,52 @@ class ProdukSales extends AdminAuthBase
             return $redirect;
         }
 
+        // Penanganan untuk produk ECP (ID virtual >= 10000)
+        if ($id >= 10000) {
+            $idEcp = $id - 10000;
+            $db = \Config\Database::connect();
+            $ecp = $db->table('tb_ecp_ekspor')->where('id_ecp', $idEcp)->get()->getRowArray();
+            if (!$ecp) {
+                session()->setFlashdata('error', 'Produk ECP tidak ditemukan atau telah dihapus.');
+                return redirect()->to(base_url('admin/produk_sales/index'));
+            }
+
+            $namaProduk = !empty($ecp['produk_ekspor']) ? $ecp['produk_ekspor'] : (!empty($ecp['produk_dipasarkan']) ? $ecp['produk_dipasarkan'] : 'Produk Ekspor');
+            $lokasi = !empty($ecp['domisili']) ? $ecp['domisili'] : (!empty($ecp['wilayah_ecp']) ? $ecp['wilayah_ecp'] : '');
+            $spesifikasi = !empty($ecp['kategori_produk']) ? ('Kategori: ' . $ecp['kategori_produk'] . (!empty($ecp['merk_dagang']) ? ' | Merk: ' . $ecp['merk_dagang'] : '')) : ($ecp['produk_dipasarkan'] ?: '');
+            $kapasitas = !empty($ecp['kapasitas_produksi']) ? $ecp['kapasitas_produksi'] : (!empty($ecp['kuantitas_ekspor']) ? 'Ekspor: ' . $ecp['kuantitas_ekspor'] : '');
+            $hargaExw = isset($ecp['nilai_ekspor_usd']) ? ('Ekspor: $' . number_format((float)$ecp['nilai_ekspor_usd'], 0, ',', '.') . ' USD') : '';
+
+            $produk = [
+                'id_produk_supplier' => $id,
+                'id_supplier'        => null,
+                'nama_produk'        => $namaProduk,
+                'nama_perusahaan'    => $ecp['nama_perusahaan'] ?: '',
+                'lokasi_barang'      => $lokasi,
+                'spesifikasi'        => $spesifikasi,
+                'kapasitas_produksi' => $kapasitas,
+                'moq'                => $ecp['kuantitas_ekspor'] ?: '',
+                'harga_exw'          => $hargaExw,
+                'komisi'             => '',
+                'sertifikasi'        => '',
+                'legalitas'          => '',
+                'sudah_ekspor'       => 'Sudah',
+                'foto_1'             => null,
+            ];
+
+            $suppliers    = $this->supplierModel->orderBy('nama_perusahaan', 'ASC')->findAll();
+            $kodeProduk   = 'ECP-' . str_pad((string)$idEcp, 4, '0', STR_PAD_LEFT);
+            $currentPhoto = base_url('assets/img/logo.png');
+
+            return view('admin/produk_sales/edit', [
+                'produk'            => $produk,
+                'suppliers'         => $suppliers,
+                'kode_produk'       => $kodeProduk,
+                'current_photo_url' => $currentPhoto,
+                'validation'        => \Config\Services::validation(),
+            ]);
+        }
+
         $produk = $this->productModel->find($id);
         if (!$produk) {
             session()->setFlashdata('error', 'Produk tidak ditemukan atau telah dihapus.');
@@ -186,6 +244,51 @@ class ProdukSales extends AdminAuthBase
     {
         if ($redirect = $this->checkAuth()) {
             return $redirect;
+        }
+
+        // Penanganan simpan edit untuk produk ECP (ID virtual >= 10000)
+        if ($id >= 10000) {
+            $idEcp = $id - 10000;
+            $db = \Config\Database::connect();
+            $ecp = $db->table('tb_ecp_ekspor')->where('id_ecp', $idEcp)->get()->getRowArray();
+            if (!$ecp) {
+                session()->setFlashdata('error', 'Produk ECP tidak ditemukan atau telah dihapus.');
+                return redirect()->to(base_url('admin/produk_sales/index'));
+            }
+
+            $rules = [
+                'nama_produk' => 'required|min_length[3]|max_length[255]',
+            ];
+            $messages = [
+                'nama_produk' => [
+                    'required'   => 'Nama produk wajib diisi.',
+                    'min_length' => 'Nama produk minimal 3 karakter.',
+                    'max_length' => 'Nama produk maksimal 255 karakter.',
+                ],
+            ];
+
+            if (!$this->validate($rules, $messages)) {
+                session()->setFlashdata('error', 'Terdapat kesalahan pada input formulir. Silakan periksa kembali.');
+                return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            }
+
+            $namaProduk  = trim((string)$this->request->getPost('nama_produk'));
+            $lokasi      = trim((string)$this->request->getPost('lokasi_barang'));
+            $spesifikasi = trim((string)$this->request->getPost('spesifikasi'));
+            $kapasitas   = trim((string)$this->request->getPost('kapasitas_produksi'));
+
+            $db->table('tb_ecp_ekspor')->where('id_ecp', $idEcp)->update([
+                'produk_ekspor'      => $namaProduk,
+                'domisili'           => $lokasi,
+                'produk_dipasarkan'  => $spesifikasi,
+                'kapasitas_produksi' => $kapasitas,
+                'updated_at'         => date('Y-m-d H:i:s'),
+            ]);
+
+            $kodeProduk = 'ECP-' . str_pad((string)$idEcp, 4, '0', STR_PAD_LEFT);
+            session()->setFlashdata('success', 'Data produk sales ' . $kodeProduk . ' berhasil diperbarui.');
+
+            return redirect()->to(base_url('admin/produk_sales/index'));
         }
 
         $produk = $this->productModel->find($id);
@@ -297,6 +400,24 @@ class ProdukSales extends AdminAuthBase
     {
         if ($redirect = $this->checkAuth()) {
             return $redirect;
+        }
+
+        // Penanganan hapus untuk produk ECP (ID virtual >= 10000)
+        if ($id >= 10000) {
+            $idEcp = $id - 10000;
+            $db = \Config\Database::connect();
+            $ecp = $db->table('tb_ecp_ekspor')->where('id_ecp', $idEcp)->get()->getRowArray();
+            if (!$ecp) {
+                session()->setFlashdata('error', 'Produk ECP tidak ditemukan atau telah dihapus.');
+                return redirect()->to(base_url('admin/produk_sales/index'));
+            }
+
+            $db->table('tb_ecp_ekspor')->where('id_ecp', $idEcp)->delete();
+            $kode = 'ECP-' . str_pad((string)$idEcp, 4, '0', STR_PAD_LEFT);
+            $nama = !empty($ecp['produk_ekspor']) ? $ecp['produk_ekspor'] : (!empty($ecp['produk_dipasarkan']) ? $ecp['produk_dipasarkan'] : 'Produk Ekspor');
+            session()->setFlashdata('success', 'Produk sales ' . $kode . ' (' . esc($nama) . ') berhasil dihapus.');
+
+            return redirect()->to(base_url('admin/produk_sales/index'));
         }
 
         $produk = $this->productModel->find($id);

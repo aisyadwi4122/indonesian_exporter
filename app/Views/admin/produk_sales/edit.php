@@ -69,9 +69,13 @@
 
                             <!-- Supplier / Perusahaan -->
                             <div class="mb-3">
-                                <label for="id_supplier" class="form-label fw-bold">Supplier / Perusahaan <span class="text-danger">*</span></label>
-                                <select name="id_supplier" id="id_supplier" class="form-select <?= (isset($validation) && $validation->hasError('id_supplier')) ? 'is-invalid' : '' ?>" required>
-                                    <option value="">-- Pilih Supplier --</option>
+                                <label for="id_supplier" class="form-label fw-bold">Supplier / Perusahaan <?= !empty($produk['id_supplier']) ? '<span class="text-danger">*</span>' : '' ?></label>
+                                <select name="id_supplier" id="id_supplier" class="form-select <?= (isset($validation) && $validation->hasError('id_supplier')) ? 'is-invalid' : '' ?>" <?= !empty($produk['id_supplier']) ? 'required' : '' ?>>
+                                    <?php if (empty($produk['id_supplier']) && !empty($produk['nama_perusahaan'])) : ?>
+                                        <option value="" selected><?= esc($produk['nama_perusahaan']) ?> (Peserta ECP)</option>
+                                    <?php else : ?>
+                                        <option value="">-- Pilih Supplier --</option>
+                                    <?php endif; ?>
                                     <?php foreach ($suppliers as $s) : ?>
                                         <option value="<?= $s['id_supplier'] ?>" <?= (old('id_supplier', $produk['id_supplier']) == $s['id_supplier']) ? 'selected' : '' ?>>
                                             <?= esc($s['nama_perusahaan']) ?> (<?= esc($s['domisili_usaha'] ?? 'Indonesia') ?>)

@@ -76,8 +76,8 @@
                                 <?php foreach ($products as $p) : ?>
                                     <?php 
                                         $id         = (int)$p['id_produk_supplier'];
-                                        $kodeProduk = \App\Models\SupplierProductModel::getKodeProduk($id);
-                                        $photoUrl   = \App\Models\SupplierProductModel::photoUrl($p, 1);
+                                        $kodeProduk = !empty($p['kode_produk']) ? $p['kode_produk'] : \App\Models\SupplierProductModel::getKodeProduk($id);
+                                        $photoUrl   = !empty($p['foto_url']) ? $p['foto_url'] : \App\Models\SupplierProductModel::photoUrl($p, 1);
                                     ?>
                                     <tr>
                                         <td class="text-center">
@@ -88,7 +88,7 @@
                                                  onerror="this.onerror=null; this.src='<?= base_url('assets/img/logo.png') ?>';">
                                         </td>
                                         <td>
-                                            <span class="badge bg-light text-dark border font-monospace px-2 py-1">
+                                            <span class="badge font-monospace px-2 py-1" style="color: #0f172a !important; background-color: #f1f5f9; border: 1px solid #cbd5e1; font-size: 12px;">
                                                 <?= esc($kodeProduk) ?>
                                             </span>
                                         </td>
