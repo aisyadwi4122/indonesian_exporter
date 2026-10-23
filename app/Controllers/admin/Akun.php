@@ -18,6 +18,31 @@ class Akun extends AdminAuthBase
         $this->salesModel        = new SalesModel();
         $this->supplierUserModel = new SupplierUserModel();
         $this->supplierModel     = new SupplierModel();
+        $this->ensureTipeAksesColumnExists();
+    }
+
+    /**
+     * Memastikan kolom tipe_akses ada di tabel tb_sales agar tidak terjadi error SQL #1054
+     */
+    protected function ensureTipeAksesColumnExists(): void
+    {
+        try {
+            $db = Database::connect('default');
+            if ($db->tableExists('tb_sales') && !$db->fieldExists('tipe_akses', 'tb_sales')) {
+                $forge = \Config\Database::forge();
+                $forge->addColumn('tb_sales', [
+                    'tipe_akses' => [
+                        'type'       => 'VARCHAR',
+                        'constraint' => 10,
+                        'default'    => 'internal',
+                        'null'       => false,
+                        'after'      => 'status',
+                    ],
+                ]);
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'ensureTipeAksesColumnExists error: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -286,15 +311,25 @@ class Akun extends AdminAuthBase
         $adminUser = session()->get('username') ?? 'admin';
 
         if ($tipe === 'sales') {
+            $this->ensureTipeAksesColumnExists();
             $tipeAkses = strtolower(trim((string)$this->request->getPost('tipe_akses')));
-            $this->salesModel->setAllowedFields(['nama_sales', 'username', 'password', 'email', 'no_hp', 'wilayah', 'status', 'tipe_akses']);
-            $this->salesModel->insert([
+            if ($tipeAkses !== 'internal' && $tipeAkses !== 'eksternal') {
+                $tipeAkses = 'internal';
+            }
+
+            $dataInsert = [
                 'nama_sales' => $nama,
                 'username'   => $username,
                 'password'   => password_hash($password, PASSWORD_DEFAULT),
                 'status'     => ($status === 1 ? 'aktif' : 'nonaktif'),
-                'tipe_akses' => $tipeAkses,
-            ]);
+            ];
+
+            $db = Database::connect('default');
+            if ($db->fieldExists('tipe_akses', 'tb_sales')) {
+                $dataInsert['tipe_akses'] = $tipeAkses;
+            }
+
+            $this->salesModel->insert($dataInsert);
 
             log_message('info', "Admin '{$adminUser}' berhasil membuat akun sales baru '{$username}' dengan tipe akses '{$tipeAkses}'.");
         } else {
@@ -472,19 +507,25 @@ class Akun extends AdminAuthBase
                 throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
             }
 
+            $this->ensureTipeAksesColumnExists();
             $oldTipeAkses = $account['tipe_akses'] ?? 'internal';
             $newTipeAkses = strtolower(trim((string)$this->request->getPost('tipe_akses')));
+            if ($newTipeAkses !== 'internal' && $newTipeAkses !== 'eksternal') {
+                $newTipeAkses = 'internal';
+            }
 
             $updateData = [
                 'nama_sales' => $nama,
                 'status'     => ($status === 1 ? 'aktif' : 'nonaktif'),
-                'tipe_akses' => $newTipeAkses,
             ];
+            $db = Database::connect('default');
+            if ($db->fieldExists('tipe_akses', 'tb_sales')) {
+                $updateData['tipe_akses'] = $newTipeAkses;
+            }
             if (!empty($password)) {
                 $updateData['password'] = password_hash($password, PASSWORD_DEFAULT);
             }
 
-            $this->salesModel->setAllowedFields(['nama_sales', 'username', 'password', 'email', 'no_hp', 'wilayah', 'status', 'tipe_akses']);
             $this->salesModel->update($id, $updateData);
 
             if ($oldTipeAkses !== $newTipeAkses) {
