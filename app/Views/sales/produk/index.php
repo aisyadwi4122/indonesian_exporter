@@ -74,6 +74,51 @@ body {
   color: #ffffff !important;
 }
 
+.btn-komisi-has {
+  color: #16a34a !important;
+  border: 1px solid #16a34a !important;
+  background-color: #f0fdf4 !important;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+}
+.btn-komisi-has:hover,
+.btn-komisi-has:focus {
+  color: #ffffff !important;
+  background-color: #16a34a !important;
+  border-color: #16a34a !important;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.25);
+}
+.btn-komisi-none {
+  color: #dc2626 !important;
+  border: 1px solid #dc2626 !important;
+  background-color: #fef2f2 !important;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+}
+.btn-komisi-none:hover,
+.btn-komisi-none:focus {
+  color: #ffffff !important;
+  background-color: #dc2626 !important;
+  border-color: #dc2626 !important;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);
+}
+
+#modalKomisi {
+  z-index: 99999 !important;
+}
+#modalKomisi.show {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  opacity: 1 !important;
+}
+#modalKomisi .modal-dialog {
+  max-width: 500px;
+  width: 90%;
+  margin: 0 auto;
+}
+
 /* Produk Hero & Breadcrumb */
 .produk-hero {
   color: #ffffff !important;
@@ -216,6 +261,11 @@ body {
                        autocomplete="off">
             </div>
         </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-sales-primary" style="font-size: 13.5px;">
+                <i class="fa-solid fa-magnifying-glass me-1"></i> Cari
+            </button>
+        </div>
         <?php if (!empty($q)): ?>
         <div class="col-auto">
             <a href="<?= base_url('sales/produk' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sales-secondary" style="font-size: 13.5px;">
@@ -225,6 +275,13 @@ body {
         <?php endif; ?>
     </form>
 </div>
+
+<!-- Keterangan Jumlah Produk -->
+<?php if (!empty($totalRows) && $totalRows > 0): ?>
+<div class="mb-3 text-white fw-medium" style="font-size: 14px; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);">
+    Menampilkan <?= (int)$startRow ?> - <?= (int)$endRow ?> dari <?= (int)$totalRows ?> produk
+</div>
+<?php endif; ?>
 
 <!-- Pesan Jika Produk Tidak Ditemukan -->
 <div id="emptyState" class="sales-card text-center py-5" style="display: <?= empty($products) ? 'block' : 'none' ?>;">
@@ -255,6 +312,26 @@ body {
                 $detailUrl = base_url('sales/produk/' . $idProduk . ($is_preview ? '?mode=eksternal' : ''));
                 $detailPdfUrl = base_url('sales/produk/' . $idProduk . '/pdf' . ($is_preview ? '?mode=eksternal' : ''));
                 $searchDesc = $is_internal ? ($descClean . ' ' . $supplier . ' ' . $lokasi) : ($descClean . ' ' . $lokasi . ' ' . $kodeProduk);
+
+                // Format Komisi untuk Mode Eksternal
+                $rawKomisi = $p['komisi'] ?? null;
+                $cleanKomisi = ($rawKomisi !== null) ? trim((string)$rawKomisi) : '';
+                $hasKomisi = false;
+                $formattedKomisi = '';
+
+                if ($cleanKomisi !== '' && $cleanKomisi !== '0' && $cleanKomisi !== '0.0' && $cleanKomisi !== '0%') {
+                    $hasKomisi = true;
+                    if (is_numeric($cleanKomisi)) {
+                        $num = (float)$cleanKomisi;
+                        if ($num > 0 && $num <= 1) {
+                            $formattedKomisi = ($num * 100) . '%';
+                        } else {
+                            $formattedKomisi = $num . '%';
+                        }
+                    } else {
+                        $formattedKomisi = $cleanKomisi;
+                    }
+                }
             ?>
             <div class="col product-card-col" 
                  data-id="<?= $idProduk ?>"
@@ -311,6 +388,21 @@ body {
                             <?= esc($descShort) ?>
                         </p>
                         
+                        <!-- Tombol Info Komisi (Mode Eksternal) -->
+                        <?php if (!$is_internal): ?>
+                            <button type="button" 
+                                    class="btn btn-sm <?= $hasKomisi ? 'btn-komisi-has' : 'btn-komisi-none' ?> w-100 mb-2 btn-info-komisi"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalKomisi"
+                                    onclick="if(window.openKomisiModal) window.openKomisiModal(this)"
+                                    data-kode="<?= esc($kodeProduk, 'attr') ?>"
+                                    data-nama="<?= esc($nama, 'attr') ?>"
+                                    <?= $hasKomisi ? 'data-komisi="' . esc($formattedKomisi, 'attr') . '"' : '' ?>
+                                    title="Informasi Komisi">
+                                <i class="fa-solid fa-coins me-1"></i> Info Komisi
+                            </button>
+                        <?php endif; ?>
+
                         <!-- Aksi Kartu Produk (Hanya Lihat & Unduh) -->
                         <div class="pt-2 border-top d-flex gap-2">
                             <a href="<?= $detailUrl ?>" 
@@ -330,6 +422,56 @@ body {
             </div>
         <?php endforeach; ?>
     <?php endif; ?>
+</div>
+
+<!-- Navigasi Halaman (Pagination) -->
+<?php if (!empty($pager) && $pager->getPageCount() > 1): ?>
+    <div class="mt-4 mb-3 d-flex justify-content-center">
+        <?= $pager->links('default', 'pager_rapi') ?>
+    </div>
+<?php endif; ?>
+
+<!-- Modal Informasi Komisi (Satu Popup Bersama Seluruh Halaman) -->
+<div class="modal fade" id="modalKomisi" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="modalKomisiTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow border-0" style="border-radius: 12px; overflow: hidden; background: #ffffff;">
+            <div class="modal-header border-bottom py-3 px-4 bg-light">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="modalKomisiTitle" style="font-size: 16.5px;">
+                    <i class="fa-solid fa-coins text-success"></i> Informasi Komisi
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body p-4 text-start">
+                <div class="mb-3 pb-2 border-bottom">
+                    <span class="text-muted d-block small mb-1" style="font-size: 12px;">Kode Produk</span>
+                    <span id="modalKomisiKode" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold" style="font-size: 13px;"></span>
+                </div>
+                <div class="mb-3 pb-2 border-bottom">
+                    <span class="text-muted d-block small mb-1" style="font-size: 12px;">Nama Produk</span>
+                    <h6 id="modalKomisiNama" class="fw-bold text-dark mb-0 text-break" style="font-size: 15px; line-height: 1.4; word-break: break-word;"></h6>
+                </div>
+                <div>
+                    <!-- Status jika ada data komisi -->
+                    <div id="modalKomisiRowFilled" style="display: none;">
+                        <span class="text-muted d-block small mb-1" style="font-size: 12px;">Komisi</span>
+                        <div class="p-3 rounded border text-break" style="background-color: #f0fdf4; border-color: #bbf7d0 !important; color: #15803d; font-size: 14px; font-weight: 600; white-space: pre-line; word-break: break-word;">
+                            <i class="fa-solid fa-circle-check me-1 text-success"></i> <span id="modalKomisiValue"></span>
+                        </div>
+                    </div>
+                    <!-- Status jika tidak ada data komisi -->
+                    <div id="modalKomisiRowEmpty" style="display: none;">
+                        <span class="text-muted d-block small mb-1" style="font-size: 12px;">Status Komisi</span>
+                        <div class="p-3 rounded border" style="background-color: #fef2f2; border-color: #fecaca !important; color: #b91c1c; font-size: 14px; font-weight: 500;">
+                            <i class="fa-solid fa-circle-info me-1 text-danger"></i> Status komisi: Belum dibahas
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top py-2 px-4 bg-light d-flex justify-content-end">
+                <button type="button" class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal" style="border-radius: 6px;">Tutup</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <?= $this->endSection() ?>
@@ -399,6 +541,88 @@ document.addEventListener('DOMContentLoaded', function () {
             filterProducts(searchInput.value);
         }
     }
+
+    // -------------------------------------------------------------
+    // FITUR MODAL POPUP INFORMASI KOMISI BERSAMA
+    // -------------------------------------------------------------
+    const modalEl = document.getElementById('modalKomisi');
+    let lastFocusedBtn = null;
+    let bsModalInstance = null;
+
+    if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        bsModalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+    }
+
+    function openKomisiModal(button) {
+        lastFocusedBtn = button;
+        const kode = button.getAttribute('data-kode') || '';
+        const nama = button.getAttribute('data-nama') || '';
+        const komisi = button.getAttribute('data-komisi');
+
+        const kodeEl = document.getElementById('modalKomisiKode');
+        const namaEl = document.getElementById('modalKomisiNama');
+        const rowFilled = document.getElementById('modalKomisiRowFilled');
+        const rowEmpty = document.getElementById('modalKomisiRowEmpty');
+        const valEl = document.getElementById('modalKomisiValue');
+
+        if (kodeEl) kodeEl.textContent = kode;
+        if (namaEl) namaEl.textContent = nama;
+
+        if (komisi !== null && komisi.trim() !== '') {
+            if (valEl) valEl.textContent = komisi;
+            if (rowFilled) rowFilled.style.display = 'block';
+            if (rowEmpty) rowEmpty.style.display = 'none';
+        } else {
+            if (rowFilled) rowFilled.style.display = 'none';
+            if (rowEmpty) rowEmpty.style.display = 'block';
+        }
+
+        if (modalEl) {
+            modalEl.classList.add('show');
+            modalEl.style.display = 'flex';
+            document.body.classList.add('modal-open');
+            const closeBtn = modalEl.querySelector('.btn-close') || modalEl;
+            closeBtn.focus();
+        }
+    }
+
+    function closeKomisiModal() {
+        if (modalEl) {
+            modalEl.classList.remove('show');
+            modalEl.style.display = 'none';
+            document.body.classList.remove('modal-open');
+            if (lastFocusedBtn) {
+                lastFocusedBtn.focus();
+            }
+        }
+    }
+
+    window.openKomisiModal = openKomisiModal;
+    window.closeKomisiModal = closeKomisiModal;
+
+    // Event delegation untuk tombol Info Komisi dan penutupan modal
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-info-komisi');
+        if (btn) {
+            e.preventDefault();
+            openKomisiModal(btn);
+            return;
+        }
+
+        if (modalEl && modalEl.classList.contains('show')) {
+            if (e.target.closest('[data-bs-dismiss="modal"]') || e.target === modalEl) {
+                e.preventDefault();
+                closeKomisiModal();
+            }
+        }
+    });
+
+    // Dukungan tombol Esc untuk penutupan modal
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modalEl && modalEl.classList.contains('show')) {
+            closeKomisiModal();
+        }
+    });
 });
 </script>
 <?= $this->endSection() ?>

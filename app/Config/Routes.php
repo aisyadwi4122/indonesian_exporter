@@ -47,6 +47,12 @@ $routes->group('supplier', ['filter' => 'supplierauth'], function ($routes) {
     $routes->post('perusahaan/simpan', 'Supplier\Perusahaan::simpan');
     $routes->post('perusahaan/hapus', 'Supplier\Perusahaan::hapus');
     $routes->get('produk', 'Supplier\Produk::index');
+    $routes->get('produk/index', 'Supplier\Produk::index');
+    $routes->get('produk/tambah', 'Supplier\Produk::tambah');
+    $routes->post('produk/proses_tambah', 'Supplier\Produk::proses_tambah');
+    $routes->get('produk/edit/(:num)', 'Supplier\Produk::edit/$1');
+    $routes->post('produk/proses_edit/(:num)', 'Supplier\Produk::proses_edit/$1');
+    $routes->post('produk/delete/(:num)', 'Supplier\Produk::delete/$1');
     $routes->get('history', 'Supplier\History::index');
 });
 

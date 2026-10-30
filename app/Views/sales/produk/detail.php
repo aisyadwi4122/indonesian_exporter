@@ -217,6 +217,106 @@ body {
   padding: 6px 10px;
   border: 1px solid #cbd5e1;
 }
+
+/* ================= IMAGE MODAL CUSTOM STYLING ================= */
+#imageModal {
+  z-index: 99999 !important;
+  background-color: rgba(15, 23, 42, 0.78) !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  outline: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  align-items: center;
+  justify-content: center;
+}
+#imageModal.show {
+  display: flex !important;
+}
+#imageModal .modal-dialog {
+  max-width: 740px;
+  width: 92%;
+  margin: auto;
+  pointer-events: auto;
+}
+#imageModal .modal-content {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+}
+#imageModal .modal-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 12px 18px;
+}
+.btn-close-modal-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #cbd5e1;
+  background-color: #f1f5f9;
+  color: #1e293b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.btn-close-modal-img:hover {
+  background-color: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+  transform: scale(1.08);
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.35);
+}
+#imageModal .modal-body {
+  background-color: #0b1120;
+  position: relative;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  cursor: zoom-out;
+}
+#imageModal .modal-body img {
+  max-width: 100%;
+  max-height: 58vh;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s ease;
+}
+#imageModal .modal-body img:hover {
+  transform: scale(1.01);
+}
+.modal-img-click-hint {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.78);
+  color: #cbd5e1;
+  font-size: 11.5px;
+  padding: 3px 12px;
+  border-radius: 9999px;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+}
+#imageModal .modal-footer {
+  background-color: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  padding: 10px 18px;
+}
 </style>
 
 <?php
@@ -422,9 +522,9 @@ if ($is_internal && $rawIg !== '') {
                         $mainPhoto = !empty($fotosList) ? $fotosList[0] : base_url('assets/img/logo.png');
                         $hasPhotos = !empty($fotosList);
                     ?>
-                    <div style="background-color: #f8fafc; border-radius: 8px; overflow: hidden; height: 320px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; cursor: pointer;"
-                         data-bs-toggle="modal" 
-                         data-bs-target="#imageModal"
+                    <div id="mainProductPhotoContainer"
+                         style="background-color: #f8fafc; border-radius: 8px; overflow: hidden; height: 320px; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; cursor: pointer;"
+                         onclick="openImageModal(this)"
                          title="Klik untuk melihat foto lebih besar">
                         <img id="mainProductImage" src="<?= esc($mainPhoto) ?>" 
                              alt="<?= esc($product['nama_produk_id'] ?? 'Foto Produk') ?>" 
@@ -443,7 +543,8 @@ if ($is_internal && $rawIg !== '') {
                                     <button type="button" 
                                             class="btn p-0 border rounded bg-white shadow-sm thumb-btn <?= $idx === 0 ? 'border-primary' : '' ?>" 
                                             style="width: 58px; height: 58px; overflow: hidden; border-width: 2px !important;"
-                                            onclick="switchMainPhoto('<?= esc($fUrl, 'attr') ?>', this)">
+                                            onclick="switchMainPhoto('<?= esc($fUrl, 'attr') ?>', this); openImageModal(this);"
+                                            title="Buka foto <?= $idx + 1 ?>">
                                         <img src="<?= esc($fUrl) ?>" 
                                              alt="Thumbnail <?= $idx + 1 ?>" 
                                              loading="lazy"
@@ -457,22 +558,51 @@ if ($is_internal && $rawIg !== '') {
                     <?php endif; ?>
                 </div>
 
-                <!-- Modal Bootstrap untuk Foto Besar -->
-                <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered modal-lg">
-                        <div class="modal-content border-0 shadow">
-                            <div class="modal-header py-2 px-3">
-                                <h6 class="modal-title text-dark fw-semibold" id="imageModalLabel"><?= esc($product['nama_produk_id'] ?? 'Foto Produk') ?></h6>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <!-- Modal / Lightbox Foto Besar -->
+                <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true" style="display: none;">
+                    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                        <div class="modal-content">
+                            <!-- Modal Header -->
+                            <div class="modal-header d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2 overflow-hidden me-2">
+                                    <i class="fa-solid fa-image text-success fs-5"></i>
+                                    <h6 class="modal-title text-dark fw-bold mb-0 text-truncate" id="imageModalLabel" title="<?= esc($product['nama_produk_id'] ?? 'Foto Produk') ?>">
+                                        <?= esc($product['nama_produk_id'] ?? 'Foto Produk') ?>
+                                    </h6>
+                                </div>
+                                <button type="button" 
+                                        id="imageModalCloseBtn"
+                                        class="btn-close-modal-img" 
+                                        aria-label="Tutup" 
+                                        title="Tutup (Esc)">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
                             </div>
-                            <div class="modal-body p-2 text-center bg-light">
+
+                            <!-- Modal Body: Klik gambar atau latar untuk menutup -->
+                            <div class="modal-body" id="imageModalBody" title="Klik di mana saja untuk menutup">
                                 <img id="modalProductImage" 
                                      src="<?= esc($mainPhoto) ?>" 
                                      alt="Preview Foto" 
                                      loading="lazy"
                                      referrerpolicy="no-referrer"
-                                     style="max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 6px;"
                                      onerror="this.onerror=null; this.src='<?= base_url('assets/img/logo.png') ?>';">
+                                <div class="modal-img-click-hint">
+                                    <i class="fa-solid fa-circle-info me-1 text-info"></i> Klik pada gambar atau latar belakang untuk menutup
+                                </div>
+                            </div>
+
+                            <!-- Modal Footer -->
+                            <div class="modal-footer d-flex align-items-center justify-content-between">
+                                <small class="text-muted d-none d-sm-inline">
+                                    Tekan tombol <kbd style="background: #e2e8f0; color: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 11px;">Esc</kbd> untuk menutup
+                                </small>
+                                <button type="button" 
+                                        id="imageModalCloseFooterBtn"
+                                        class="btn btn-secondary btn-sm px-4 fw-semibold d-inline-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-xmark"></i>
+                                    <span>Tutup / Kembali</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -541,49 +671,75 @@ if ($is_internal && $rawIg !== '') {
                         <i class="fa-solid fa-truck-fast text-success"></i>Informasi Ekspor Produk
                     </h5>
 
+                    <?php if (!empty($produkSupplier['spesifikasi']) && $produkSupplier['spesifikasi'] !== '-'): ?>
                     <div class="row info-row">
                         <div class="col-sm-4 label-col">Spesifikasi</div>
-                        <div class="col-sm-8 value-col"><?= !empty($produkSupplier['spesifikasi']) ? esc($produkSupplier['spesifikasi']) : '-' ?></div>
-                    </div>
-                    <div class="row info-row">
-                        <div class="col-sm-4 label-col">Kapasitas Produksi</div>
-                        <div class="col-sm-8 value-col"><?= !empty($produkSupplier['kapasitas_produksi']) ? esc($produkSupplier['kapasitas_produksi']) : '-' ?></div>
-                    </div>
-                    <?php if ($is_internal): ?>
-                    <div class="row info-row">
-                        <div class="col-sm-4 label-col">Legalitas</div>
-                        <div class="col-sm-8 value-col"><?= !empty($produkSupplier['legalitas']) ? esc($produkSupplier['legalitas']) : '-' ?></div>
+                        <div class="col-sm-8 value-col"><?= esc($produkSupplier['spesifikasi']) ?></div>
                     </div>
                     <?php endif; ?>
+
+                    <?php if (!empty($produkSupplier['kapasitas_produksi']) && $produkSupplier['kapasitas_produksi'] !== '-'): ?>
+                    <div class="row info-row">
+                        <div class="col-sm-4 label-col">Kapasitas Produksi</div>
+                        <div class="col-sm-8 value-col"><?= esc($produkSupplier['kapasitas_produksi']) ?></div>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if ($is_internal && !empty($produkSupplier['legalitas']) && $produkSupplier['legalitas'] !== '-'): ?>
+                    <div class="row info-row">
+                        <div class="col-sm-4 label-col">Legalitas</div>
+                        <div class="col-sm-8 value-col"><?= esc($produkSupplier['legalitas']) ?></div>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($produkSupplier['sertifikasi']) && $produkSupplier['sertifikasi'] !== '-'): ?>
                     <div class="row info-row">
                         <div class="col-sm-4 label-col">Sertifikasi</div>
-                        <div class="col-sm-8 value-col"><?= !empty($produkSupplier['sertifikasi']) ? esc($produkSupplier['sertifikasi']) : '-' ?></div>
+                        <div class="col-sm-8 value-col"><?= esc($produkSupplier['sertifikasi']) ?></div>
                     </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($produkSupplier['lokasi_barang']) && $produkSupplier['lokasi_barang'] !== '-'): ?>
                     <div class="row info-row">
                         <div class="col-sm-4 label-col">Lokasi Barang</div>
-                        <div class="col-sm-8 value-col"><?= !empty($produkSupplier['lokasi_barang']) ? esc($produkSupplier['lokasi_barang']) : '-' ?></div>
+                        <div class="col-sm-8 value-col"><?= esc($produkSupplier['lokasi_barang']) ?></div>
                     </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($produkSupplier['moq']) && $produkSupplier['moq'] !== '-'): ?>
                     <div class="row info-row">
                         <div class="col-sm-4 label-col">MOQ</div>
-                        <div class="col-sm-8 value-col"><?= !empty($produkSupplier['moq']) ? esc($produkSupplier['moq']) : '-' ?></div>
+                        <div class="col-sm-8 value-col"><?= esc($produkSupplier['moq']) ?></div>
                     </div>
+                    <?php endif; ?>
+
+                    <?php 
+                        $hExw = trim((string)($produkSupplier['harga_exw'] ?? ''));
+                        $isHargaValid = ($hExw !== '' && $hExw !== '-' && stripos($hExw, '$0 USD') === false && $hExw !== '$0' && $hExw !== '0');
+                    ?>
+                    <?php if ($isHargaValid): ?>
                     <div class="row info-row">
                         <div class="col-sm-4 label-col">Harga EXW</div>
-                        <div class="col-sm-8 value-col"><?= !empty($produkSupplier['harga_exw']) ? esc($produkSupplier['harga_exw']) : '-' ?></div>
+                        <div class="col-sm-8 value-col"><?= esc($hExw) ?></div>
                     </div>
-                    <?php if ($is_internal): ?>
+                    <?php endif; ?>
+
+                    <?php if ($is_internal && !empty($produkSupplier['komisi']) && $produkSupplier['komisi'] !== '-'): ?>
                     <div class="row info-row">
                         <div class="col-sm-4 label-col">
                             Komisi
                             <span class="badge bg-secondary ms-1" style="font-size: 10px; font-weight: 500;">Internal</span>
                         </div>
-                        <div class="col-sm-8 value-col"><?= !empty($produkSupplier['komisi']) ? esc($produkSupplier['komisi']) : '-' ?></div>
+                        <div class="col-sm-8 value-col"><?= esc($produkSupplier['komisi']) ?></div>
                     </div>
                     <?php endif; ?>
+
+                    <?php if (!empty($produkSupplier['sudah_ekspor']) && $produkSupplier['sudah_ekspor'] !== '-'): ?>
                     <div class="row info-row">
                         <div class="col-sm-4 label-col">Sudah Ekspor</div>
-                        <div class="col-sm-8 value-col"><?= !empty($produkSupplier['sudah_ekspor']) ? esc($produkSupplier['sudah_ekspor']) : '-' ?></div>
+                        <div class="col-sm-8 value-col"><?= esc($produkSupplier['sudah_ekspor']) ?></div>
                     </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -970,10 +1126,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // -----------------------------------------------------------------
     // 1. Tooltip Bootstrap
     // -----------------------------------------------------------------
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-        new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            try {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            } catch (err) {}
+        });
+    }
 
     // -----------------------------------------------------------------
     // 2. Hash URL Synchronization (#produk, #perusahaan, #history)
@@ -988,9 +1148,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const hash = window.location.hash;
         if (hash && hashToTab[hash]) {
             const targetBtn = document.querySelector(hashToTab[hash]);
-            if (targetBtn) {
-                const tabInstance = bootstrap.Tab.getOrCreateInstance(targetBtn);
-                tabInstance.show();
+            if (targetBtn && typeof bootstrap !== 'undefined' && bootstrap.Tab) {
+                try {
+                    const tabInstance = bootstrap.Tab.getOrCreateInstance(targetBtn);
+                    tabInstance.show();
+                } catch (err) {}
             }
         }
     }
@@ -1072,5 +1234,108 @@ function switchMainPhoto(url, btn) {
         btn.classList.add('border-primary');
     }
 }
+
+// -----------------------------------------------------------------
+// 4. Pengendali Modal Foto Produk (Buka, Tutup, Escape, Backdrop)
+// -----------------------------------------------------------------
+var lastFocusedImageTrigger = null;
+
+function openImageModal(triggerEl) {
+    var modalEl = document.getElementById('imageModal');
+    if (!modalEl) return;
+
+    if (triggerEl) {
+        lastFocusedImageTrigger = triggerEl;
+    } else if (document.activeElement) {
+        lastFocusedImageTrigger = document.activeElement;
+    }
+
+    modalEl.style.display = 'flex';
+    modalEl.classList.add('show');
+    modalEl.setAttribute('aria-modal', 'true');
+    modalEl.removeAttribute('aria-hidden');
+
+    document.body.classList.add('modal-open');
+    document.body.style.overflow = 'hidden';
+
+    var closeBtn = document.getElementById('imageModalCloseBtn');
+    if (closeBtn) {
+        closeBtn.focus();
+    }
+}
+
+function closeImageModal() {
+    var modalEl = document.getElementById('imageModal');
+    if (!modalEl) return;
+
+    modalEl.classList.remove('show');
+    modalEl.style.display = 'none';
+    modalEl.setAttribute('aria-hidden', 'true');
+    modalEl.removeAttribute('aria-modal');
+
+    // Bersihkan sisa efek backdrop jika ada
+    document.querySelectorAll('.modal-backdrop').forEach(function (el) {
+        el.remove();
+    });
+
+    // Kembalikan kemampuan scroll pada body
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+
+    // Kembalikan fokus ke thumbnail atau elemen yang membuka popup
+    if (lastFocusedImageTrigger && typeof lastFocusedImageTrigger.focus === 'function') {
+        try {
+            lastFocusedImageTrigger.focus();
+        } catch (err) {}
+    }
+}
+
+// Pasang Event Listener langsung pada elemen tombol & area penutup
+var closeBtn = document.getElementById('imageModalCloseBtn');
+if (closeBtn) {
+    closeBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeImageModal();
+    });
+}
+
+var closeFooterBtn = document.getElementById('imageModalCloseFooterBtn');
+if (closeFooterBtn) {
+    closeFooterBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeImageModal();
+    });
+}
+
+var modalBody = document.getElementById('imageModalBody');
+if (modalBody) {
+    modalBody.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeImageModal();
+    });
+}
+
+var modalEl = document.getElementById('imageModal');
+if (modalEl) {
+    modalEl.addEventListener('click', function (e) {
+        if (e.target === this) {
+            e.preventDefault();
+            closeImageModal();
+        }
+    });
+}
+
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
+        var m = document.getElementById('imageModal');
+        if (m && (m.classList.contains('show') || m.style.display !== 'none')) {
+            closeImageModal();
+        }
+    }
+});
 </script>
 <?= $this->endSection() ?>

@@ -247,8 +247,11 @@ foreach ($items as $index => $item):
                 'Sudah Ekspor'       => $produkSupplier['sudah_ekspor'] ?? null,
             ];
             foreach ($fields as $label => $val) {
-                if ($val !== null && trim((string)$val) !== '') {
-                    $exportInfo[$label] = trim((string)$val);
+                if ($val !== null) {
+                    $valStr = trim((string)$val);
+                    if ($valStr !== '' && $valStr !== '-' && stripos($valStr, '$0 USD') === false && $valStr !== '$0' && $valStr !== '0') {
+                        $exportInfo[$label] = $valStr;
+                    }
                 }
             }
         }

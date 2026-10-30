@@ -7,6 +7,7 @@ use App\Models\SupplierProductModel;
 use App\Models\SupplierModel;
 use App\Models\SupplierExportHistoryModel;
 use App\Models\ProductModel;
+use App\Models\ProdukSalesModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -22,54 +23,69 @@ class Produk extends BaseController
         $isPreview = $modeInfo['is_preview'];
         $accountTipe = $modeInfo['account_tipe'];
 
-        $supplierProductModel = new SupplierProductModel();
+        $productSalesModel = new ProdukSalesModel();
         $q = trim((string)($this->request->getGet('q') ?? ''));
+        $page = (int)($this->request->getGet('page') ?? 1);
+        if ($page < 1) {
+            $page = 1;
+        }
+        $perPage = 16;
 
-        $builder = $supplierProductModel->select('
-            tb_produk_supplier.*,
-            tb_produk_supplier.id_produk_supplier as id_produk,
-            tb_produk_supplier.nama_produk as nama_produk_id,
-            tb_supplier.nama_perusahaan,
-            tb_supplier.nama_kontak,
-            tb_supplier.no_hp,
-            tb_supplier.jenis_perusahaan,
-            tb_supplier.domisili_usaha
-        ')->join('tb_supplier', 'tb_supplier.id_supplier = tb_produk_supplier.id_supplier', 'left');
+        // Ambil data produk terpadu 127 produk (10 Supplier IE + 117 ECP)
+        $allItems = $productSalesModel->getUnifiedProducts('');
 
         if ($q !== '') {
-            if ($isInternal) {
-                // Mode Internal: pencarian menyeluruh seperti sekarang
-                $builder->groupStart()
-                    ->like('tb_produk_supplier.nama_produk', $q)
-                    ->orLike('tb_supplier.nama_perusahaan', $q)
-                    ->orLike('tb_produk_supplier.spesifikasi', $q)
-                    ->orLike('tb_produk_supplier.lokasi_barang', $q)
-                    ->orLike('tb_supplier.domisili_usaha', $q)
-                ->groupEnd();
-            } else {
-                // Mode Eksternal: HANYA mencocokkan nama_produk, spesifikasi (deskripsi), dan lokasi_barang.
-                // TIDAK BOLEH mencocokkan nama perusahaan, nama kontak, atau produk_dipasarkan.
-                $builder->groupStart()
-                    ->like('tb_produk_supplier.nama_produk', $q)
-                    ->orLike('tb_produk_supplier.spesifikasi', $q)
-                    ->orLike('tb_produk_supplier.lokasi_barang', $q)
-                ->groupEnd();
+            $qLower = strtolower($q);
+            $filtered = [];
+            foreach ($allItems as $item) {
+                $kode = strtolower($item['kode_produk'] ?? '');
+                $nama = strtolower($item['nama_produk'] ?? '');
+                $lokasi = strtolower($item['lokasi_barang'] ?? ($item['domisili_usaha'] ?? ''));
+                $spesifikasi = strtolower($item['spesifikasi'] ?? '');
+
+                $match = (strpos($kode, $qLower) !== false ||
+                          strpos($nama, $qLower) !== false ||
+                          strpos($lokasi, $qLower) !== false ||
+                          strpos($spesifikasi, $qLower) !== false);
+
+                // Mode Internal boleh mencari nama perusahaan
+                if ($isInternal) {
+                    $perusahaan = strtolower($item['nama_perusahaan'] ?? '');
+                    if (!$match && strpos($perusahaan, $qLower) !== false) {
+                        $match = true;
+                    }
+                }
+
+                if ($match) {
+                    $filtered[] = $item;
+                }
             }
+            $allItems = $filtered;
         }
 
-        // Pengurutan tidak boleh memakai nama perusahaan di mode eksternal
-        $products = $builder->orderBy('tb_produk_supplier.id_produk_supplier', 'DESC')->findAll();
+        $totalRows = count($allItems);
 
-        foreach ($products as &$p) {
-            $p['foto_url'] = SupplierProductModel::photoUrl($p, 1);
-            $idProd = (int)($p['id_produk_supplier'] ?? ($p['id_produk'] ?? 0));
-            $p['kode_produk'] = SupplierProductModel::getKodeProduk($idProd);
-        }
-        unset($p);
+        // Potong data sesuai halaman aktif (16 per halaman)
+        $products = array_slice($allItems, ($page - 1) * $perPage, $perPage);
+
+        // Inisialisasi pager CI4 agar links('default', 'pager_rapi') berjalan normal
+        $pager = \Config\Services::pager();
+        $pager->store('default', $page, $perPage, $totalRows);
+
+        $startRow = $totalRows > 0 ? (($page - 1) * $perPage) + 1 : 0;
+        $endRow   = min($page * $perPage, $totalRows);
 
         // PENYARINGAN SATU TEMPAT: Mode eksternal WAJIB memanggil maskForExternal sebelum data dikirim ke view
         if (!$isInternal) {
+            $komisiMap = array_column($products, 'komisi', 'id_produk_supplier');
             $products = SupplierProductModel::maskForExternal($products);
+            foreach ($products as &$p) {
+                $prodId = $p['id_produk_supplier'] ?? ($p['id_produk'] ?? 0);
+                if (array_key_exists($prodId, $komisiMap)) {
+                    $p['komisi'] = $komisiMap[$prodId];
+                }
+            }
+            unset($p);
         }
 
         $data = [
@@ -81,6 +97,10 @@ class Produk extends BaseController
             'is_internal'  => $isInternal,
             'is_preview'   => $isPreview,
             'account_tipe' => $accountTipe,
+            'pager'        => $pager,
+            'totalRows'    => $totalRows,
+            'startRow'     => $startRow,
+            'endRow'       => $endRow,
         ];
 
         return view('sales/produk/index', $data);
@@ -184,34 +204,40 @@ class Produk extends BaseController
             $isPdfInternal = false;
         }
 
-        $supplierProductModel = new SupplierProductModel();
+        $productSalesModel = new ProdukSalesModel();
         $q = trim((string)($this->request->getGet('q') ?? ''));
 
-        $builder = $supplierProductModel->select('
-            tb_produk_supplier.id_produk_supplier
-        ')->join('tb_supplier', 'tb_supplier.id_supplier = tb_produk_supplier.id_supplier', 'left');
+        $allItems = $productSalesModel->getUnifiedProducts('');
 
         if ($q !== '') {
-            if ($isPdfInternal) {
-                $builder->groupStart()
-                    ->like('tb_produk_supplier.nama_produk', $q)
-                    ->orLike('tb_supplier.nama_perusahaan', $q)
-                    ->orLike('tb_produk_supplier.spesifikasi', $q)
-                    ->orLike('tb_produk_supplier.lokasi_barang', $q)
-                    ->orLike('tb_supplier.domisili_usaha', $q)
-                ->groupEnd();
-            } else {
-                // Mode eksternal: HANYA nama_produk, spesifikasi, dan lokasi_barang
-                $builder->groupStart()
-                    ->like('tb_produk_supplier.nama_produk', $q)
-                    ->orLike('tb_produk_supplier.spesifikasi', $q)
-                    ->orLike('tb_produk_supplier.lokasi_barang', $q)
-                ->groupEnd();
+            $qLower = strtolower($q);
+            $filtered = [];
+            foreach ($allItems as $item) {
+                $kode = strtolower($item['kode_produk'] ?? '');
+                $nama = strtolower($item['nama_produk'] ?? '');
+                $lokasi = strtolower($item['lokasi_barang'] ?? ($item['domisili_usaha'] ?? ''));
+                $spesifikasi = strtolower($item['spesifikasi'] ?? '');
+
+                $match = (strpos($kode, $qLower) !== false ||
+                          strpos($nama, $qLower) !== false ||
+                          strpos($lokasi, $qLower) !== false ||
+                          strpos($spesifikasi, $qLower) !== false);
+
+                if ($isPdfInternal) {
+                    $perusahaan = strtolower($item['nama_perusahaan'] ?? '');
+                    if (!$match && strpos($perusahaan, $qLower) !== false) {
+                        $match = true;
+                    }
+                }
+
+                if ($match) {
+                    $filtered[] = $item;
+                }
             }
+            $allItems = $filtered;
         }
 
-        $rows = $builder->orderBy('tb_produk_supplier.id_produk_supplier', 'DESC')->findAll();
-        $count = count($rows);
+        $count = count($allItems);
 
         $redirectQuery = [];
         if ($q !== '') {
@@ -227,30 +253,11 @@ class Produk extends BaseController
         }
 
         if ($count === 0) {
-            // Fallback jika menggunakan tb_produk
-            $productModel = new ProductModel();
-            $pBuilder = $productModel->select('id_produk');
-            if ($q !== '') {
-                $pBuilder->like('nama_produk_id', $q)->orLike('nama_produk_en', $q);
-            }
-            $pRows = $pBuilder->findAll();
-            $pCount = count($pRows);
-
-            if ($pCount > 50) {
-                return redirect()->to($redirectUrl)->with('error', 'Persempit pencarian (maksimal 50 produk per PDF)');
-            }
-
-            if ($pCount === 0) {
-                return redirect()->to($redirectUrl)->with('error', 'Tidak ada produk yang ditemukan untuk diekspor');
-            }
-
-            $rows = array_map(function ($r) {
-                return ['id_produk_supplier' => $r['id_produk']];
-            }, $pRows);
+            return redirect()->to($redirectUrl)->with('error', 'Tidak ada produk yang ditemukan untuk diekspor');
         }
 
         $items = [];
-        foreach ($rows as $row) {
+        foreach ($allItems as $row) {
             $data = $this->buildDetailData((int)$row['id_produk_supplier']);
             if (!empty($data)) {
                 if (!$isPdfInternal) {
@@ -328,6 +335,109 @@ class Produk extends BaseController
 
     private function buildDetailData(int $id): array
     {
+        // 1. Data dari tb_ecp_ekspor (virtual ID 10001 - 10117)
+        if ($id > 10000) {
+            $idEcp = $id - 10000;
+            $db = \Config\Database::connect();
+            $ecp = $db->table('tb_ecp_ekspor')->where('id_ecp', $idEcp)->get()->getRowArray();
+            if ($ecp) {
+                $kodeProduk = 'ECP-' . str_pad((string)$idEcp, 4, '0', STR_PAD_LEFT);
+                $namaProduk = !empty($ecp['produk_ekspor']) ? $ecp['produk_ekspor'] : (!empty($ecp['produk_dipasarkan']) ? $ecp['produk_dipasarkan'] : 'Produk Ekspor');
+                $namaPerusahaan = !empty($ecp['nama_perusahaan']) ? $ecp['nama_perusahaan'] : '-';
+                $lokasi = !empty($ecp['domisili']) ? $ecp['domisili'] : (!empty($ecp['wilayah_ecp']) ? $ecp['wilayah_ecp'] : '-');
+                $spesifikasi = !empty($ecp['kategori_produk']) ? ('Kategori: ' . $ecp['kategori_produk'] . (!empty($ecp['merk_dagang']) ? ' | Merk: ' . $ecp['merk_dagang'] : '')) : ($ecp['produk_dipasarkan'] ?: '');
+                $kapasitas = !empty($ecp['kapasitas_produksi']) ? $ecp['kapasitas_produksi'] : (!empty($ecp['kuantitas_ekspor']) ? 'Ekspor: ' . $ecp['kuantitas_ekspor'] : '');
+                $moq = !empty($ecp['kuantitas_ekspor']) ? $ecp['kuantitas_ekspor'] : '';
+                $nilaiUsd = isset($ecp['nilai_ekspor_usd']) && is_numeric($ecp['nilai_ekspor_usd']) ? (float)$ecp['nilai_ekspor_usd'] : 0.0;
+                $hargaExw = ($nilaiUsd > 0) ? ('Ekspor: $' . number_format($nilaiUsd, 0, ',', '.') . ' USD') : '';
+
+                $defaultImg = 'assets/img/logo.png';
+                $fotos = [base_url($defaultImg)];
+
+                $product = [
+                    'id_produk'           => $id,
+                    'kode_produk'         => $kodeProduk,
+                    'nama_produk_id'      => $namaProduk,
+                    'nama_produk_en'      => $namaPerusahaan,
+                    'nama_kategori_id'    => !empty($ecp['kategori_produk']) ? $ecp['kategori_produk'] : 'Produk Ekspor',
+                    'nama_kategori_en'    => !empty($ecp['kategori_produk']) ? $ecp['kategori_produk'] : 'Export Product',
+                    'foto_produk'         => $defaultImg,
+                    'deskripsi_produk_id' => $spesifikasi,
+                    'deskripsi_produk_en' => $spesifikasi,
+                ];
+
+                $produkSupplier = [
+                    'id_produk_supplier' => $id,
+                    'id_supplier'        => null,
+                    'nama_produk'        => $namaProduk,
+                    'spesifikasi'        => $spesifikasi,
+                    'kapasitas_produksi' => $kapasitas,
+                    'legalitas'          => null,
+                    'sertifikasi'        => null,
+                    'lokasi_barang'      => $lokasi,
+                    'moq'                => $moq,
+                    'harga_exw'          => $hargaExw,
+                    'komisi'             => null,
+                    'sudah_ekspor'       => 'Sudah',
+                    'kode_produk'        => $kodeProduk,
+                ];
+
+                $supplier = [
+                    'id_supplier'               => null,
+                    'nama_perusahaan'           => $namaPerusahaan,
+                    'nama_kontak'               => $ecp['nama_peserta'] ?? '',
+                    'no_hp'                     => $ecp['no_hp'] ?? '',
+                    'email'                     => $ecp['email'] ?? '',
+                    'website'                   => $ecp['website'] ?? '',
+                    'instagram'                 => $ecp['instagram'] ?? '',
+                    'domisili_usaha'            => $lokasi,
+                    'jenis_perusahaan'          => $ecp['jenis_perusahaan'] ?? '',
+                    'kapasitas_produksi'        => $kapasitas,
+                    'produk_dipasarkan'         => $ecp['produk_dipasarkan'] ?? '',
+                    'jumlah_pegawai'            => '',
+                    'frekuensi_ekspor'          => '',
+                    'pameran_internasional'     => '',
+                    'keunggulan_produk'         => '',
+                    'legalitas'                 => '',
+                    'sertifikasi'               => '',
+                    'pernah_ekspor'             => 'Sudah',
+                    'kategori_ekspor'           => $ecp['kategori_produk'] ?? '',
+                    'ringkasan_ekspor_tanggal'  => !empty($ecp['tahun']) ? (string)$ecp['tahun'] : '',
+                    'ringkasan_ekspor_produk'   => !empty($ecp['produk_ekspor']) ? $ecp['produk_ekspor'] : '',
+                    'ringkasan_ekspor_kapasitas'=> !empty($ecp['kuantitas_ekspor']) ? $ecp['kuantitas_ekspor'] : '',
+                    'ringkasan_ekspor_negara'   => !empty($ecp['negara_tujuan']) ? $ecp['negara_tujuan'] : '',
+                    'ringkasan_ekspor_nilai'    => ($nilaiUsd > 0) ? ('$' . number_format($nilaiUsd, 0, ',', '.') . ' USD') : '',
+                    'kode_produk'               => $kodeProduk,
+                ];
+
+                $histories = [];
+                if (!empty($ecp['tahun']) || !empty($ecp['negara_tujuan'])) {
+                    $histories[] = [
+                        'tahun'            => !empty($ecp['tahun']) ? (string)$ecp['tahun'] : '-',
+                        'produk'           => !empty($ecp['produk_ekspor']) ? $ecp['produk_ekspor'] : ($ecp['produk_dipasarkan'] ?? '-'),
+                        'negara_tujuan'    => !empty($ecp['negara_tujuan']) ? $ecp['negara_tujuan'] : '-',
+                        'jenis_ekspor'     => !empty($ecp['jenis_ekspor']) ? $ecp['jenis_ekspor'] : '-',
+                        'kuantitas'        => !empty($ecp['kuantitas_ekspor']) ? $ecp['kuantitas_ekspor'] : '-',
+                        'nilai_ekspor_usd' => ($nilaiUsd > 0) ? $nilaiUsd : null,
+                        'catatan'          => !empty($ecp['wilayah_ecp']) ? ('ECP: ' . $ecp['wilayah_ecp']) : '',
+                    ];
+                }
+
+                $years = !empty($ecp['tahun']) ? [(int)$ecp['tahun']] : [];
+                $totalNilai = $nilaiUsd;
+
+                return [
+                    'product'        => $product,
+                    'produkSupplier' => $produkSupplier,
+                    'supplier'       => $supplier,
+                    'histories'      => $histories,
+                    'years'          => $years,
+                    'totalNilai'     => $totalNilai,
+                    'fotos'          => $fotos,
+                ];
+            }
+        }
+
         $supplierProductModel = new SupplierProductModel();
         $produkSupplier = $supplierProductModel->find($id);
 

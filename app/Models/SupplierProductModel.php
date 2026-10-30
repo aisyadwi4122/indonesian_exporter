@@ -301,6 +301,9 @@ class SupplierProductModel extends Model
      */
     public static function getKodeProduk(int $id): string
     {
+        if ($id > 10000) {
+            return 'ECP-' . str_pad((string)($id - 10000), 4, '0', STR_PAD_LEFT);
+        }
         return 'IE-' . str_pad((string)$id, 4, '0', STR_PAD_LEFT);
     }
 
@@ -315,7 +318,7 @@ class SupplierProductModel extends Model
      * - Produk: legalitas, komisi.
      *
      * Menambahkan:
-     * - kode_produk = 'IE-' . str_pad(id_produk_supplier, 4, '0', STR_PAD_LEFT)
+     * - kode_produk = 'IE-' . str_pad(id_produk_supplier, 4, '0', STR_PAD_LEFT) atau 'ECP-xxxx'
      */
     public static function maskForExternal(array $data): array
     {
@@ -337,7 +340,7 @@ class SupplierProductModel extends Model
             ?? ($data['id_produk'] 
             ?? ($data['id'] ?? 0))))
         );
-        $kodeProduk = self::getKodeProduk($prodId);
+        $kodeProduk = !empty($data['kode_produk']) ? $data['kode_produk'] : self::getKodeProduk($prodId);
         $data['kode_produk'] = $kodeProduk;
 
         $companyName = (string)(
@@ -499,6 +502,38 @@ class SupplierProductModel extends Model
         );
 
         return $data;
+    }
+
+    /**
+     * Mengambil query builder untuk produk milik supplier tertentu dengan filter kata kunci
+     *
+     * @param int $supplierId
+     * @param string $keyword
+     * @return \CodeIgniter\Database\BaseBuilder|\App\Models\SupplierProductModel
+     */
+    public function getSupplierProducts(int $supplierId, string $keyword = '')
+    {
+        $builder = $this->where('id_supplier', $supplierId);
+
+        if ($keyword !== '') {
+            $builder->groupStart()
+                ->like('nama_produk', $keyword)
+                ->orLike('lokasi_barang', $keyword)
+                ->orLike('spesifikasi', $keyword)
+                ->orLike('kapasitas_produksi', $keyword)
+                ->orLike('moq', $keyword)
+                ->orLike('harga_exw', $keyword);
+
+            if (preg_match('/^IE-0*([0-9]+)$/i', $keyword, $m)) {
+                $builder->orWhere('id_produk_supplier', (int)$m[1]);
+            } elseif (is_numeric($keyword)) {
+                $builder->orWhere('id_produk_supplier', (int)$keyword);
+            }
+
+            $builder->groupEnd();
+        }
+
+        return $builder->orderBy('id_produk_supplier', 'DESC');
     }
 }
 
