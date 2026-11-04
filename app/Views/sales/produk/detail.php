@@ -473,7 +473,7 @@ if ($is_internal && $rawIg !== '') {
 <div class="produk-hero mb-4">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
         <div class="produk-breadcrumb mb-0">
-            <strong>SALES</strong> / <a href="<?= base_url('sales/produk' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="text-white text-decoration-none">PRODUK</a> / <span style="opacity: 0.85;"><?= esc(strtoupper($product['nama_produk_id'] ?? 'DETAIL PRODUK')) ?></span>
+            <strong>SALES</strong> / <a href="<?= base_url('sales/produk-supplier' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="text-white text-decoration-none">PRODUK SUPPLIER</a> / <span style="opacity: 0.85;"><?= esc(strtoupper($product['nama_produk_id'] ?? 'DETAIL PRODUK SUPPLIER')) ?></span>
         </div>
 
         <!-- BADGE & KONTROL MODE -->
@@ -483,7 +483,7 @@ if ($is_internal && $rawIg !== '') {
                     <i class="fa-solid fa-shield-halved me-1"></i> Mode: Internal
                 </span>
                 <?php if ($account_tipe === 'internal'): ?>
-                    <a href="<?= base_url('sales/produk/' . esc($product['id_produk'] ?? '') . '?mode=eksternal') ?>" 
+                    <a href="<?= base_url('sales/produk-supplier/' . esc($product['id_produk'] ?? '') . '?mode=eksternal') ?>" 
                        class="btn btn-sm btn-outline-light shadow-sm" 
                        style="font-size: 12px; border-radius: 6px; padding: 4px 10px;"
                        title="Lihat detail dalam mode eksternal">
@@ -495,7 +495,7 @@ if ($is_internal && $rawIg !== '') {
                     <i class="fa-solid fa-globe me-1"></i> Mode: Eksternal<?= $is_preview ? ' (Pratinjau)' : '' ?>
                 </span>
                 <?php if ($account_tipe === 'internal'): ?>
-                    <a href="<?= base_url('sales/produk/' . esc($product['id_produk'] ?? '')) ?>" 
+                    <a href="<?= base_url('sales/produk-supplier/' . esc($product['id_produk'] ?? '')) ?>" 
                        class="btn btn-sm btn-light text-dark fw-semibold shadow-sm" 
                        style="font-size: 12px; border-radius: 6px; padding: 4px 10px;"
                        title="Kembali ke mode internal">
@@ -539,7 +539,7 @@ if ($is_internal && $rawIg !== '') {
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="pdfDropdownDetail" style="min-width: 290px;">
                         <li>
-                            <a class="dropdown-item py-2" href="<?= base_url('sales/produk/' . esc($product['id_produk'] ?? '') . '/pdf?tipe_pdf=eksternal') ?>" target="_blank">
+                            <a class="dropdown-item py-2" href="<?= base_url('sales/produk-supplier/' . esc($product['id_produk'] ?? '') . '/pdf?tipe_pdf=eksternal') ?>" target="_blank">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <span class="fw-bold text-dark"><i class="fa-solid fa-file-pdf text-success me-2"></i>PDF Eksternal</span>
                                     <span class="badge bg-success" style="font-size: 10px;">Default</span>
@@ -549,7 +549,7 @@ if ($is_internal && $rawIg !== '') {
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                            <a class="dropdown-item py-2" href="<?= base_url('sales/produk/' . esc($product['id_produk'] ?? '') . '/pdf?tipe_pdf=internal') ?>" target="_blank">
+                            <a class="dropdown-item py-2" href="<?= base_url('sales/produk-supplier/' . esc($product['id_produk'] ?? '') . '/pdf?tipe_pdf=internal') ?>" target="_blank">
                                 <div class="fw-bold text-dark"><i class="fa-solid fa-file-shield text-warning me-2"></i>PDF Internal</div>
                                 <small class="text-muted d-block mt-1">Lengkap dengan data supplier, legalitas & komisi</small>
                             </a>
@@ -557,13 +557,13 @@ if ($is_internal && $rawIg !== '') {
                     </ul>
                 </div>
             <?php else: ?>
-                <a href="<?= base_url('sales/produk/' . esc($product['id_produk'] ?? '') . '/pdf' . ($is_preview ? '?mode=eksternal' : '')) ?>" 
+                <a href="<?= base_url('sales/produk-supplier/' . esc($product['id_produk'] ?? '') . '/pdf' . ($is_preview ? '?mode=eksternal' : '')) ?>" 
                    target="_blank" 
                    class="btn btn-sales-primary shadow-sm">
                     <i class="fa-solid fa-file-pdf me-1"></i> Cetak PDF
                 </a>
             <?php endif; ?>
-            <a href="<?= base_url('sales/produk' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sales-secondary shadow-sm">
+            <a href="<?= base_url('sales/produk-supplier' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sales-secondary shadow-sm">
                 <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar
             </a>
         </div>

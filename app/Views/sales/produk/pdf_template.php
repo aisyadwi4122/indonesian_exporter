@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Katalog Produk</title>
+    <title>Katalog Produk Supplier</title>
     <style>
         @page {
             margin: 18mm 15mm 18mm 15mm;
@@ -160,7 +160,7 @@ foreach ($items as $index => $item):
                     Indonesian Exporter
                 </span>
                 <span style="font-size: 11px; color: #64748b; vertical-align: middle;">
-                    &mdash; Katalog Produk
+                    &mdash; Katalog Produk Supplier
                 </span>
             </td>
             <td style="width: 40%; text-align: right; vertical-align: middle; font-size: 10px; color: #64748b;">

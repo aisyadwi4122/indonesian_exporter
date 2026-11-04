@@ -22,12 +22,38 @@ $routes->get('sales/logout', 'Auth::logout');
 // SALES PROTECTED ROUTES
 $routes->group('sales', ['filter' => 'salesauth'], function ($routes) {
     $routes->get('dashboard', 'Sales\Dashboard::index');
-    $routes->get('produk', 'Sales\Produk::index');
-    $routes->get('produk/pdf', 'Sales\Produk::exportPdf');
-    $routes->get('produk/detail/(:any)/pdf', 'Sales\Produk::detailPdf/$1');
-    $routes->get('produk/detail/(:any)', 'Sales\Produk::detail/$1');
-    $routes->get('produk/(:any)/pdf', 'Sales\Produk::detailPdf/$1');
-    $routes->get('produk/(:any)', 'Sales\Produk::detail/$1');
+    $routes->get('produk-supplier', 'Sales\Produk::index');
+    $routes->get('produk-supplier/pdf', 'Sales\Produk::exportPdf');
+    $routes->get('produk-supplier/detail/(:any)/pdf', 'Sales\Produk::detailPdf/$1');
+    $routes->get('produk-supplier/detail/(:any)', 'Sales\Produk::detail/$1');
+    $routes->get('produk-supplier/(:any)/pdf', 'Sales\Produk::detailPdf/$1');
+    $routes->get('produk-supplier/(:any)', 'Sales\Produk::detail/$1');
+});
+
+// Redirect 301 Permanen dari URL lama /sales/produk/* ke /sales/produk-supplier/*
+$routes->get('sales/produk', function () {
+    $q = $_SERVER['QUERY_STRING'] ?? '';
+    return redirect()->to(base_url('sales/produk-supplier' . ($q !== '' ? '?' . $q : '')), 301);
+});
+$routes->get('sales/produk/pdf', function () {
+    $q = $_SERVER['QUERY_STRING'] ?? '';
+    return redirect()->to(base_url('sales/produk-supplier/pdf' . ($q !== '' ? '?' . $q : '')), 301);
+});
+$routes->get('sales/produk/detail/(:any)/pdf', function ($id) {
+    $q = $_SERVER['QUERY_STRING'] ?? '';
+    return redirect()->to(base_url('sales/produk-supplier/detail/' . $id . '/pdf' . ($q !== '' ? '?' . $q : '')), 301);
+});
+$routes->get('sales/produk/detail/(:any)', function ($id) {
+    $q = $_SERVER['QUERY_STRING'] ?? '';
+    return redirect()->to(base_url('sales/produk-supplier/detail/' . $id . ($q !== '' ? '?' . $q : '')), 301);
+});
+$routes->get('sales/produk/(:any)/pdf', function ($id) {
+    $q = $_SERVER['QUERY_STRING'] ?? '';
+    return redirect()->to(base_url('sales/produk-supplier/' . $id . '/pdf' . ($q !== '' ? '?' . $q : '')), 301);
+});
+$routes->get('sales/produk/(:any)', function ($id) {
+    $q = $_SERVER['QUERY_STRING'] ?? '';
+    return redirect()->to(base_url('sales/produk-supplier/' . $id . ($q !== '' ? '?' . $q : '')), 301);
 });
 
 $routes->group('sales', ['filter' => 'role:sales'], function ($r) {
@@ -47,6 +73,12 @@ $routes->group('supplier', ['filter' => 'supplierauth'], function ($routes) {
     $routes->post('perusahaan/simpan', 'Supplier\Perusahaan::simpan');
     $routes->post('perusahaan/hapus', 'Supplier\Perusahaan::hapus');
     $routes->get('produk', 'Supplier\Produk::index');
+    $routes->get('produk/index', 'Supplier\Produk::index');
+    $routes->get('produk/tambah', 'Supplier\Produk::tambah');
+    $routes->post('produk/proses_tambah', 'Supplier\Produk::proses_tambah');
+    $routes->get('produk/edit/(:num)', 'Supplier\Produk::edit/$1');
+    $routes->post('produk/proses_edit/(:num)', 'Supplier\Produk::proses_edit/$1');
+    $routes->post('produk/delete/(:num)', 'Supplier\Produk::delete/$1');
     $routes->get('history', 'Supplier\History::index');
 });
 

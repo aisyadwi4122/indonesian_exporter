@@ -10,7 +10,7 @@ $isEdit = !empty($product);
     <div>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-1" style="font-size: 13px;">
-                <li class="breadcrumb-item"><a href="<?= base_url('sales/produk'); ?>" class="text-decoration-none text-muted">Produk</a></li>
+                <li class="breadcrumb-item"><a href="<?= base_url('sales/produk-supplier'); ?>" class="text-decoration-none text-muted">Produk Supplier</a></li>
                 <li class="breadcrumb-item active" aria-current="page"><?= $isEdit ? 'Edit Produk' : 'Tambah Produk'; ?></li>
             </ol>
         </nav>
@@ -21,7 +21,7 @@ $isEdit = !empty($product);
             <?= $isEdit ? 'Perbarui informasi dan spesifikasi produk katalog.' : 'Isi formulir berikut untuk mendaftarkan produk baru ke katalog.'; ?>
         </p>
     </div>
-    <a href="<?= base_url('sales/produk'); ?>" class="btn-sales-secondary">
+    <a href="<?= base_url('sales/produk-supplier'); ?>" class="btn-sales-secondary">
         <i class="fa-solid fa-arrow-left"></i>
         <span>Kembali ke Daftar</span>
     </a>
@@ -254,7 +254,7 @@ $isEdit = !empty($product);
                         <i class="fa-solid fa-floppy-disk"></i>
                         <span><?= $isEdit ? 'Perbarui Produk' : 'Simpan Produk Baru'; ?></span>
                     </button>
-                    <a href="<?= base_url('sales/produk'); ?>" class="btn btn-sales-secondary justify-content-center py-2">
+                    <a href="<?= base_url('sales/produk-supplier'); ?>" class="btn btn-sales-secondary justify-content-center py-2">
                         Batal
                     </a>
                 </div>
