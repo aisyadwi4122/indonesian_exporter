@@ -247,8 +247,11 @@ foreach ($items as $index => $item):
                 'Sudah Ekspor'       => $produkSupplier['sudah_ekspor'] ?? null,
             ];
             foreach ($fields as $label => $val) {
-                if ($val !== null && trim((string)$val) !== '') {
-                    $exportInfo[$label] = trim((string)$val);
+                if ($val !== null) {
+                    $valStr = trim((string)$val);
+                    if ($valStr !== '' && $valStr !== '-' && stripos($valStr, '$0 USD') === false && $valStr !== '$0' && $valStr !== '0') {
+                        $exportInfo[$label] = $valStr;
+                    }
                 }
             }
         }
@@ -302,18 +305,13 @@ foreach ($items as $index => $item):
                     'Kategori Ekspor'        => $supplier['kategori_ekspor'] ?? null,
                 ];
             } else {
-                // Mode eksternal: HANYA field non-identitas
+                // Mode eksternal: HANYA 5 field profil usaha (selaras dengan tab Profil Usaha Eksternal)
                 $fields = [
                     'Jenis Perusahaan'       => $supplier['jenis_perusahaan'] ?? null,
                     'Domisili Usaha'         => $supplier['domisili_usaha'] ?? null,
                     'Produk yang Dipasarkan' => $supplier['produk_dipasarkan'] ?? null,
-                    'Kapasitas Produksi'     => $supplier['kapasitas_produksi'] ?? null,
                     'Jumlah Pegawai'         => $supplier['jumlah_pegawai'] ?? null,
-                    'Frekuensi Ekspor'       => $supplier['frekuensi_ekspor'] ?? null,
-                    'Keunggulan Produk'      => $supplier['keunggulan_produk'] ?? null,
-                    'Sertifikasi Usaha'      => $supplier['sertifikasi'] ?? null,
                     'Pernah Ekspor'          => $supplier['pernah_ekspor'] ?? null,
-                    'Kategori Ekspor'        => $supplier['kategori_ekspor'] ?? null,
                 ];
             }
             foreach ($fields as $label => $val) {
@@ -350,8 +348,8 @@ foreach ($items as $index => $item):
     </div>
     <?php endif; ?>
 
-    <!-- Bagian Data History Ekspor (sembunyikan jika histories kosong) -->
-    <?php if (!empty($histories)): ?>
+    <!-- Bagian Data History Ekspor (HANYA tampil untuk PDF Internal) -->
+    <?php if (!empty($is_internal) && !empty($histories)): ?>
     <div>
         <div class="section-title">Data History Ekspor</div>
         <table class="history-table">

@@ -197,6 +197,12 @@ body {
   border-bottom: none;
 }
 
+@media (max-width: 767.98px) {
+  .profil-usaha-eksternal .col-md-6:first-child .info-row:last-child {
+    border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+  }
+}
+
 .desc-content {
   background-color: rgba(255, 255, 255, 0.65) !important;
   border: 1px solid rgba(226, 232, 240, 0.8);
@@ -1004,9 +1010,9 @@ if ($is_internal && $rawIg !== '') {
                     </div>
                 </div>
             <?php else: ?>
-                <!-- ================= MODE EKSTERNAL: HANYA FIELD NON-IDENTITAS ================= -->
-                <!-- Field non-identitas: jenis perusahaan, kapasitas produksi, jumlah pegawai, frekuensi ekspor, produk dipasarkan, keunggulan produk, sertifikasi, pernah ekspor, kategori ekspor, domisili usaha -->
-                <div class="row g-4 mb-4">
+                <!-- ================= MODE EKSTERNAL: HANYA 5 FIELD PROFIL USAHA ================= -->
+                <!-- 5 Field Tetap: Jenis Perusahaan, Domisili Usaha, Produk yang Dipasarkan, Jumlah Pegawai, Pernah Ekspor -->
+                <div class="row g-md-4 g-0 mb-4 profil-usaha-eksternal">
                     <div class="col-md-6">
                         <div class="row info-row">
                             <div class="col-5 label-col">Jenis Perusahaan</div>
@@ -1020,35 +1026,15 @@ if ($is_internal && $rawIg !== '') {
                             <div class="col-5 label-col">Produk yang Dipasarkan</div>
                             <div class="col-7 value-col"><?= esc(!empty($supplier['produk_dipasarkan']) ? $supplier['produk_dipasarkan'] : '-') ?></div>
                         </div>
-                        <div class="row info-row">
-                            <div class="col-5 label-col">Kapasitas Produksi</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['kapasitas_produksi']) ? $supplier['kapasitas_produksi'] : '-') ?></div>
-                        </div>
+                    </div>
+                    <div class="col-md-6">
                         <div class="row info-row">
                             <div class="col-5 label-col">Jumlah Pegawai</div>
                             <div class="col-7 value-col"><?= esc(!empty($supplier['jumlah_pegawai']) ? $supplier['jumlah_pegawai'] : '-') ?></div>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="row info-row">
-                            <div class="col-5 label-col">Frekuensi Ekspor</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['frekuensi_ekspor']) ? $supplier['frekuensi_ekspor'] : '-') ?></div>
-                        </div>
                         <div class="row info-row">
                             <div class="col-5 label-col">Pernah Ekspor</div>
                             <div class="col-7 value-col"><?= esc(!empty($supplier['pernah_ekspor']) ? $supplier['pernah_ekspor'] : '-') ?></div>
-                        </div>
-                        <div class="row info-row">
-                            <div class="col-5 label-col">Kategori Ekspor</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['kategori_ekspor']) ? $supplier['kategori_ekspor'] : '-') ?></div>
-                        </div>
-                        <div class="row info-row">
-                            <div class="col-5 label-col">Keunggulan Produk</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['keunggulan_produk']) ? $supplier['keunggulan_produk'] : '-') ?></div>
-                        </div>
-                        <div class="row info-row">
-                            <div class="col-5 label-col">Sertifikasi</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['sertifikasi']) ? $supplier['sertifikasi'] : '-') ?></div>
                         </div>
                     </div>
                 </div>
