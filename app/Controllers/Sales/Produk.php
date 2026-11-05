@@ -552,9 +552,7 @@ class Produk extends BaseController
 
         // Siapkan base64 gambar dan sanitasi HTML deskripsi per item produk
         foreach ($items as &$item) {
-            $supplierProdId = (int)($item['produkSupplier']['id_produk_supplier'] ?? ($item['product']['id_produk'] ?? 0));
-            $fotoFile = $item['product']['foto_produk'] ?? null;
-            $item['imageData'] = $this->pdfImageData($supplierProdId, $fotoFile);
+            $item['imageData'] = $this->resolvePdfImageData($item);
             $item['deskripsi_id_sanitized'] = $this->sanitizeHtml($item['product']['deskripsi_produk_id'] ?? '');
             $item['deskripsi_en_sanitized'] = $this->sanitizeHtml($item['product']['deskripsi_produk_en'] ?? '');
         }
@@ -563,8 +561,8 @@ class Produk extends BaseController
         $options = new Options();
         $options->set('defaultFont', 'DejaVu Sans');
         $options->set('isHtml5ParserEnabled', true);
-        $options->set('isRemoteEnabled', false);
-        $options->set('chroot', FCPATH);
+        $options->set('isRemoteEnabled', true);
+        $options->set('chroot', [FCPATH, defined('ROOTPATH') ? ROOTPATH : FCPATH]);
 
         $dompdf = new Dompdf($options);
         $dompdf->setPaper('A4', 'portrait');
@@ -590,89 +588,314 @@ class Produk extends BaseController
         exit;
     }
 
-    private function pdfImageData(int $supplierProductId = 0, ?string $legacyFile = null): ?string
+    /**
+     * Menyelesaikan data URI gambar untuk PDF secara komprehensif.
+     * Mendukung: foto detail view ($item['fotos']), Google Drive link/thumbnail,
+     * URL HTTP/HTTPS lokal maupun remote, serta file lokal di assets/img/produk & uploads.
+     */
+    private function resolvePdfImageData(array $item): ?string
     {
-        $path = null;
+        $supplierProdId = (int)($item['produkSupplier']['id_produk_supplier'] 
+            ?? ($item['product']['id_produk'] 
+            ?? ($item['id_produk_supplier'] 
+            ?? ($item['id_produk'] ?? 0))));
 
-        // Pakai HANYA file lokal uploads/supplier/{id}_1.jpg
-        if ($supplierProductId > 0) {
-            $supplierLocal = FCPATH . 'uploads/supplier/' . $supplierProductId . '_1.jpg';
-            if (is_file($supplierLocal)) {
-                $path = $supplierLocal;
-            }
-        }
+        $candidates = [];
 
-        // Fallback untuk produk lokal non-supplier (tb_produk) jika berupa file lokal di disk
-        if ($path === null && $legacyFile !== null && trim($legacyFile) !== '') {
-            $legacyTrimmed = trim($legacyFile);
-            if (!str_starts_with($legacyTrimmed, 'http://') && !str_starts_with($legacyTrimmed, 'https://')) {
-                if (is_file(FCPATH . 'assets/img/produk/' . $legacyTrimmed)) {
-                    $path = FCPATH . 'assets/img/produk/' . $legacyTrimmed;
-                } elseif (is_file(FCPATH . ltrim($legacyTrimmed, '/\\'))) {
-                    $path = FCPATH . ltrim($legacyTrimmed, '/\\');
+        // 1. Fotos list dari data detail (sumber utama yang tampil di layar detail browser)
+        if (!empty($item['fotos']) && is_array($item['fotos'])) {
+            foreach ($item['fotos'] as $f) {
+                if (is_string($f) && trim($f) !== '') {
+                    $candidates[] = trim($f);
                 }
             }
         }
 
-        if ($path === null || !is_file($path)) {
+        // 2. Foto produk dari array product
+        if (!empty($item['product']['foto_produk']) && is_string($item['product']['foto_produk'])) {
+            $candidates[] = trim($item['product']['foto_produk']);
+        }
+
+        // 3. Foto dari array produkSupplier (foto_1 .. foto_5)
+        if (!empty($item['produkSupplier']) && is_array($item['produkSupplier'])) {
+            for ($i = 1; $i <= 5; $i++) {
+                if (!empty($item['produkSupplier']['foto_' . $i]) && is_string($item['produkSupplier']['foto_' . $i])) {
+                    $candidates[] = trim($item['produkSupplier']['foto_' . $i]);
+                }
+            }
+        }
+
+        // 4. File spesifik uploads/supplier/{id}_1.jpg
+        if ($supplierProdId > 0) {
+            $candidates[] = 'uploads/supplier/' . $supplierProdId . '_1.jpg';
+        }
+
+        $candidates = array_values(array_unique($candidates));
+
+        foreach ($candidates as $cand) {
+            $raw = $this->loadPdfImageBinary($cand, $supplierProdId);
+            if ($raw !== null && strlen($raw) > 0) {
+                $dataUri = $this->formatPdfImageDataUri($raw);
+                if ($dataUri !== null) {
+                    return $dataUri;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Backward-compatibility wrapper untuk pemanggilan lama pdfImageData.
+     */
+    private function pdfImageData(int $supplierProductId = 0, ?string $legacyFile = null): ?string
+    {
+        return $this->resolvePdfImageData([
+            'id_produk_supplier' => $supplierProductId,
+            'product' => ['foto_produk' => $legacyFile],
+            'fotos' => !empty($legacyFile) ? [$legacyFile] : [],
+        ]);
+    }
+
+    /**
+     * Memuat binary gambar dari link Drive, URL HTTP/HTTPS, atau file lokal di disk.
+     */
+    private function loadPdfImageBinary(string $candidate, int $supplierProdId = 0): ?string
+    {
+        $candidate = trim($candidate);
+        if ($candidate === '') {
             return null;
         }
 
-        try {
-            $raw = @file_get_contents($path);
-            if ($raw === false || empty($raw)) {
-                return null;
+        // 1. Link Google Drive (open?id=, /file/d/, thumbnail?id=, dll)
+        $driveId = SupplierProductModel::driveFileId($candidate);
+        if ($driveId !== null) {
+            $driveUrl = 'https://drive.google.com/thumbnail?id=' . $driveId . '&sz=w1000';
+            $remoteData = $this->downloadRemotePdfImage($driveUrl);
+            if ($remoteData !== null) {
+                return $remoteData;
+            }
+        }
+
+        // 2. HTTP / HTTPS URL
+        if (str_starts_with($candidate, 'http://') || str_starts_with($candidate, 'https://')) {
+            // Jika URL adalah path lokal aplikasi (misal base_url('assets/img/produk/...'))
+            $parsedPath = parse_url($candidate, PHP_URL_PATH);
+            if (!empty($parsedPath)) {
+                $localBinary = $this->findLocalPdfImage($parsedPath);
+                if ($localBinary !== null) {
+                    return $localBinary;
+                }
             }
 
-            $src = @imagecreatefromstring($raw);
-            if (!$src) {
-                return null;
+            // Jika bukan path lokal atau tidak ditemukan lokal, unduh via HTTP/cURL
+            $remoteData = $this->downloadRemotePdfImage($candidate);
+            if ($remoteData !== null) {
+                return $remoteData;
             }
 
-            $origWidth = imagesx($src);
-            $origHeight = imagesy($src);
-
-            if ($origWidth <= 0 || $origHeight <= 0) {
-                imagedestroy($src);
-                return null;
-            }
-
-            $maxWidth = 800;
-            if ($origWidth > $maxWidth) {
-                $newWidth = $maxWidth;
-                $newHeight = (int)round(($origHeight / $origWidth) * $maxWidth);
-            } else {
-                $newWidth = $origWidth;
-                $newHeight = $origHeight;
-            }
-
-            $dst = imagecreatetruecolor($newWidth, $newHeight);
-            if (!$dst) {
-                imagedestroy($src);
-                return null;
-            }
-
-            // Latar putih untuk transparansi PNG/WebP/GIF
-            $white = imagecolorallocate($dst, 255, 255, 255);
-            imagefill($dst, 0, 0, $white);
-
-            imagecopyresampled($dst, $src, 0, 0, 0, 0, $newWidth, $newHeight, $origWidth, $origHeight);
-
-            ob_start();
-            imagejpeg($dst, null, 80);
-            $jpegData = ob_get_clean();
-
-            imagedestroy($src);
-            imagedestroy($dst);
-
-            if (!$jpegData) {
-                return null;
-            }
-
-            return 'data:image/jpeg;base64,' . base64_encode($jpegData);
-        } catch (\Throwable $e) {
             return null;
         }
+
+        // 3. File lokal filesystem
+        return $this->findLocalPdfImage($candidate, $supplierProdId);
+    }
+
+    /**
+     * Mencari dan membaca file lokal di berbagai direktori potensial (FCPATH, ROOTPATH/public, ROOTPATH).
+     */
+    private function findLocalPdfImage(string $relPath, int $supplierProdId = 0): ?string
+    {
+        $clean = ltrim(trim($relPath), '/\\');
+        if ($clean === '') {
+            return null;
+        }
+
+        $baseDirs = [
+            FCPATH,
+            defined('ROOTPATH') ? ROOTPATH . 'public' . DIRECTORY_SEPARATOR : '',
+            defined('ROOTPATH') ? ROOTPATH : '',
+        ];
+
+        $subPaths = [
+            $clean,
+            'assets/img/produk/' . $clean,
+            'uploads/supplier/' . $clean,
+            'uploads/produk_sales/' . $clean,
+            'uploads/' . $clean,
+        ];
+
+        if ($supplierProdId > 0) {
+            $subPaths[] = 'uploads/supplier/' . $supplierProdId . '_1.jpg';
+        }
+
+        $basename = basename($clean);
+        if ($basename !== '' && $basename !== $clean) {
+            $subPaths[] = 'assets/img/produk/' . $basename;
+            $subPaths[] = 'uploads/produk_sales/' . $basename;
+            $subPaths[] = 'uploads/supplier/' . $basename;
+            $subPaths[] = $basename;
+        }
+
+        $checked = [];
+        foreach ($baseDirs as $bd) {
+            if (empty($bd)) {
+                continue;
+            }
+            foreach ($subPaths as $sp) {
+                $full = rtrim($bd, '/\\') . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $sp);
+                if (isset($checked[$full])) {
+                    continue;
+                }
+                $checked[$full] = true;
+
+                if (is_file($full)) {
+                    $raw = @file_get_contents($full);
+                    if ($raw !== false && strlen($raw) > 0) {
+                        return $raw;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Mengunduh gambar remote via cURL (prioritas) atau file_get_contents dengan stream context.
+     */
+    private function downloadRemotePdfImage(string $url): ?string
+    {
+        if (function_exists('curl_init')) {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 6);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+            $data = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode >= 200 && $httpCode < 300 && !empty($data)) {
+                return $data;
+            }
+        }
+
+        $ctx = stream_context_create([
+            'http' => [
+                'timeout' => 6,
+                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                'follow_location' => 1,
+                'max_redirects' => 3,
+            ],
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+            ],
+        ]);
+
+        $data = @file_get_contents($url, false, $ctx);
+        if ($data !== false && strlen($data) > 0) {
+            return $data;
+        }
+
+        return null;
+    }
+
+    /**
+     * Mengonversi raw image binary ke format Data URI.
+     * Mengoptimalkan & resize via GD jika didukung, dengan fallback langsung ke raw data URI jika GD gagal.
+     */
+    private function formatPdfImageDataUri(string $raw): ?string
+    {
+        $mime = $this->detectImageMime($raw);
+        if (!$mime) {
+            return null;
+        }
+
+        // Optimasi & resize via GD jika didukung
+        if (function_exists('imagecreatefromstring') && function_exists('imagecreatetruecolor')) {
+            try {
+                $src = @imagecreatefromstring($raw);
+                if ($src) {
+                    $origWidth = imagesx($src);
+                    $origHeight = imagesy($src);
+
+                    if ($origWidth > 0 && $origHeight > 0) {
+                        $maxWidth = 800;
+                        if ($origWidth > $maxWidth) {
+                            $newWidth = $maxWidth;
+                            $newHeight = (int)round(($origHeight / $origWidth) * $maxWidth);
+                        } else {
+                            $newWidth = $origWidth;
+                            $newHeight = $origHeight;
+                        }
+
+                        $dst = imagecreatetruecolor($newWidth, $newHeight);
+                        if ($dst) {
+                            $white = imagecolorallocate($dst, 255, 255, 255);
+                            imagefill($dst, 0, 0, $white);
+                            imagecopyresampled($dst, $src, 0, 0, 0, 0, $newWidth, $newHeight, $origWidth, $origHeight);
+
+                            ob_start();
+                            imagejpeg($dst, null, 80);
+                            $jpegData = ob_get_clean();
+
+                            imagedestroy($src);
+                            imagedestroy($dst);
+
+                            if (!empty($jpegData)) {
+                                return 'data:image/jpeg;base64,' . base64_encode($jpegData);
+                            }
+                        } else {
+                            imagedestroy($src);
+                        }
+                    } else {
+                        imagedestroy($src);
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Jangan gagalkan proses jika GD error, fallback ke data URI asli di bawah
+            }
+        }
+
+        // Fallback: langsung kembalikan base64 data URI dari raw bytes
+        return 'data:' . $mime . ';base64,' . base64_encode($raw);
+    }
+
+    /**
+     * Mendeteksi MIME type dari binary signature atau finfo.
+     */
+    private function detectImageMime(string $raw): ?string
+    {
+        if (str_starts_with($raw, "\x89PNG\r\n\x1a\n")) {
+            return 'image/png';
+        }
+        if (str_starts_with($raw, "\xFF\xD8\xFF")) {
+            return 'image/jpeg';
+        }
+        if (str_starts_with($raw, "GIF87a") || str_starts_with($raw, "GIF89a")) {
+            return 'image/gif';
+        }
+        if (str_starts_with($raw, "RIFF") && substr($raw, 8, 4) === 'WEBP') {
+            return 'image/webp';
+        }
+
+        if (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_buffer($finfo, $raw);
+            finfo_close($finfo);
+            if (!empty($mime) && str_starts_with($mime, 'image/')) {
+                return $mime;
+            }
+        }
+
+        return 'image/jpeg';
     }
 
     private function sanitizeHtml(?string $html): string
