@@ -142,6 +142,21 @@ class ProdukSalesModel extends SupplierProductModel
     }
 
     /**
+     * Menghitung total seluruh produk terpadu (Supplier IE + ECP)
+     * Sama persis dengan sumber data yang tampil di halaman Produk Sales.
+     *
+     * @return int
+     */
+    public function countUnifiedProducts(): int
+    {
+        $db = \Config\Database::connect();
+        $supplierCount = $db->table('tb_produk_supplier')->countAllResults();
+        $ecpCount      = $db->table('tb_ecp_ekspor')->countAllResults();
+
+        return (int)($supplierCount + $ecpCount);
+    }
+
+    /**
      * Mendapatkan saran kode produk berikutnya berdasarkan auto-increment ID
      *
      * @return string
