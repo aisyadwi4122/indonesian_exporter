@@ -28,6 +28,7 @@ $routes->group('sales', ['filter' => 'salesauth'], function ($routes) {
     $routes->get('produk-supplier/detail/(:any)', 'Sales\Produk::detail/$1');
     $routes->get('produk-supplier/(:any)/pdf', 'Sales\Produk::detailPdf/$1');
     $routes->get('produk-supplier/(:any)', 'Sales\Produk::detail/$1');
+    $routes->post('activity/commission-click', 'Sales\Produk::recordCommissionClick');
 });
 
 // Redirect 301 Permanen dari URL lama /sales/produk/* ke /sales/produk-supplier/*

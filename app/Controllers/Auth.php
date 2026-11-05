@@ -105,6 +105,26 @@ class Auth extends BaseController
                 'sales_logged_in' => true,
             ]);
 
+        // Catat login history (Non-blocking)
+        try {
+            $loginHistoryModel = new \App\Models\LoginHistoryModel();
+            $ipAddress = (string) $this->request->getIPAddress();
+            $userAgent = (string) $this->request->getUserAgent()->getAgentString();
+            $loginHistoryModel->recordLogin((int) $user['id_perusahaan'], $ipAddress, $userAgent);
+        } catch (\Throwable $e) {
+            log_message('error', 'Gagal mencatat login history: ' . $e->getMessage());
+        }
+
+            // Catat login history (Non-blocking)
+            try {
+                $loginHistoryModel = new \App\Models\LoginHistoryModel();
+                $ipAddress = (string) $this->request->getIPAddress();
+                $userAgent = (string) $this->request->getUserAgent()->getAgentString();
+                $loginHistoryModel->recordLogin((int) $salesUser['id_sales'], $ipAddress, $userAgent);
+            } catch (\Throwable $e) {
+                log_message('error', 'Gagal mencatat login history: ' . $e->getMessage());
+            }
+
             return redirect()->to(base_url('sales/dashboard'));
         }
 
@@ -144,6 +164,16 @@ class Auth extends BaseController
             'role'            => 'sales',
             'sales_logged_in' => true,
         ]);
+
+        // Catat login history (Non-blocking)
+        try {
+            $loginHistoryModel = new \App\Models\LoginHistoryModel();
+            $ipAddress = (string) $this->request->getIPAddress();
+            $userAgent = (string) $this->request->getUserAgent()->getAgentString();
+            $loginHistoryModel->recordLogin((int) $user['id_perusahaan'], $ipAddress, $userAgent);
+        } catch (\Throwable $e) {
+            log_message('error', 'Gagal mencatat login history: ' . $e->getMessage());
+        }
 
         // Redirect ke halaman dashboard sales
         return redirect()->to(base_url('sales/dashboard'));

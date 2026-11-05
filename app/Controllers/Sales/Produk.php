@@ -9,6 +9,9 @@ use App\Models\SupplierExportHistoryModel;
 use App\Models\ProductModel;
 use App\Models\ProdukSalesModel;
 use App\Models\SearchHistoryModel;
+use App\Models\DetailClickHistoryModel;
+use App\Models\CommissionClickHistoryModel;
+use App\Models\PdfHistoryModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -154,6 +157,28 @@ class Produk extends BaseController
             $detailData = SupplierProductModel::maskForExternal($detailData);
         }
 
+        // Catat riwayat klik detail (Non-blocking & deduplikasi)
+        try {
+            $now = time();
+            $lastProd = session()->get('sales_last_detail_prod');
+            $lastTime = (int) (session()->get('sales_last_detail_time') ?? 0);
+            $isDuplicate = ($lastProd === (int)$id && ($now - $lastTime < 10));
+
+            if (!$isDuplicate) {
+                $userId = (int) (session()->get('sales_id') ?? session()->get('user_id') ?? 0);
+                $detailClickModel = new DetailClickHistoryModel();
+                $prodName = $detailData['product']['nama_produk_id'] ?? ($detailData['product']['nama_produk'] ?? ('Produk #' . $id));
+                $detailClickModel->recordClick($userId, (int)$id, $prodName);
+
+                session()->set([
+                    'sales_last_detail_prod' => (int)$id,
+                    'sales_last_detail_time' => $now,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Gagal mencatat detail click: ' . $e->getMessage());
+        }
+
         $productTitle = $detailData['product']['nama_produk_id'] ?? 'Detail Produk';
 
         $data = array_merge([
@@ -211,6 +236,30 @@ class Produk extends BaseController
         } else {
             $kodeProduk = SupplierProductModel::getKodeProduk((int)$id);
             $filename = 'produk-' . strtolower($kodeProduk) . '-' . $slug . '-' . date('Ymd') . '.pdf';
+        }
+
+        // Catat riwayat cetak PDF detail (Non-blocking & deduplikasi)
+        try {
+            $now = time();
+            $lastPdfKey = session()->get('sales_last_pdf_detail_key');
+            $lastPdfTime = (int) (session()->get('sales_last_pdf_detail_time') ?? 0);
+            $currKey = $id . '_' . ($isPdfInternal ? 'internal' : 'eksternal');
+            $isDuplicate = ($lastPdfKey === $currKey && ($now - $lastPdfTime < 10));
+
+            if (!$isDuplicate) {
+                $userId = (int) (session()->get('sales_id') ?? session()->get('user_id') ?? 0);
+                $pdfHistoryModel = new PdfHistoryModel();
+                $pdfTypeLabel = $isPdfInternal ? 'PDF Detail (Internal)' : 'PDF Detail (Eksternal)';
+                $prodName = $detailData['product']['nama_produk_id'] ?? ($detailData['product']['nama_produk'] ?? ('Produk #' . $id));
+                $pdfHistoryModel->recordPdf($userId, $pdfTypeLabel, (int)$id, $prodName);
+
+                session()->set([
+                    'sales_last_pdf_detail_key' => $currKey,
+                    'sales_last_pdf_detail_time' => $now,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Gagal mencatat pdf detail history: ' . $e->getMessage());
         }
 
         $this->renderPdf([$detailData], $filename, $isPdfInternal);
@@ -304,6 +353,29 @@ class Produk extends BaseController
             $filename = 'katalog-produk-' . date('Ymd') . '.pdf';
         }
 
+        // Catat riwayat cetak PDF daftar katalog (Non-blocking & deduplikasi)
+        try {
+            $now = time();
+            $lastPdfKey = session()->get('sales_last_pdf_export_key');
+            $lastPdfTime = (int) (session()->get('sales_last_pdf_export_time') ?? 0);
+            $currKey = $isPdfInternal ? 'internal' : 'eksternal';
+            $isDuplicate = ($lastPdfKey === $currKey && ($now - $lastPdfTime < 10));
+
+            if (!$isDuplicate) {
+                $userId = (int) (session()->get('sales_id') ?? session()->get('user_id') ?? 0);
+                $pdfHistoryModel = new PdfHistoryModel();
+                $pdfTypeLabel = $isPdfInternal ? 'Export PDF Daftar (Internal)' : 'Export PDF Daftar (Eksternal)';
+                $pdfHistoryModel->recordPdf($userId, $pdfTypeLabel, null, null);
+
+                session()->set([
+                    'sales_last_pdf_export_key' => $currKey,
+                    'sales_last_pdf_export_time' => $now,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Gagal mencatat pdf export history: ' . $e->getMessage());
+        }
+
         $this->renderPdf($items, $filename, $isPdfInternal);
     }
 
@@ -313,6 +385,57 @@ class Produk extends BaseController
      *
      * @return array{account_tipe: string, is_internal: bool, is_preview: bool}
      */
+    /**
+     * Endpoint POST untuk mencatat klik Info Komisi (Aksi JS Modal)
+     */
+    public function recordCommissionClick()
+    {
+        $userId = (int) (session()->get('sales_id') ?? session()->get('user_id') ?? 0);
+        if ($userId <= 0) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Unauthorized'])->setStatusCode(401);
+        }
+
+        $productId = (int) ($this->request->getPost('product_id') ?? 0);
+        $productName = trim((string) ($this->request->getPost('product_name') ?? ''));
+
+        if ($productId <= 0) {
+            $raw = (string) $this->request->getBody();
+            if (!empty($raw)) {
+                $json = json_decode($raw, true);
+                $productId = (int) ($json['product_id'] ?? 0);
+                $productName = trim((string) ($json['product_name'] ?? ''));
+            }
+        }
+
+        if ($productId <= 0) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid product ID'])->setStatusCode(400);
+        }
+
+        // Cegah ganda akibat klik berulang (5 detik)
+        $now = time();
+        $lastClickProd = session()->get('sales_last_comm_click_prod');
+        $lastClickTime = (int) (session()->get('sales_last_comm_click_time') ?? 0);
+
+        if ($lastClickProd === $productId && ($now - $lastClickTime) < 5) {
+            return $this->response->setJSON(['status' => 'ignored', 'message' => 'Duplicate click ignored']);
+        }
+
+        try {
+            $commModel = new CommissionClickHistoryModel();
+            $commModel->recordClick($userId, $productId, $productName ?: ('Produk #' . $productId));
+
+            session()->set([
+                'sales_last_comm_click_prod' => $productId,
+                'sales_last_comm_click_time' => $now,
+            ]);
+
+            return $this->response->setJSON(['status' => 'success']);
+        } catch (\Throwable $e) {
+            log_message('error', 'Gagal mencatat commission click: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Failed to record'])->setStatusCode(500);
+        }
+    }
+
     private function resolveSalesMode(): array
     {
         $salesId = session()->get('sales_id') ?? session()->get('user_id');

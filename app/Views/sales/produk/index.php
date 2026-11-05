@@ -395,6 +395,7 @@ body {
                                     data-bs-toggle="modal"
                                     data-bs-target="#modalKomisi"
                                     onclick="if(window.openKomisiModal) window.openKomisiModal(this)"
+                                    data-id="<?= (int)$idProduk ?>"
                                     data-kode="<?= esc($kodeProduk, 'attr') ?>"
                                     data-nama="<?= esc($nama, 'attr') ?>"
                                     <?= $hasKomisi ? 'data-komisi="' . esc($formattedKomisi, 'attr') . '"' : '' ?>
@@ -564,6 +565,23 @@ document.addEventListener('DOMContentLoaded', function () {
         const rowFilled = document.getElementById('modalKomisiRowFilled');
         const rowEmpty = document.getElementById('modalKomisiRowEmpty');
         const valEl = document.getElementById('modalKomisiValue');
+
+        // Pencatatan klik Info Komisi di latar belakang (Non-blocking)
+        const prodId = button.getAttribute('data-id');
+        if (prodId) {
+            try {
+                const formData = new FormData();
+                formData.append('product_id', prodId);
+                formData.append('product_name', nama);
+                formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+                fetch('<?= base_url('sales/activity/commission-click') ?>', {
+                    method: 'POST',
+                    body: formData,
+                    keepalive: true
+                }).catch(function () {});
+            } catch (err) {}
+        }
 
         if (kodeEl) kodeEl.textContent = kode;
         if (namaEl) namaEl.textContent = nama;
