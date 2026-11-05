@@ -6,7 +6,6 @@ use App\Controllers\BaseController;
 use App\Models\ArtikelModel;
 use App\Models\ProductModel;
 use App\Models\SliderModel;
-use App\Models\SearchHistoryModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class DashboardController extends BaseController
@@ -26,12 +25,6 @@ class DashboardController extends BaseController
         // $data['aktivitasCount'] = $aktivitasModel->countAll();
         $data['sliderCount'] = $sliderModel->countAll();
         $data['artikelCount'] = $artikelModel->countAll();
-
-        $searchHistoryModel = new SearchHistoryModel();
-        $data['searchCount'] = $searchHistoryModel->getTotalSearchCount();
-        $data['topKeywords'] = $searchHistoryModel->getTopKeywords(10);
-        $data['recentSearches'] = $searchHistoryModel->getRecentSearches(10);
-
 
         return view('admin/dashboard/index', $data);
     }
