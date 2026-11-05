@@ -8,6 +8,7 @@ use App\Models\SupplierModel;
 use App\Models\SupplierExportHistoryModel;
 use App\Models\ProductModel;
 use App\Models\ProdukSalesModel;
+use App\Models\SearchHistoryModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -64,6 +65,32 @@ class Produk extends BaseController
         }
 
         $totalRows = count($allItems);
+
+        // Pencatatan Riwayat Pencarian Sales (Non-blocking)
+        if ($q !== '') {
+            try {
+                $qClean = strtolower(trim($q));
+                if ($qClean !== '') {
+                    $now = time();
+                    $lastKeyword = session()->get('sales_last_search_keyword');
+                    $lastTime    = (int) (session()->get('sales_last_search_time') ?? 0);
+                    $isDuplicate = ($lastKeyword === $qClean && ($now - $lastTime < 30 || $page > 1));
+
+                    if (!$isDuplicate) {
+                        $userId = (int) (session()->get('sales_id') ?? session()->get('user_id') ?? 0);
+                        $searchHistoryModel = new SearchHistoryModel();
+                        $searchHistoryModel->recordSearch($userId, $qClean, $totalRows);
+
+                        session()->set([
+                            'sales_last_search_keyword' => $qClean,
+                            'sales_last_search_time'    => $now,
+                        ]);
+                    }
+                }
+            } catch (\Throwable $e) {
+                log_message('error', 'Gagal mencatat riwayat pencarian sales: ' . $e->getMessage());
+            }
+        }
 
         // Potong data sesuai halaman aktif (16 per halaman)
         $products = array_slice($allItems, ($page - 1) * $perPage, $perPage);
