@@ -107,7 +107,7 @@ if (!function_exists('formatTglIndo')) {
                             <?php elseif ($trend['direction'] === 'down'): ?>
                                 <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 small"><?= $trend['label'] ?></span>
                             <?php else: ?>
-                                <span class="badge bg-light text-muted border px-2 py-1 small"><?= $trend['label'] ?></span>
+                                <span class="badge border px-2 py-1 small" style="color: #64748b !important; background-color: #f8fafc;"><?= $trend['label'] ?></span>
                             <?php endif; ?>
                         </div>
                         <div class="fs-4 fw-bold text-dark mb-1"><?= number_format($statCards['search']['count'], 0, ',', '.') ?></div>
@@ -130,7 +130,7 @@ if (!function_exists('formatTglIndo')) {
                             <?php elseif ($trend['direction'] === 'down'): ?>
                                 <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 small"><?= $trend['label'] ?></span>
                             <?php else: ?>
-                                <span class="badge bg-light text-muted border px-2 py-1 small"><?= $trend['label'] ?></span>
+                                <span class="badge border px-2 py-1 small" style="color: #64748b !important; background-color: #f8fafc;"><?= $trend['label'] ?></span>
                             <?php endif; ?>
                         </div>
                         <div class="fs-4 fw-bold text-dark mb-1"><?= number_format($statCards['login']['count'], 0, ',', '.') ?></div>
@@ -153,7 +153,7 @@ if (!function_exists('formatTglIndo')) {
                             <?php elseif ($trend['direction'] === 'down'): ?>
                                 <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 small"><?= $trend['label'] ?></span>
                             <?php else: ?>
-                                <span class="badge bg-light text-muted border px-2 py-1 small"><?= $trend['label'] ?></span>
+                                <span class="badge border px-2 py-1 small" style="color: #64748b !important; background-color: #f8fafc;"><?= $trend['label'] ?></span>
                             <?php endif; ?>
                         </div>
                         <div class="fs-4 fw-bold text-dark mb-1"><?= number_format($statCards['detail']['count'], 0, ',', '.') ?></div>
@@ -176,7 +176,7 @@ if (!function_exists('formatTglIndo')) {
                             <?php elseif ($trend['direction'] === 'down'): ?>
                                 <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 small"><?= $trend['label'] ?></span>
                             <?php else: ?>
-                                <span class="badge bg-light text-muted border px-2 py-1 small"><?= $trend['label'] ?></span>
+                                <span class="badge border px-2 py-1 small" style="color: #64748b !important; background-color: #f8fafc;"><?= $trend['label'] ?></span>
                             <?php endif; ?>
                         </div>
                         <div class="fs-4 fw-bold text-dark mb-1"><?= number_format($statCards['commission']['count'], 0, ',', '.') ?></div>
@@ -199,7 +199,7 @@ if (!function_exists('formatTglIndo')) {
                             <?php elseif ($trend['direction'] === 'down'): ?>
                                 <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 small"><?= $trend['label'] ?></span>
                             <?php else: ?>
-                                <span class="badge bg-light text-muted border px-2 py-1 small"><?= $trend['label'] ?></span>
+                                <span class="badge border px-2 py-1 small" style="color: #64748b !important; background-color: #f8fafc;"><?= $trend['label'] ?></span>
                             <?php endif; ?>
                         </div>
                         <div class="fs-4 fw-bold text-dark mb-1"><?= number_format($statCards['pdf']['count'], 0, ',', '.') ?></div>
@@ -218,7 +218,7 @@ if (!function_exists('formatTglIndo')) {
                         <h4 class="app-card-title mb-0 fw-bold" style="font-size: 1.05rem;">
                             <i class="fa-solid fa-chart-line text-primary me-2"></i>Grafik Aktivitas Pengguna
                         </h4>
-                        <span class="badge bg-light text-muted border">Harian</span>
+                        <span class="badge border" style="color: #64748b !important; background-color: #f8fafc; font-size: 11.5px;">Harian</span>
                     </div>
                     <div class="app-card-body p-3">
                         <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
@@ -235,7 +235,7 @@ if (!function_exists('formatTglIndo')) {
                         <h4 class="app-card-title mb-0 fw-bold" style="font-size: 1.05rem;">
                             <i class="fa-solid fa-chart-pie text-success me-2"></i>Ringkasan Aktivitas
                         </h4>
-                        <span class="badge bg-light text-muted border">Proporsi</span>
+                        <span class="badge border" style="color: #64748b !important; background-color: #f8fafc; font-size: 11.5px;">Proporsi</span>
                     </div>
                     <div class="app-card-body p-3 d-flex flex-column justify-content-between">
                         <div class="chart-container" style="position: relative; height: 210px; width: 100%;">
@@ -303,7 +303,7 @@ if (!function_exists('formatTglIndo')) {
                                             <tr>
                                                 <td class="cell text-center text-muted"><?= $no++ ?></td>
                                                 <td class="cell">
-                                                    <span class="badge bg-light text-dark border font-monospace" style="font-size: 13px;">
+                                                    <span class="badge border font-monospace" style="color: #1e293b !important; background-color: #f8fafc; font-size: 13px; font-weight: 600; padding: 5px 9px;">
                                                         <?= esc($row['keyword']) ?>
                                                     </span>
                                                 </td>
@@ -494,7 +494,7 @@ if (!function_exists('formatTglIndo')) {
                                             <tr>
                                                 <td class="cell text-center text-muted"><?= $no++ ?></td>
                                                 <td class="cell">
-                                                    <span class="badge bg-light text-dark border" style="font-size: 12px;">
+                                                    <span class="badge border" style="color: #1e293b !important; background-color: #f8fafc; font-size: 12px; font-weight: 600; padding: 5px 9px;">
                                                         <?= esc($row['pdf_type']) ?>
                                                     </span>
                                                 </td>
