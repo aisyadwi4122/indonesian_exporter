@@ -226,6 +226,19 @@ $routes->get('admin/akun_sales/edit/(:num)', function ($id) {
     return redirect()->to(base_url('admin/akun/edit/sales/' . $id));
 });
 
+// ADMIN LAPORAN AKTIVITAS
+$routes->get('admin/laporan-aktivitas/pencarian', 'admin\LaporanAktivitas::pencarian');
+$routes->get('admin/laporan-aktivitas/pencarian/export', 'admin\LaporanAktivitas::exportPencarian');
+$routes->get('admin/laporan-aktivitas/login-sales', 'admin\LaporanAktivitas::loginSales');
+$routes->get('admin/laporan-aktivitas/login-sales/export', 'admin\LaporanAktivitas::exportLoginSales');
+$routes->get('admin/laporan-aktivitas/detail', 'admin\LaporanAktivitas::detail');
+$routes->get('admin/laporan-aktivitas/detail/export', 'admin\LaporanAktivitas::exportDetail');
+$routes->get('admin/laporan-aktivitas/info-komisi', 'admin\LaporanAktivitas::infoKomisi');
+$routes->get('admin/laporan-aktivitas/info-komisi/export', 'admin\LaporanAktivitas::exportInfoKomisi');
+$routes->get('admin/laporan-aktivitas/pdf', 'admin\LaporanAktivitas::pdf');
+$routes->get('admin/laporan-aktivitas/pdf/export', 'admin\LaporanAktivitas::exportPdf');
+
+
 $routes->get('/', function () {
     return redirect()->to('/en/'); // Default redirect ke /en/home
 });

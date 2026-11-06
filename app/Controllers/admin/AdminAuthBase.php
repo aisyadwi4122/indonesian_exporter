@@ -28,6 +28,9 @@ class AdminAuthBase extends BaseController
         if (!session()->get('logged_in')) {
             return redirect()->to(base_url('login'));
         }
+        if (session()->get('role') === 'sales') {
+            return redirect()->to(base_url('login'))->with('error', 'Akses ditolak. Halaman hanya untuk admin.');
+        }
         return null;
     }
 }

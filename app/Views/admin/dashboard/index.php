@@ -66,7 +66,7 @@ if (!function_exists('formatTglIndo')) {
         <div class="row g-3 mb-4 align-items-center justify-content-between">
             <div class="col-12 col-md-auto">
                 <h2 class="h5 mb-1 fw-bold text-dark" style="font-size: 1.25rem;">
-                    Ringkasan aktivitas penggunaan website Indonesia Eksporter
+                    Ringkasan aktivitas penggunaan halaman Sales Internal dan Eksternal 
                 </h2>
                 <span class="text-muted small">
                     Aktivitas user Sales dalam periode: <strong class="text-dark"><?= date('d M Y', strtotime($startDate)) ?> – <?= date('d M Y', strtotime($endDate)) ?></strong>
@@ -280,7 +280,7 @@ if (!function_exists('formatTglIndo')) {
                         <h4 class="app-card-title mb-0 fw-bold" style="font-size: 1rem;">
                             <i class="fa-solid fa-magnifying-glass text-primary me-2"></i>History Pencarian
                         </h4>
-                        <a href="#" class="btn btn-sm btn-link text-decoration-none text-muted p-0" style="font-size: 13px;">Lihat Semua &rarr;</a>
+                        <a href="<?= base_url('admin/laporan-aktivitas/pencarian?start_date=' . urlencode($startDate) . '&end_date=' . urlencode($endDate)) ?>" class="btn btn-sm btn-link text-decoration-none text-muted p-0" style="font-size: 13px;">Lihat Semua &rarr;</a>
                     </div>
                     <div class="app-card-body p-3 pt-0">
                         <div class="table-responsive">
@@ -330,7 +330,7 @@ if (!function_exists('formatTglIndo')) {
                         <h4 class="app-card-title mb-0 fw-bold" style="font-size: 1rem;">
                             <i class="fa-solid fa-user-check text-success me-2"></i>History Login dari Sales
                         </h4>
-                        <a href="#" class="btn btn-sm btn-link text-decoration-none text-muted p-0" style="font-size: 13px;">Lihat Semua &rarr;</a>
+                        <a href="<?= base_url('admin/laporan-aktivitas/login-sales?start_date=' . urlencode($startDate) . '&end_date=' . urlencode($endDate)) ?>" class="btn btn-sm btn-link text-decoration-none text-muted p-0" style="font-size: 13px;">Lihat Semua &rarr;</a>
                     </div>
                     <div class="app-card-body p-3 pt-0">
                         <div class="table-responsive">
@@ -379,7 +379,7 @@ if (!function_exists('formatTglIndo')) {
                         <h4 class="app-card-title mb-0 fw-bold" style="font-size: 1rem;">
                             <i class="fa-regular fa-file-lines text-purple me-2" style="color: #9333ea;"></i>History Klik Detail
                         </h4>
-                        <a href="#" class="btn btn-sm btn-link text-decoration-none text-muted p-0" style="font-size: 13px;">Lihat Semua &rarr;</a>
+                        <a href="<?= base_url('admin/laporan-aktivitas/detail?start_date=' . urlencode($startDate) . '&end_date=' . urlencode($endDate)) ?>" class="btn btn-sm btn-link text-decoration-none text-muted p-0" style="font-size: 13px;">Lihat Semua &rarr;</a>
                     </div>
                     <div class="app-card-body p-3 pt-0">
                         <div class="table-responsive">
@@ -425,7 +425,7 @@ if (!function_exists('formatTglIndo')) {
                         <h4 class="app-card-title mb-0 fw-bold" style="font-size: 1rem;">
                             <i class="fa-solid fa-circle-info text-warning me-2" style="color: #ea580c;"></i>History Klik Info Komisi
                         </h4>
-                        <a href="#" class="btn btn-sm btn-link text-decoration-none text-muted p-0" style="font-size: 13px;">Lihat Semua &rarr;</a>
+                        <a href="<?= base_url('admin/laporan-aktivitas/info-komisi?start_date=' . urlencode($startDate) . '&end_date=' . urlencode($endDate)) ?>" class="btn btn-sm btn-link text-decoration-none text-muted p-0" style="font-size: 13px;">Lihat Semua &rarr;</a>
                     </div>
                     <div class="app-card-body p-3 pt-0">
                         <div class="table-responsive">
@@ -471,7 +471,7 @@ if (!function_exists('formatTglIndo')) {
                         <h4 class="app-card-title mb-0 fw-bold" style="font-size: 1rem;">
                             <i class="fa-solid fa-file-pdf text-teal me-2" style="color: #0d9488;"></i>History PDF
                         </h4>
-                        <a href="#" class="btn btn-sm btn-link text-decoration-none text-muted p-0" style="font-size: 13px;">Lihat Semua &rarr;</a>
+                        <a href="<?= base_url('admin/laporan-aktivitas/pdf?start_date=' . urlencode($startDate) . '&end_date=' . urlencode($endDate)) ?>" class="btn btn-sm btn-link text-decoration-none text-muted p-0" style="font-size: 13px;">Lihat Semua &rarr;</a>
                     </div>
                     <div class="app-card-body p-3 pt-0">
                         <div class="table-responsive">

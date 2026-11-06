@@ -11,7 +11,7 @@
 
                 <li class="nav-item">
                     <!--//Bootstrap Icons: https://icons.getbootstrap.com/ -->
-                    <a class="nav-link" href="<?= base_url('admin/dashboard') ?>">
+                    <a class="nav-link <?= (current_url() == base_url('admin/dashboard') ? 'active' : '') ?>" href="<?= base_url('admin/dashboard') ?>">
                         <span class="nav-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-speedometer2" viewBox="0 0 16 16">
                                 <path d="M8 4a.5.5 0 0 1 .5.5V6a.5.5 0 0 1-1 0V4.5A.5.5 0 0 1 8 4zM3.732 5.732a.5.5 0 0 1 .707 0l.915.914a.5.5 0 1 1-.708.708l-.914-.915a.5.5 0 0 1 0-.707zM2 10a.5.5 0 0 1 .5-.5h1.586a.5.5 0 0 1 0 1H2.5A.5.5 0 0 1 2 10zm9.5 0a.5.5 0 0 1 .5-.5h1.5a.5.5 0 0 1 0 1H12a.5.5 0 0 1-.5-.5zm.754-4.246a.389.389 0 0 0-.527-.02L7.547 9.31a.91.91 0 1 0 1.302 1.258l3.434-4.297a.389.389 0 0 0-.029-.518z" />
@@ -20,6 +20,35 @@
                         </span>
                         <span class="nav-link-text">Dashboard</span>
                     </a><!--//nav-link-->
+                </li><!--//nav-item-->
+
+                <?php
+                $currentUri = uri_string();
+                $isLaporanAktivitas = (strpos($currentUri, 'admin/laporan-aktivitas') !== false);
+                ?>
+                <li class="nav-item has-submenu">
+                    <a class="nav-link submenu-toggle <?= $isLaporanAktivitas ? 'active' : 'collapsed' ?>" href="#" data-bs-toggle="collapse" data-bs-target="#submenu-laporan-aktivitas" aria-expanded="<?= $isLaporanAktivitas ? 'true' : 'false' ?>" aria-controls="submenu-laporan-aktivitas">
+                        <span class="nav-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart-line" viewBox="0 0 16 16">
+                                <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1V2zm1 12h2V2h-2v12zm-3 0V7H7v7h2zm-5 0v-3H2v3h2z"/>
+                            </svg>
+                        </span>
+                        <span class="nav-link-text">Laporan Aktivitas</span>
+                        <span class="submenu-arrow">
+                            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chevron-down" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </span>
+                    </a>
+                    <div id="submenu-laporan-aktivitas" class="collapse submenu submenu-laporan-aktivitas <?= $isLaporanAktivitas ? 'show' : '' ?>" data-bs-parent="#menu-accordion">
+                        <ul class="submenu-list list-unstyled">
+                            <li class="submenu-item"><a class="submenu-link <?= (strpos($currentUri, 'admin/laporan-aktivitas/pencarian') !== false) ? 'active' : '' ?>" href="<?= base_url('admin/laporan-aktivitas/pencarian') ?>">History Pencarian</a></li>
+                            <li class="submenu-item"><a class="submenu-link <?= (strpos($currentUri, 'admin/laporan-aktivitas/login-sales') !== false) ? 'active' : '' ?>" href="<?= base_url('admin/laporan-aktivitas/login-sales') ?>">History Login Sales</a></li>
+                            <li class="submenu-item"><a class="submenu-link <?= (strpos($currentUri, 'admin/laporan-aktivitas/detail') !== false) ? 'active' : '' ?>" href="<?= base_url('admin/laporan-aktivitas/detail') ?>">History Detail</a></li>
+                            <li class="submenu-item"><a class="submenu-link <?= (strpos($currentUri, 'admin/laporan-aktivitas/info-komisi') !== false) ? 'active' : '' ?>" href="<?= base_url('admin/laporan-aktivitas/info-komisi') ?>">History Info Komisi</a></li>
+                            <li class="submenu-item"><a class="submenu-link <?= (strpos($currentUri, 'admin/laporan-aktivitas/pdf') !== false) ? 'active' : '' ?>" href="<?= base_url('admin/laporan-aktivitas/pdf') ?>">History PDF</a></li>
+                        </ul>
+                    </div>
                 </li><!--//nav-item-->
 
                 <li class="nav-item">
