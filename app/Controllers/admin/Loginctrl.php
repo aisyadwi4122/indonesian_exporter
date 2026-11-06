@@ -46,6 +46,7 @@ class Loginctrl extends BaseController
                     'favicon_website' => $dataUser->favicon_website,
                     'logo_perusahaan' => $dataUser->logo_perusahaan,
                     'foto_utama' => $dataUser->foto_utama,
+                    'role' => 'admin',
                     'logged_in' => TRUE
                 ]);
                 return redirect()->to(base_url('admin/dashboard'));

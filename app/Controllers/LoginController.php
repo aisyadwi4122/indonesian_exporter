@@ -12,6 +12,9 @@ class LoginController extends BaseController
     {
         // Pengecekan jika pengguna sudah login
         if (session()->get('logged_in')) {
+            if (session()->get('role') === 'sales') {
+                return redirect()->to(base_url('sales/dashboard'));
+            }
             return redirect()->to(base_url('admin/dashboard')); // Ubah 'vw_home' sesuai dengan halaman yang diinginkan setelah login
         }
 

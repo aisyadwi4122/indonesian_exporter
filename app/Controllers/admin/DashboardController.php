@@ -17,6 +17,9 @@ class DashboardController extends BaseController
         if (!session()->get('logged_in')) {
             return redirect()->to(base_url('login'));
         }
+        if (session()->get('role') === 'sales') {
+            return redirect()->to(base_url('sales/dashboard'))->with('error', 'Akses ditolak. Halaman hanya untuk admin.');
+        }
 
         // 1. Data 3 Kartu Lama (Tetap Dipertahankan)
         $produkModel  = new ProductModel();
