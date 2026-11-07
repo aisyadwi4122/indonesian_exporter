@@ -14,12 +14,23 @@
  * - $productList (array, optional)
  */
 
-$showMode    = $showMode ?? false;
-$showSales   = $showSales ?? false;
-$showProduct = $showProduct ?? false;
-$showJenis   = $showJenis ?? false;
-$salesList   = $salesList ?? [];
-$productList = $productList ?? [];
+$exportUrl    = $exportUrl ?? (current_url() . '/export');
+$pageTitle    = $pageTitle ?? '';
+$pageSubtitle = $pageSubtitle ?? '';
+$showMode     = $showMode ?? false;
+$showSales    = $showSales ?? false;
+$showProduct  = $showProduct ?? false;
+$showJenis    = $showJenis ?? false;
+$salesList    = $salesList ?? [];
+$productList  = $productList ?? [];
+$filters      = $filters ?? [
+    'start_date' => date('Y-m-01'),
+    'end_date'   => date('Y-m-t'),
+    'mode'       => '',
+    'sales_id'   => null,
+    'product_id' => null,
+    'jenis'      => '',
+];
 
 // Hitung query export (mempertahankan semua filter tanpa parameter page)
 $exportParams = [
@@ -154,3 +165,4 @@ $hasActiveFilter = (!empty($filters['mode']) && $filters['mode'] !== 'semua')
         </div>
     </div>
 </div>
+

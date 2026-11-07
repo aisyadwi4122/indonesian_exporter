@@ -5,11 +5,11 @@
     <div class="container-xl">
 
         <!-- Filter Bar & Header -->
-        <?= $this->include('admin/laporan_aktivitas/_filter_bar', [
+        <?= view('admin/laporan_aktivitas/_filter_bar', [
             'pageTitle'    => $pageTitle,
             'pageSubtitle' => $pageSubtitle,
             'filters'      => $filters,
-            'exportUrl'    => base_url('admin/laporan-aktivitas/produk-terlaris/export'),
+            'exportUrl'    => $exportUrl ?? base_url('admin/laporan-aktivitas/produk-terlaris/export'),
             'showMode'     => true,
             'showSales'    => true,
             'salesList'    => $salesList,
@@ -127,3 +127,4 @@
 </div>
 
 <?= $this->endSection(); ?>
+

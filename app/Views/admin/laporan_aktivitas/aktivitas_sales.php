@@ -5,11 +5,11 @@
     <div class="container-xl">
 
         <!-- Filter Bar & Header -->
-        <?= $this->include('admin/laporan_aktivitas/_filter_bar', [
+        <?= view('admin/laporan_aktivitas/_filter_bar', [
             'pageTitle'    => $pageTitle,
             'pageSubtitle' => $pageSubtitle,
             'filters'      => $filters,
-            'exportUrl'    => base_url('admin/laporan-aktivitas/aktivitas-sales/export'),
+            'exportUrl'    => $exportUrl ?? base_url('admin/laporan-aktivitas/aktivitas-sales/export'),
             'showMode'     => true,
             'showSales'    => true,
             'showProduct'  => true,
@@ -169,3 +169,4 @@
 </div>
 
 <?= $this->endSection(); ?>
+
