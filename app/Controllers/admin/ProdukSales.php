@@ -31,6 +31,7 @@ class ProdukSales extends AdminAuthBase
         }
 
         $searchQuery = trim((string)($this->request->getGet('q') ?? ''));
+        $supplierId  = (int)($this->request->getGet('supplier_id') ?? 0);
         $page = (int)($this->request->getGet('page') ?? 1);
         if ($page < 1) {
             $page = 1;
@@ -38,7 +39,15 @@ class ProdukSales extends AdminAuthBase
         $perPage = 10;
 
         // Ambil data produk terpadu 127 produk (10 Supplier IE di awal + 117 ECP)
-        $allItems  = $this->productModel->getUnifiedProducts($searchQuery);
+        $allItems = $this->productModel->getUnifiedProducts($searchQuery);
+
+        // Filter berdasarkan supplier jika dipilih
+        if ($supplierId > 0) {
+            $allItems = array_values(array_filter($allItems, function ($item) use ($supplierId) {
+                return isset($item['id_supplier']) && (int)$item['id_supplier'] === $supplierId;
+            }));
+        }
+
         $totalRows = count($allItems);
 
         // Potong data sesuai halaman aktif
@@ -48,10 +57,28 @@ class ProdukSales extends AdminAuthBase
         $pager = \Config\Services::pager();
         $pager->store('default', $page, $perPage, $totalRows);
 
+        // Ambil daftar supplier untuk dropdown filter
+        $suppliers = $this->supplierModel->orderBy('nama_perusahaan', 'ASC')->findAll();
+
+        // Hitung jumlah produk per supplier di tb_produk_supplier
+        $db = \Config\Database::connect();
+        $countRows = $db->table('tb_produk_supplier')
+            ->select('id_supplier, COUNT(*) as total')
+            ->groupBy('id_supplier')
+            ->get()
+            ->getResultArray();
+        $productCounts = [];
+        foreach ($countRows as $cr) {
+            $productCounts[(int)$cr['id_supplier']] = (int)$cr['total'];
+        }
+
         return view('admin/produk_sales/index', [
-            'products'     => $products,
-            'pager'        => $pager,
-            'search_query' => $searchQuery,
+            'products'             => $products,
+            'pager'                => $pager,
+            'search_query'         => $searchQuery,
+            'selected_supplier_id' => $supplierId,
+            'suppliers'            => $suppliers,
+            'product_counts'       => $productCounts,
         ]);
     }
 
@@ -64,13 +91,15 @@ class ProdukSales extends AdminAuthBase
             return $redirect;
         }
 
-        $suppliers     = $this->supplierModel->orderBy('nama_perusahaan', 'ASC')->findAll();
-        $suggestedCode = $this->productModel->getNextSuggestedCode();
+        $suppliers          = $this->supplierModel->orderBy('nama_perusahaan', 'ASC')->findAll();
+        $suggestedCode      = $this->productModel->getNextSuggestedCode();
+        $selectedSupplierId = (int)($this->request->getGet('id_supplier') ?? 0);
 
         return view('admin/produk_sales/tambah', [
-            'suppliers'      => $suppliers,
-            'suggested_code' => $suggestedCode,
-            'validation'     => \Config\Services::validation(),
+            'suppliers'            => $suppliers,
+            'suggested_code'       => $suggestedCode,
+            'selected_supplier_id' => $selectedSupplierId,
+            'validation'           => \Config\Services::validation(),
         ]);
     }
 
@@ -86,6 +115,7 @@ class ProdukSales extends AdminAuthBase
         $rules = [
             'nama_produk'        => 'required|min_length[3]|max_length[255]',
             'id_supplier'        => 'required|is_natural_no_zero',
+            'deskripsi'          => 'permit_empty',
             'lokasi_barang'      => 'permit_empty|max_length[255]',
             'kapasitas_produksi' => 'permit_empty|max_length[255]',
             'moq'                => 'permit_empty|max_length[255]',
@@ -138,6 +168,7 @@ class ProdukSales extends AdminAuthBase
         $dataInsert = [
             'id_supplier'        => (int)$this->request->getPost('id_supplier'),
             'nama_produk'        => trim((string)$this->request->getPost('nama_produk')),
+            'deskripsi'          => trim((string)$this->request->getPost('deskripsi')),
             'lokasi_barang'      => trim((string)$this->request->getPost('lokasi_barang')),
             'spesifikasi'        => trim((string)$this->request->getPost('spesifikasi')),
             'kapasitas_produksi' => trim((string)$this->request->getPost('kapasitas_produksi')),
@@ -192,6 +223,7 @@ class ProdukSales extends AdminAuthBase
                 'id_produk_supplier' => $id,
                 'id_supplier'        => null,
                 'nama_produk'        => $namaProduk,
+                'deskripsi'          => $ecp['produk_dipasarkan'] ?: '',
                 'nama_perusahaan'    => $ecp['nama_perusahaan'] ?: '',
                 'lokasi_barang'      => $lokasi,
                 'spesifikasi'        => $spesifikasi,
@@ -300,6 +332,7 @@ class ProdukSales extends AdminAuthBase
         $rules = [
             'nama_produk'        => 'required|min_length[3]|max_length[255]',
             'id_supplier'        => 'required|is_natural_no_zero',
+            'deskripsi'          => 'permit_empty',
             'lokasi_barang'      => 'permit_empty|max_length[255]',
             'kapasitas_produksi' => 'permit_empty|max_length[255]',
             'moq'                => 'permit_empty|max_length[255]',
@@ -373,6 +406,7 @@ class ProdukSales extends AdminAuthBase
         $dataUpdate = [
             'id_supplier'        => (int)$this->request->getPost('id_supplier'),
             'nama_produk'        => trim((string)$this->request->getPost('nama_produk')),
+            'deskripsi'          => trim((string)$this->request->getPost('deskripsi')),
             'lokasi_barang'      => trim((string)$this->request->getPost('lokasi_barang')),
             'spesifikasi'        => trim((string)$this->request->getPost('spesifikasi')),
             'kapasitas_produksi' => trim((string)$this->request->getPost('kapasitas_produksi')),

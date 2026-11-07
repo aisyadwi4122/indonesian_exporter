@@ -13,6 +13,8 @@ use Psr\Log\LoggerInterface;
  */
 class AdminAuthBase extends BaseController
 {
+    protected $helpers = ['url', 'form'];
+
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
         parent::initController($request, $response, $logger);

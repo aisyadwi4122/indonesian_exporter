@@ -296,7 +296,8 @@
         </div>
     </div>
 
-    <!-- BAGIAN 3: DATA HISTORY EKSPOR -->
+    <?php if (!empty($is_internal)): ?>
+    <!-- BAGIAN 3: DATA HISTORY EKSPOR (HANYA INTERNAL) -->
     <div class="section-box">
         <div class="section-header">
             3. Data History Ekspor 
@@ -343,6 +344,7 @@
             <?php endif; ?>
         </div>
     </div>
+    <?php endif; ?>
 
 </body>
 </html>

@@ -15,6 +15,7 @@ class SupplierProductModel extends Model
     protected $allowedFields    = [
         'id_supplier',
         'nama_produk',
+        'deskripsi',
         'spesifikasi',
         'kapasitas_produksi',
         'legalitas',
@@ -301,6 +302,9 @@ class SupplierProductModel extends Model
      */
     public static function getKodeProduk(int $id): string
     {
+        if ($id > 10000) {
+            return 'ECP-' . str_pad((string)($id - 10000), 4, '0', STR_PAD_LEFT);
+        }
         return 'IE-' . str_pad((string)$id, 4, '0', STR_PAD_LEFT);
     }
 
@@ -315,7 +319,7 @@ class SupplierProductModel extends Model
      * - Produk: legalitas, komisi.
      *
      * Menambahkan:
-     * - kode_produk = 'IE-' . str_pad(id_produk_supplier, 4, '0', STR_PAD_LEFT)
+     * - kode_produk = 'IE-' . str_pad(id_produk_supplier, 4, '0', STR_PAD_LEFT) atau 'ECP-xxxx'
      */
     public static function maskForExternal(array $data): array
     {
@@ -337,7 +341,7 @@ class SupplierProductModel extends Model
             ?? ($data['id_produk'] 
             ?? ($data['id'] ?? 0))))
         );
-        $kodeProduk = self::getKodeProduk($prodId);
+        $kodeProduk = !empty($data['kode_produk']) ? $data['kode_produk'] : self::getKodeProduk($prodId);
         $data['kode_produk'] = $kodeProduk;
 
         $companyName = (string)(
@@ -416,7 +420,12 @@ class SupplierProductModel extends Model
                 $data['supplier']['legalitas'],
                 $data['supplier']['link_dokumen_legalitas'],
                 $data['supplier']['link_dokumen_sertifikat'],
-                $data['supplier']['link_foto_usaha']
+                $data['supplier']['link_foto_usaha'],
+                $data['supplier']['ringkasan_ekspor_tanggal'],
+                $data['supplier']['ringkasan_ekspor_produk'],
+                $data['supplier']['ringkasan_ekspor_kapasitas'],
+                $data['supplier']['ringkasan_ekspor_negara'],
+                $data['supplier']['ringkasan_ekspor_nilai']
             );
 
             // Bersihkan sisa teks bebas di profil usaha jika memuat nama perusahaan/merek
@@ -439,31 +448,10 @@ class SupplierProductModel extends Model
             }
         }
 
-        // Sanitasi teks riwayat ekspor agar tidak membocorkan nama perusahaan / nama kunci
-        if (!empty($censorPatterns) && isset($data['histories']) && is_array($data['histories'])) {
-            foreach ($data['histories'] as $hIdx => $h) {
-                if (is_array($h)) {
-                    foreach ($h as $fld => $val) {
-                        if (is_string($val) && $val !== '') {
-                            foreach ($censorPatterns as $pat) {
-                                if (stripos($val, $pat) !== false) {
-                                    $val = preg_replace('/\b' . preg_quote($pat, '/') . '\b/i', '', $val);
-                                    $val = trim(preg_replace('/\s+/', ' ', str_replace(['()', '( )', '[]'], '', $val)));
-                                    $val = trim($val, " -:,\t\n\r\0\x0B");
-                                    if (str_starts_with($val, '(') && str_ends_with($val, ')')) {
-                                        $val = trim(substr($val, 1, -1));
-                                    }
-                                    if ($val === '') {
-                                        $val = $kodeProduk;
-                                    }
-                                }
-                            }
-                            $data['histories'][$hIdx][$fld] = $val;
-                        }
-                    }
-                }
-            }
-        }
+        // Hapus total data history ekspor untuk mode eksternal (Sales Eksternal dilarang melihat riwayat ekspor)
+        $data['histories']  = [];
+        $data['years']      = [];
+        $data['totalNilai'] = 0.0;
 
         // Bersihkan jika nama_produk_en ada di root dan membocorkan nama perusahaan
         if ($companyName !== '' && isset($data['nama_produk_en']) && trim((string)$data['nama_produk_en']) === trim($companyName)) {
@@ -495,10 +483,47 @@ class SupplierProductModel extends Model
             $data['link_dokumen_legalitas'],
             $data['link_dokumen_sertifikat'],
             $data['link_foto_usaha'],
-            $data['komisi']
+            $data['komisi'],
+            $data['ringkasan_ekspor_tanggal'],
+            $data['ringkasan_ekspor_produk'],
+            $data['ringkasan_ekspor_kapasitas'],
+            $data['ringkasan_ekspor_negara'],
+            $data['ringkasan_ekspor_nilai']
         );
 
         return $data;
+    }
+
+    /**
+     * Mengambil query builder untuk produk milik supplier tertentu dengan filter kata kunci
+     *
+     * @param int $supplierId
+     * @param string $keyword
+     * @return \CodeIgniter\Database\BaseBuilder|\App\Models\SupplierProductModel
+     */
+    public function getSupplierProducts(int $supplierId, string $keyword = '')
+    {
+        $builder = $this->where('id_supplier', $supplierId);
+
+        if ($keyword !== '') {
+            $builder->groupStart()
+                ->like('nama_produk', $keyword)
+                ->orLike('lokasi_barang', $keyword)
+                ->orLike('spesifikasi', $keyword)
+                ->orLike('kapasitas_produksi', $keyword)
+                ->orLike('moq', $keyword)
+                ->orLike('harga_exw', $keyword);
+
+            if (preg_match('/^IE-0*([0-9]+)$/i', $keyword, $m)) {
+                $builder->orWhere('id_produk_supplier', (int)$m[1]);
+            } elseif (is_numeric($keyword)) {
+                $builder->orWhere('id_produk_supplier', (int)$keyword);
+            }
+
+            $builder->groupEnd();
+        }
+
+        return $builder->orderBy('id_produk_supplier', 'DESC');
     }
 }
 

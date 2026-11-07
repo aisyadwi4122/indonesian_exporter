@@ -300,9 +300,9 @@ body {
                 $idProduk = $p['id_produk_supplier'] ?? ($p['id_produk'] ?? 0);
                 $kodeProduk = $p['kode_produk'] ?? ('IE-' . str_pad((string)$idProduk, 4, '0', STR_PAD_LEFT));
                 $nama = !empty($p['nama_produk']) ? $p['nama_produk'] : (!empty($p['nama_produk_id']) ? $p['nama_produk_id'] : ($p['nama_produk_en'] ?? 'Produk'));
-                $descRaw = !empty($p['spesifikasi']) ? $p['spesifikasi'] : (!empty($p['deskripsi_produk_id']) ? $p['deskripsi_produk_id'] : ($p['deskripsi_produk_en'] ?? ''));
+                $descRaw = !empty($p['deskripsi']) ? $p['deskripsi'] : (!empty($p['spesifikasi']) ? $p['spesifikasi'] : (!empty($p['deskripsi_produk_id']) ? $p['deskripsi_produk_id'] : ($p['deskripsi_produk_en'] ?? '')));
                 $descClean = trim(strip_tags($descRaw));
-                $descShort = mb_strlen($descClean) > 110 ? mb_substr($descClean, 0, 110) . '...' : $descClean;
+                $descShort = mb_strlen($descClean) > 100 ? mb_substr($descClean, 0, 100) . '...' : $descClean;
                 $supplier = $is_internal ? (!empty($p['nama_perusahaan']) ? $p['nama_perusahaan'] : '') : '';
                 $lokasi = !empty($p['lokasi_barang']) ? $p['lokasi_barang'] : (!empty($p['domisili_usaha']) ? $p['domisili_usaha'] : '');
 

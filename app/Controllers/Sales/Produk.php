@@ -527,7 +527,8 @@ class Produk extends BaseController
                     'nama_kategori_id'    => !empty($ecp['kategori_produk']) ? $ecp['kategori_produk'] : 'Produk Ekspor',
                     'nama_kategori_en'    => !empty($ecp['kategori_produk']) ? $ecp['kategori_produk'] : 'Export Product',
                     'foto_produk'         => $defaultImg,
-                    'deskripsi_produk_id' => $spesifikasi,
+                    'deskripsi'           => !empty($ecp['produk_dipasarkan']) ? $ecp['produk_dipasarkan'] : '',
+                    'deskripsi_produk_id' => !empty($ecp['produk_dipasarkan']) ? $ecp['produk_dipasarkan'] : ($spesifikasi ?: '-'),
                     'deskripsi_produk_en' => $spesifikasi,
                 ];
 
@@ -658,8 +659,9 @@ class Produk extends BaseController
                 'nama_kategori_id'    => 'Produk Supplier',
                 'nama_kategori_en'    => 'Supplier Product',
                 'foto_produk'         => $foto,
-                'deskripsi_produk_id' => $produkSupplier['spesifikasi'] ?? '-',
-                'deskripsi_produk_en' => $produkSupplier['spesifikasi'] ?? '-',
+                'deskripsi'           => $produkSupplier['deskripsi'] ?? '',
+                'deskripsi_produk_id' => !empty($produkSupplier['deskripsi']) ? $produkSupplier['deskripsi'] : ($produkSupplier['spesifikasi'] ?? '-'),
+                'deskripsi_produk_en' => !empty($produkSupplier['deskripsi']) ? $produkSupplier['deskripsi'] : ($produkSupplier['spesifikasi'] ?? '-'),
             ];
         } else {
             // Fallback jika id berasal dari tb_produk
@@ -1074,6 +1076,11 @@ class Produk extends BaseController
 
         // Hapus atribut style, class, dan on*
         $cleaned = preg_replace('/\s*(?:style|class|on[a-z]+)\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $cleaned);
+
+        // Jika teks biasa tanpa tag p atau br, pertahankan baris baru dengan nl2br
+        if (strpos($cleaned, '<p') === false && strpos($cleaned, '<br') === false) {
+            $cleaned = nl2br(htmlspecialchars($cleaned, ENT_QUOTES, 'UTF-8'));
+        }
 
         return trim($cleaned ?? '');
     }

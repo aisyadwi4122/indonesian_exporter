@@ -65,6 +65,7 @@
             color: #334155;
             margin-bottom: 8px;
             text-align: justify;
+            word-wrap: break-word;
         }
         .desc-box table {
             width: 100%;

@@ -32,11 +32,34 @@
             </div>
         <?php endif; ?>
 
-        <!-- Search Bar -->
-        <div class="row g-2 mb-3 align-items-center justify-content-end">
-            <div class="col-12 col-md-5 col-lg-4">
+        <!-- Filter & Search Bar -->
+        <div class="row g-2 mb-3 align-items-center justify-content-between">
+            <div class="col-12 col-md-6 col-lg-5">
+                <form action="<?= base_url('admin/produk_sales/index') ?>" method="GET" class="d-flex align-items-center gap-2">
+                    <?php if (!empty($search_query)) : ?>
+                        <input type="hidden" name="q" value="<?= esc($search_query) ?>">
+                    <?php endif; ?>
+                    <label for="filterSupplier" class="form-label mb-0 text-muted small text-nowrap fw-semibold">
+                        <i class="fa-solid fa-filter me-1"></i>Perusahaan:
+                    </label>
+                    <select name="supplier_id" id="filterSupplier" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="0">-- Semua Perusahaan --</option>
+                        <?php if (!empty($suppliers)) : ?>
+                            <?php foreach ($suppliers as $s) : ?>
+                                <option value="<?= $s['id_supplier'] ?>" <?= (!empty($selected_supplier_id) && (int)$selected_supplier_id === (int)$s['id_supplier']) ? 'selected' : '' ?>>
+                                    <?= esc($s['nama_perusahaan']) ?> (<?= $product_counts[(int)$s['id_supplier']] ?? 0 ?> produk)
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </form>
+            </div>
+            <div class="col-12 col-md-6 col-lg-5 text-end">
                 <form action="<?= base_url('admin/produk_sales/index') ?>" method="GET">
-                    <div class="input-group">
+                    <?php if (!empty($selected_supplier_id)) : ?>
+                        <input type="hidden" name="supplier_id" value="<?= esc($selected_supplier_id) ?>">
+                    <?php endif; ?>
+                    <div class="input-group input-group-sm">
                         <input type="text" 
                                name="q" 
                                class="form-control" 
@@ -45,8 +68,8 @@
                         <button class="btn btn-primary text-white" type="submit" title="Cari">
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </button>
-                        <?php if ($search_query !== '') : ?>
-                            <a href="<?= base_url('admin/produk_sales/index') ?>" class="btn btn-outline-secondary" title="Reset Pencarian">
+                        <?php if ($search_query !== '' || !empty($selected_supplier_id)) : ?>
+                            <a href="<?= base_url('admin/produk_sales/index') ?>" class="btn btn-outline-secondary" title="Reset Filter & Pencarian">
                                 <i class="fa-solid fa-rotate-left"></i>
                             </a>
                         <?php endif; ?>
@@ -101,7 +124,14 @@
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <span class="fw-semibold"><?= esc($p['nama_perusahaan'] ?? '-') ?></span>
+                                            <div class="d-flex align-items-center gap-1 flex-wrap">
+                                                <span class="fw-semibold"><?= esc($p['nama_perusahaan'] ?? '-') ?></span>
+                                                <?php if (!empty($p['id_supplier']) && isset($product_counts[(int)$p['id_supplier']])) : ?>
+                                                    <span class="badge bg-light text-dark border" style="font-size: 11px;" title="Jumlah produk perusahaan ini">
+                                                        <?= $product_counts[(int)$p['id_supplier']] ?> produk
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
                                             <?php if (!empty($p['domisili_usaha'])) : ?>
                                                 <small class="text-muted d-block"><?= esc($p['domisili_usaha']) ?></small>
                                             <?php endif; ?>
@@ -123,6 +153,13 @@
                                         </td>
                                         <td class="text-center">
                                             <div class="btn-group btn-group-sm" role="group">
+                                                <?php if (!empty($p['id_supplier'])) : ?>
+                                                    <a href="<?= base_url('admin/produk_sales/tambah?id_supplier=' . (int)$p['id_supplier']) ?>" 
+                                                       class="btn btn-outline-success" 
+                                                       title="Tambah Produk untuk Perusahaan ini">
+                                                        <i class="fa-solid fa-plus"></i>
+                                                    </a>
+                                                <?php endif; ?>
                                                 <a href="<?= base_url('admin/produk_sales/edit/' . $id) ?>" 
                                                    class="btn btn-outline-primary" 
                                                    title="Ubah Produk">

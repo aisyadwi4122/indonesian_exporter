@@ -700,32 +700,30 @@ if ($is_internal && $rawIg !== '') {
                         <div class="col-sm-8 value-col"><?= esc($kategori) ?></div>
                     </div>
 
-                    <!-- Deskripsi Indonesia -->
+                    <!-- Deskripsi Produk -->
                     <div class="mt-3 pt-3 border-top">
                         <label class="fw-semibold text-dark small mb-2 d-block">
-                            <i class="fa-solid fa-file-lines me-1 text-secondary"></i>Deskripsi Produk (Bahasa Indonesia)
+                            <i class="fa-solid fa-file-lines me-1 text-secondary"></i>Deskripsi Produk
                         </label>
                         <?php
-                            $allowedTags = '<p><br><ul><ol><li><strong><b><em><i><a><h3><h4><table><thead><tbody><tr><th><td>';
-                            $descIdClean = !empty($product['deskripsi_produk_id']) ? strip_tags($product['deskripsi_produk_id'], $allowedTags) : '';
+                            $prodDesc = !empty($product['deskripsi']) ? $product['deskripsi'] : (!empty($product['deskripsi_produk_id']) && $product['deskripsi_produk_id'] !== '-' ? $product['deskripsi_produk_id'] : '');
                         ?>
-                        <div class="desc-content">
-                            <?= $descIdClean !== '' ? $descIdClean : '<span class="text-muted fst-italic">Tidak ada deskripsi.</span>' ?>
+                        <div class="desc-content" style="white-space: pre-line; line-height: 1.6;">
+                            <?= !empty($prodDesc) ? nl2br(esc($prodDesc)) : '<span class="text-muted">-</span>' ?>
                         </div>
                     </div>
 
-                    <!-- Deskripsi Inggris -->
+                    <?php if (!empty($product['deskripsi_produk_en']) && $product['deskripsi_produk_en'] !== '-' && $product['deskripsi_produk_en'] !== ($product['deskripsi_produk_id'] ?? '')): ?>
+                    <!-- Deskripsi Inggris (Jika Tersedia) -->
                     <div class="mt-3 pt-3 border-top">
                         <label class="fw-semibold text-dark small mb-2 d-block">
                             <i class="fa-solid fa-file-lines me-1 text-secondary"></i>Deskripsi Produk (English)
                         </label>
-                        <?php
-                            $descEnClean = !empty($product['deskripsi_produk_en']) ? strip_tags($product['deskripsi_produk_en'], $allowedTags) : '';
-                        ?>
-                        <div class="desc-content">
-                            <?= $descEnClean !== '' ? $descEnClean : '<span class="text-muted fst-italic">No description available.</span>' ?>
+                        <div class="desc-content" style="white-space: pre-line; line-height: 1.6;">
+                            <?= nl2br(esc($product['deskripsi_produk_en'])) ?>
                         </div>
                     </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Kartu Informasi Ekspor Produk -->

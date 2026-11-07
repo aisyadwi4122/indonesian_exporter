@@ -162,8 +162,19 @@
                         <!-- Kolom Kanan: Rincian & Spesifikasi -->
                         <div class="col-12 col-lg-6">
                             <h5 class="section-title border-bottom pb-2 mb-3 text-primary">
-                                <i class="fa-solid fa-list-check me-2"></i>Spesifikasi & Komersial
+                                <i class="fa-solid fa-list-check me-2"></i>Deskripsi & Komersial
                             </h5>
+
+                            <!-- Deskripsi Produk -->
+                            <div class="mb-3">
+                                <label for="deskripsi" class="form-label fw-bold">Deskripsi Produk</label>
+                                <textarea name="deskripsi" 
+                                          id="deskripsi" 
+                                          rows="4" 
+                                          class="form-control" 
+                                          placeholder="Tuliskan deskripsi lengkap produk (kegunaan, keunggulan, penjelasan detail)..."><?= old('deskripsi', $produk['deskripsi'] ?? '') ?></textarea>
+                                <small class="text-muted">Deskripsi ini akan ditampilkan lengkap di halaman Detail Sales tab Data Produk dan di dokumen PDF.</small>
+                            </div>
 
                             <!-- Spesifikasi -->
                             <div class="mb-3">
