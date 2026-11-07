@@ -237,6 +237,12 @@ $routes->get('admin/laporan-aktivitas/info-komisi', 'admin\LaporanAktivitas::inf
 $routes->get('admin/laporan-aktivitas/info-komisi/export', 'admin\LaporanAktivitas::exportInfoKomisi');
 $routes->get('admin/laporan-aktivitas/pdf', 'admin\LaporanAktivitas::pdf');
 $routes->get('admin/laporan-aktivitas/pdf/export', 'admin\LaporanAktivitas::exportPdf');
+$routes->get('admin/laporan-aktivitas/produk-terlaris', 'admin\LaporanAktivitas::produkTerlaris');
+$routes->get('admin/laporan-aktivitas/produk-terlaris/export', 'admin\LaporanAktivitas::exportProdukTerlaris');
+$routes->get('admin/laporan-aktivitas/sales-teraktif', 'admin\LaporanAktivitas::salesTeraktif');
+$routes->get('admin/laporan-aktivitas/sales-teraktif/export', 'admin\LaporanAktivitas::exportSalesTeraktif');
+$routes->get('admin/laporan-aktivitas/aktivitas-sales', 'admin\LaporanAktivitas::aktivitasSales');
+$routes->get('admin/laporan-aktivitas/aktivitas-sales/export', 'admin\LaporanAktivitas::exportAktivitasSales');
 
 
 $routes->get('/', function () {

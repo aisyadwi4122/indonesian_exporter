@@ -16,6 +16,7 @@ class DetailClickHistoryModel extends Model
         'user_id',
         'product_id',
         'product_name',
+        'view_mode',
         'created_at',
     ];
 
@@ -24,17 +25,21 @@ class DetailClickHistoryModel extends Model
     /**
      * Catat klik detail produk
      */
-    public function recordClick(int $userId, int $productId, string $productName): bool
+    public function recordClick(int $userId, int $productId, string $productName, string $viewMode = 'internal'): bool
     {
         if ($userId <= 0 || $productId <= 0) {
             return false;
         }
 
+        $viewMode = (strtolower(trim($viewMode)) === 'eksternal') ? 'eksternal' : 'internal';
+
         return (bool) $this->insert([
             'user_id'      => $userId,
             'product_id'   => $productId,
             'product_name' => substr(trim($productName), 0, 255),
+            'view_mode'    => $viewMode,
             'created_at'   => date('Y-m-d H:i:s'),
         ]);
     }
 }
+

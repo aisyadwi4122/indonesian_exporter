@@ -727,4 +727,489 @@ class SalesActivityModel
         $row = $this->db->query($sql, $params)->getRowArray();
         return (int) ($row['total'] ?? 0);
     }
+
+    /**
+     * Helper privat untuk menyusun klausa WHERE dan binding parameters berdasarkan array $filters
+     *
+     * @param array $filters [start_date, end_date, mode, sales_id, product_id, jenis]
+     * @param string $alias Prefix nama/alias tabel (misal: 'd', 'sh', dll.)
+     * @param array $options Konfigurasi kolom:
+     *                       - 'has_mode' (bool, default true): tabel punya kolom view_mode
+     *                       - 'has_sales' (bool, default true): tabel punya kolom user_id
+     *                       - 'has_product' (bool, default true): tabel punya kolom product_id
+     *                       - 'date_col' (string, default 'created_at'): nama kolom datetime
+     * @return array ['where' => string[], 'params' => array, 'whereSql' => string]
+     */
+    private function applyFilters(array $filters, string $alias = '', array $options = []): array
+    {
+        $hasMode    = $options['has_mode'] ?? true;
+        $hasSales   = $options['has_sales'] ?? true;
+        $hasProduct = $options['has_product'] ?? true;
+        $dateCol    = $options['date_col'] ?? 'created_at';
+        $prefix     = ($alias !== '') ? "{$alias}." : "";
+
+        $where  = [];
+        $params = [];
+
+        $startDate = !empty($filters['start_date']) ? $filters['start_date'] : date('Y-m-01');
+        $endDate   = !empty($filters['end_date']) ? $filters['end_date'] : date('Y-m-t');
+
+        $where[]  = "{$prefix}{$dateCol} >= ?";
+        $params[] = $startDate . ' 00:00:00';
+
+        $where[]  = "{$prefix}{$dateCol} <= ?";
+        $params[] = $endDate . ' 23:59:59';
+
+        if ($hasMode && !empty($filters['mode']) && in_array($filters['mode'], ['internal', 'eksternal'], true)) {
+            $where[]  = "{$prefix}view_mode = ?";
+            $params[] = $filters['mode'];
+        }
+
+        if ($hasSales && !empty($filters['sales_id']) && (int) $filters['sales_id'] > 0) {
+            $where[]  = "{$prefix}user_id = ?";
+            $params[] = (int) $filters['sales_id'];
+        }
+
+        if ($hasProduct && !empty($filters['product_id']) && (int) $filters['product_id'] > 0) {
+            $where[]  = "{$prefix}product_id = ?";
+            $params[] = (int) $filters['product_id'];
+        }
+
+        return [
+            'where'    => $where,
+            'params'   => $params,
+            'whereSql' => implode(' AND ', $where),
+        ];
+    }
+
+    /**
+     * Ambil daftar opsi produk unik untuk dropdown filter
+     */
+    public function getProductOptions(): array
+    {
+        $sql = "
+            SELECT DISTINCT p.product_id, p.nama_produk
+            FROM (
+                SELECT product_id, product_name as nama_produk FROM detail_click_history WHERE product_id > 0
+                UNION
+                SELECT product_id, product_name as nama_produk FROM commission_click_history WHERE product_id > 0
+                UNION
+                SELECT product_id, product_name as nama_produk FROM pdf_history WHERE product_id IS NOT NULL AND product_id > 0
+                UNION
+                SELECT id_produk_supplier as product_id, nama_produk FROM tb_produk_supplier
+            ) p
+            WHERE p.product_id > 0 AND p.nama_produk IS NOT NULL AND p.nama_produk != ''
+            GROUP BY p.product_id
+            ORDER BY p.nama_produk ASC
+        ";
+        return $this->db->query($sql)->getResultArray();
+    }
+
+    /**
+     * 6. Laporan Produk Terlaris (List)
+     * Peringkat produk yang paling banyak diminati sales (Klik Detail + Klik Komisi + Cetak PDF)
+     */
+    public function getProdukTerlarisList(array $filters, int $limit = 10, int $offset = 0): array
+    {
+        $fDetail = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => true, 'has_product' => false]);
+        $fComm   = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => true, 'has_product' => false]);
+        $fPdf    = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => true, 'has_product' => false]);
+
+        $unionParams = array_merge($fDetail['params'], $fComm['params'], $fPdf['params']);
+
+        $sql = "
+            SELECT 
+                combined.product_id,
+                COALESCE(ps.nama_produk, MAX(combined.product_name), CONCAT('Produk #', combined.product_id)) as nama_produk,
+                COALESCE(sup.nama_perusahaan, ecp.nama_perusahaan, '-') as nama_perusahaan,
+                CAST(SUM(combined.is_detail) AS SIGNED) as click_detail,
+                CAST(SUM(combined.is_comm) AS SIGNED) as click_komisi,
+                CAST(SUM(combined.is_pdf) AS SIGNED) as print_pdf,
+                CAST((SUM(combined.is_detail) + SUM(combined.is_comm) + SUM(combined.is_pdf)) AS SIGNED) as total_minat,
+                COUNT(DISTINCT combined.user_id) as total_sales
+            FROM (
+                SELECT product_id, user_id, product_name, 1 as is_detail, 0 as is_comm, 0 as is_pdf, created_at 
+                FROM detail_click_history 
+                WHERE {$fDetail['whereSql']} AND product_id > 0
+
+                UNION ALL
+
+                SELECT product_id, user_id, product_name, 0 as is_detail, 1 as is_comm, 0 as is_pdf, created_at 
+                FROM commission_click_history 
+                WHERE {$fComm['whereSql']} AND product_id > 0
+
+                UNION ALL
+
+                SELECT product_id, user_id, product_name, 0 as is_detail, 0 as is_comm, 1 as is_pdf, created_at 
+                FROM pdf_history 
+                WHERE {$fPdf['whereSql']} AND product_id IS NOT NULL AND product_id > 0
+            ) combined
+            LEFT JOIN tb_produk_supplier ps ON ps.id_produk_supplier = combined.product_id
+            LEFT JOIN tb_supplier sup ON sup.id_supplier = ps.id_supplier
+            LEFT JOIN tb_ecp_ekspor ecp ON (combined.product_id > 10000 AND ecp.id_ecp = (CAST(combined.product_id AS SIGNED) - 10000))
+            GROUP BY combined.product_id, ps.nama_produk, sup.nama_perusahaan, ecp.nama_perusahaan
+            ORDER BY total_minat DESC, combined.product_id DESC
+        ";
+
+        if ($limit > 0) {
+            $sql .= " LIMIT " . (int) $limit . " OFFSET " . (int) $offset;
+        }
+
+        return $this->db->query($sql, $unionParams)->getResultArray();
+    }
+
+    /**
+     * 6. Laporan Produk Terlaris (Count)
+     */
+    public function countProdukTerlaris(array $filters): int
+    {
+        $fDetail = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => true, 'has_product' => false]);
+        $fComm   = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => true, 'has_product' => false]);
+        $fPdf    = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => true, 'has_product' => false]);
+
+        $unionParams = array_merge($fDetail['params'], $fComm['params'], $fPdf['params']);
+
+        $sql = "
+            SELECT COUNT(DISTINCT combined.product_id) as total
+            FROM (
+                SELECT product_id, user_id, created_at FROM detail_click_history WHERE {$fDetail['whereSql']} AND product_id > 0
+                UNION ALL
+                SELECT product_id, user_id, created_at FROM commission_click_history WHERE {$fComm['whereSql']} AND product_id > 0
+                UNION ALL
+                SELECT product_id, user_id, created_at FROM pdf_history WHERE {$fPdf['whereSql']} AND product_id IS NOT NULL AND product_id > 0
+            ) combined
+        ";
+
+        $row = $this->db->query($sql, $unionParams)->getRowArray();
+        return (int) ($row['total'] ?? 0);
+    }
+
+    /**
+     * 7. Laporan Sales Teraktif (List)
+     * Peringkat sales berdasarkan total aktivitas dengan aturan pengecualian filter
+     */
+    public function getSalesTeraktifList(array $filters, int $limit = 10, int $offset = 0): array
+    {
+        $modeActive    = !empty($filters['mode']) && in_array($filters['mode'], ['internal', 'eksternal'], true);
+        $productActive = !empty($filters['product_id']) && (int) $filters['product_id'] > 0;
+
+        $includeLogin  = (!$modeActive && !$productActive);
+        $includeSearch = (!$productActive);
+
+        $unions = [];
+        $unionParams = [];
+
+        if ($includeLogin) {
+            $fLogin = $this->applyFilters($filters, '', ['has_mode' => false, 'has_sales' => false, 'has_product' => false]);
+            $unions[] = "SELECT user_id, 1 as is_login, 0 as is_search, 0 as is_detail, 0 as is_comm, 0 as is_pdf, created_at FROM login_history WHERE {$fLogin['whereSql']}";
+            $unionParams = array_merge($unionParams, $fLogin['params']);
+        }
+
+        if ($includeSearch) {
+            $fSearch = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => false, 'has_product' => false]);
+            $unions[] = "SELECT user_id, 0 as is_login, 1 as is_search, 0 as is_detail, 0 as is_comm, 0 as is_pdf, created_at FROM search_history WHERE {$fSearch['whereSql']}";
+            $unionParams = array_merge($unionParams, $fSearch['params']);
+        }
+
+        $fDetail = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => false, 'has_product' => true]);
+        $unions[] = "SELECT user_id, 0 as is_login, 0 as is_search, 1 as is_detail, 0 as is_comm, 0 as is_pdf, created_at FROM detail_click_history WHERE {$fDetail['whereSql']}";
+        $unionParams = array_merge($unionParams, $fDetail['params']);
+
+        $fComm = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => false, 'has_product' => true]);
+        $unions[] = "SELECT user_id, 0 as is_login, 0 as is_search, 0 as is_detail, 1 as is_comm, 0 as is_pdf, created_at FROM commission_click_history WHERE {$fComm['whereSql']}";
+        $unionParams = array_merge($unionParams, $fComm['params']);
+
+        $fPdf = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => false, 'has_product' => true]);
+        $unions[] = "SELECT user_id, 0 as is_login, 0 as is_search, 0 as is_detail, 0 as is_comm, 1 as is_pdf, created_at FROM pdf_history WHERE {$fPdf['whereSql']}";
+        $unionParams = array_merge($unionParams, $fPdf['params']);
+
+        $unionSql = implode("\n UNION ALL \n", $unions);
+
+        // Subquery untuk menghitung "Produk Paling Sering Dikunjungi" (mengikuti filter mode dan tanggal)
+        $fTopDetail = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => false, 'has_product' => false]);
+        $topDetailParams = $fTopDetail['params'];
+
+        $sql = "
+            SELECT 
+                combined.user_id,
+                COALESCE(s.nama_sales, s.username, p.username, 'Sales') as nama_sales,
+                COALESCE(s.email, p.username, '-') as sales_email,
+                " . ($includeLogin ? "CAST(SUM(combined.is_login) AS SIGNED)" : "NULL") . " as count_login,
+                " . ($includeSearch ? "CAST(SUM(combined.is_search) AS SIGNED)" : "NULL") . " as count_search,
+                CAST(SUM(combined.is_detail) AS SIGNED) as count_detail,
+                CAST(SUM(combined.is_comm) AS SIGNED) as count_comm,
+                CAST(SUM(combined.is_pdf) AS SIGNED) as count_pdf,
+                CAST((
+                    " . ($includeLogin ? "SUM(combined.is_login)" : "0") . " +
+                    " . ($includeSearch ? "SUM(combined.is_search)" : "0") . " +
+                    SUM(combined.is_detail) +
+                    SUM(combined.is_comm) +
+                    SUM(combined.is_pdf)
+                ) AS SIGNED) as total_aktivitas,
+                top_p.top_visited_product,
+                MAX(combined.created_at) as last_active
+            FROM (
+                {$unionSql}
+            ) combined
+            LEFT JOIN tb_sales s ON s.id_sales = combined.user_id
+            LEFT JOIN tb_profil p ON p.id_perusahaan = combined.user_id
+            LEFT JOIN (
+                SELECT 
+                    p_agg.user_id,
+                    SUBSTRING_INDEX(
+                        GROUP_CONCAT(
+                            CONCAT(p_agg.product_name, ' (', p_agg.cnt, ' klik)') 
+                            ORDER BY p_agg.cnt DESC, p_agg.last_at DESC 
+                            SEPARATOR '|||'
+                        ), '|||', 1
+                    ) as top_visited_product
+                FROM (
+                    SELECT user_id, product_name, COUNT(*) as cnt, MAX(created_at) as last_at
+                    FROM detail_click_history
+                    WHERE {$fTopDetail['whereSql']} AND product_id > 0
+                    GROUP BY user_id, product_name
+                ) p_agg
+                GROUP BY p_agg.user_id
+            ) top_p ON top_p.user_id = combined.user_id
+            GROUP BY combined.user_id, s.nama_sales, s.username, s.email, p.username, top_p.top_visited_product
+            ORDER BY total_aktivitas DESC, last_active DESC, combined.user_id DESC
+        ";
+
+        if ($limit > 0) {
+            $sql .= " LIMIT " . (int) $limit . " OFFSET " . (int) $offset;
+        }
+
+        $allParams = array_merge($unionParams, $topDetailParams);
+        return $this->db->query($sql, $allParams)->getResultArray();
+    }
+
+    /**
+     * 7. Laporan Sales Teraktif (Count)
+     */
+    public function countSalesTeraktif(array $filters): int
+    {
+        $modeActive    = !empty($filters['mode']) && in_array($filters['mode'], ['internal', 'eksternal'], true);
+        $productActive = !empty($filters['product_id']) && (int) $filters['product_id'] > 0;
+
+        $includeLogin  = (!$modeActive && !$productActive);
+        $includeSearch = (!$productActive);
+
+        $unions = [];
+        $unionParams = [];
+
+        if ($includeLogin) {
+            $fLogin = $this->applyFilters($filters, '', ['has_mode' => false, 'has_sales' => false, 'has_product' => false]);
+            $unions[] = "SELECT user_id FROM login_history WHERE {$fLogin['whereSql']}";
+            $unionParams = array_merge($unionParams, $fLogin['params']);
+        }
+
+        if ($includeSearch) {
+            $fSearch = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => false, 'has_product' => false]);
+            $unions[] = "SELECT user_id FROM search_history WHERE {$fSearch['whereSql']}";
+            $unionParams = array_merge($unionParams, $fSearch['params']);
+        }
+
+        $fDetail = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => false, 'has_product' => true]);
+        $unions[] = "SELECT user_id FROM detail_click_history WHERE {$fDetail['whereSql']}";
+        $unionParams = array_merge($unionParams, $fDetail['params']);
+
+        $fComm = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => false, 'has_product' => true]);
+        $unions[] = "SELECT user_id FROM commission_click_history WHERE {$fComm['whereSql']}";
+        $unionParams = array_merge($unionParams, $fComm['params']);
+
+        $fPdf = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => false, 'has_product' => true]);
+        $unions[] = "SELECT user_id FROM pdf_history WHERE {$fPdf['whereSql']}";
+        $unionParams = array_merge($unionParams, $fPdf['params']);
+
+        $unionSql = implode("\n UNION ALL \n", $unions);
+        $sql = "SELECT COUNT(DISTINCT combined.user_id) as total FROM ({$unionSql}) combined";
+
+        $row = $this->db->query($sql, $unionParams)->getRowArray();
+        return (int) ($row['total'] ?? 0);
+    }
+
+    /**
+     * 8. Laporan Aktivitas Sales (List)
+     * Seluruh aktivitas sales dalam satu daftar kronologis
+     */
+    public function getAktivitasSalesList(array $filters, int $limit = 10, int $offset = 0): array
+    {
+        $modeActive    = !empty($filters['mode']) && in_array($filters['mode'], ['internal', 'eksternal'], true);
+        $productActive = !empty($filters['product_id']) && (int) $filters['product_id'] > 0;
+        $jenisFilter   = !empty($filters['jenis']) ? $filters['jenis'] : '';
+
+        $unions = [];
+        $unionParams = [];
+
+        // 1. Login
+        if ((empty($jenisFilter) || $jenisFilter === 'login') && !$modeActive && !$productActive) {
+            $fLogin = $this->applyFilters($filters, '', ['has_mode' => false, 'has_sales' => true, 'has_product' => false]);
+            $unions[] = "
+                SELECT 
+                    user_id,
+                    '-' as view_mode,
+                    'Login' as activity_type,
+                    NULL as product_id,
+                    '-' as product_name,
+                    CONCAT('IP: ', ip_address) as keterangan,
+                    created_at
+                FROM login_history
+                WHERE {$fLogin['whereSql']}
+            ";
+            $unionParams = array_merge($unionParams, $fLogin['params']);
+        }
+
+        // 2. Pencarian
+        if ((empty($jenisFilter) || $jenisFilter === 'pencarian') && !$productActive) {
+            $fSearch = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => true, 'has_product' => false]);
+            $unions[] = "
+                SELECT 
+                    user_id,
+                    view_mode,
+                    'Pencarian' as activity_type,
+                    NULL as product_id,
+                    '-' as product_name,
+                    CONCAT('Kata kunci: \"', keyword, '\" (', result_count, ' hasil)') as keterangan,
+                    created_at
+                FROM search_history
+                WHERE {$fSearch['whereSql']}
+            ";
+            $unionParams = array_merge($unionParams, $fSearch['params']);
+        }
+
+        // 3. Detail Click
+        if (empty($jenisFilter) || $jenisFilter === 'detail') {
+            $fDetail = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => true, 'has_product' => true]);
+            $unions[] = "
+                SELECT 
+                    user_id,
+                    view_mode,
+                    'Klik Detail' as activity_type,
+                    product_id,
+                    product_name,
+                    '-' as keterangan,
+                    created_at
+                FROM detail_click_history
+                WHERE {$fDetail['whereSql']}
+            ";
+            $unionParams = array_merge($unionParams, $fDetail['params']);
+        }
+
+        // 4. Commission Click
+        if (empty($jenisFilter) || $jenisFilter === 'komisi') {
+            $fComm = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => true, 'has_product' => true]);
+            $unions[] = "
+                SELECT 
+                    user_id,
+                    view_mode,
+                    'Klik Info Komisi' as activity_type,
+                    product_id,
+                    product_name,
+                    '-' as keterangan,
+                    created_at
+                FROM commission_click_history
+                WHERE {$fComm['whereSql']}
+            ";
+            $unionParams = array_merge($unionParams, $fComm['params']);
+        }
+
+        // 5. PDF
+        if (empty($jenisFilter) || $jenisFilter === 'pdf') {
+            $fPdf = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => true, 'has_product' => true]);
+            $unions[] = "
+                SELECT 
+                    user_id,
+                    view_mode,
+                    'Cetak PDF' as activity_type,
+                    product_id,
+                    COALESCE(product_name, '-') as product_name,
+                    pdf_type as keterangan,
+                    created_at
+                FROM pdf_history
+                WHERE {$fPdf['whereSql']}
+            ";
+            $unionParams = array_merge($unionParams, $fPdf['params']);
+        }
+
+        if (empty($unions)) {
+            return [];
+        }
+
+        $unionSql = implode("\n UNION ALL \n", $unions);
+
+        $sql = "
+            SELECT 
+                act.*,
+                COALESCE(s.nama_sales, s.username, p.username, 'Sales') as nama_sales,
+                COALESCE(sup.nama_perusahaan, ecp.nama_perusahaan, '-') as nama_perusahaan
+            FROM (
+                {$unionSql}
+            ) act
+            LEFT JOIN tb_sales s ON s.id_sales = act.user_id
+            LEFT JOIN tb_profil p ON p.id_perusahaan = act.user_id
+            LEFT JOIN tb_produk_supplier ps ON ps.id_produk_supplier = act.product_id
+            LEFT JOIN tb_supplier sup ON sup.id_supplier = ps.id_supplier
+            LEFT JOIN tb_ecp_ekspor ecp ON (act.product_id > 10000 AND ecp.id_ecp = (CAST(act.product_id AS SIGNED) - 10000))
+            ORDER BY act.created_at DESC
+        ";
+
+        if ($limit > 0) {
+            $sql .= " LIMIT " . (int) $limit . " OFFSET " . (int) $offset;
+        }
+
+        return $this->db->query($sql, $unionParams)->getResultArray();
+    }
+
+    /**
+     * 8. Laporan Aktivitas Sales (Count)
+     */
+    public function countAktivitasSales(array $filters): int
+    {
+        $modeActive    = !empty($filters['mode']) && in_array($filters['mode'], ['internal', 'eksternal'], true);
+        $productActive = !empty($filters['product_id']) && (int) $filters['product_id'] > 0;
+        $jenisFilter   = !empty($filters['jenis']) ? $filters['jenis'] : '';
+
+        $unions = [];
+        $unionParams = [];
+
+        if ((empty($jenisFilter) || $jenisFilter === 'login') && !$modeActive && !$productActive) {
+            $fLogin = $this->applyFilters($filters, '', ['has_mode' => false, 'has_sales' => true, 'has_product' => false]);
+            $unions[] = "SELECT 1 FROM login_history WHERE {$fLogin['whereSql']}";
+            $unionParams = array_merge($unionParams, $fLogin['params']);
+        }
+
+        if ((empty($jenisFilter) || $jenisFilter === 'pencarian') && !$productActive) {
+            $fSearch = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => true, 'has_product' => false]);
+            $unions[] = "SELECT 1 FROM search_history WHERE {$fSearch['whereSql']}";
+            $unionParams = array_merge($unionParams, $fSearch['params']);
+        }
+
+        if (empty($jenisFilter) || $jenisFilter === 'detail') {
+            $fDetail = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => true, 'has_product' => true]);
+            $unions[] = "SELECT 1 FROM detail_click_history WHERE {$fDetail['whereSql']}";
+            $unionParams = array_merge($unionParams, $fDetail['params']);
+        }
+
+        if (empty($jenisFilter) || $jenisFilter === 'komisi') {
+            $fComm = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => true, 'has_product' => true]);
+            $unions[] = "SELECT 1 FROM commission_click_history WHERE {$fComm['whereSql']}";
+            $unionParams = array_merge($unionParams, $fComm['params']);
+        }
+
+        if (empty($jenisFilter) || $jenisFilter === 'pdf') {
+            $fPdf = $this->applyFilters($filters, '', ['has_mode' => true, 'has_sales' => true, 'has_product' => true]);
+            $unions[] = "SELECT 1 FROM pdf_history WHERE {$fPdf['whereSql']}";
+            $unionParams = array_merge($unionParams, $fPdf['params']);
+        }
+
+        if (empty($unions)) {
+            return 0;
+        }
+
+        $unionSql = implode("\n UNION ALL \n", $unions);
+        $sql = "SELECT COUNT(*) as total FROM ({$unionSql}) act";
+
+        $row = $this->db->query($sql, $unionParams)->getRowArray();
+        return (int) ($row['total'] ?? 0);
+    }
 }

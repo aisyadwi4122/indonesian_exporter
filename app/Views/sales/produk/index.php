@@ -573,6 +573,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const formData = new FormData();
                 formData.append('product_id', prodId);
                 formData.append('product_name', nama);
+                formData.append('mode', '<?= !empty($is_internal) ? 'internal' : 'eksternal' ?>');
                 formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
                 fetch('<?= base_url('sales/activity/commission-click') ?>', {

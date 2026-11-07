@@ -47,6 +47,10 @@
                             <li class="submenu-item"><a class="submenu-link <?= (strpos($currentUri, 'admin/laporan-aktivitas/detail') !== false) ? 'active' : '' ?>" href="<?= base_url('admin/laporan-aktivitas/detail') ?>">History Detail</a></li>
                             <li class="submenu-item"><a class="submenu-link <?= (strpos($currentUri, 'admin/laporan-aktivitas/info-komisi') !== false) ? 'active' : '' ?>" href="<?= base_url('admin/laporan-aktivitas/info-komisi') ?>">History Info Komisi</a></li>
                             <li class="submenu-item"><a class="submenu-link <?= (strpos($currentUri, 'admin/laporan-aktivitas/pdf') !== false) ? 'active' : '' ?>" href="<?= base_url('admin/laporan-aktivitas/pdf') ?>">History PDF</a></li>
+                            <li class="my-2 border-top" style="border-color: rgba(0,0,0,0.08) !important;"></li>
+                            <li class="submenu-item"><a class="submenu-link <?= (strpos($currentUri, 'admin/laporan-aktivitas/produk-terlaris') !== false) ? 'active' : '' ?>" href="<?= base_url('admin/laporan-aktivitas/produk-terlaris') ?>">Produk Terlaris</a></li>
+                            <li class="submenu-item"><a class="submenu-link <?= (strpos($currentUri, 'admin/laporan-aktivitas/sales-teraktif') !== false) ? 'active' : '' ?>" href="<?= base_url('admin/laporan-aktivitas/sales-teraktif') ?>">Sales Teraktif</a></li>
+                            <li class="submenu-item"><a class="submenu-link <?= (strpos($currentUri, 'admin/laporan-aktivitas/aktivitas-sales') !== false) ? 'active' : '' ?>" href="<?= base_url('admin/laporan-aktivitas/aktivitas-sales') ?>">Aktivitas Sales</a></li>
                         </ul>
                     </div>
                 </li><!--//nav-item-->
@@ -106,7 +110,7 @@
                         <span class="nav-icon">
                             <i class="fa-solid fa-boxes-stacked"></i>
                         </span>
-                        <span class="nav-link-text">Produk Sales</span>
+                        <span class="nav-link-text">Produk Supplier</span>
                     </a>
                 </li>
 

@@ -16,6 +16,7 @@ class SearchHistoryModel extends Model
         'user_id',
         'keyword',
         'result_count',
+        'view_mode',
         'created_at',
     ];
 
@@ -27,19 +28,23 @@ class SearchHistoryModel extends Model
      * @param int    $userId
      * @param string $keyword
      * @param int    $resultCount
+     * @param string $viewMode
      * @return bool
      */
-    public function recordSearch(int $userId, string $keyword, int $resultCount = 0): bool
+    public function recordSearch(int $userId, string $keyword, int $resultCount = 0, string $viewMode = 'internal'): bool
     {
         $keyword = strtolower(trim($keyword));
         if ($keyword === '') {
             return false;
         }
 
+        $viewMode = (strtolower(trim($viewMode)) === 'eksternal') ? 'eksternal' : 'internal';
+
         return (bool) $this->insert([
             'user_id'      => $userId,
             'keyword'      => $keyword,
             'result_count' => $resultCount,
+            'view_mode'    => $viewMode,
             'created_at'   => date('Y-m-d H:i:s'),
         ]);
     }
@@ -87,3 +92,4 @@ class SearchHistoryModel extends Model
             ->findAll();
     }
 }
+

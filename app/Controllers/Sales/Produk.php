@@ -82,7 +82,8 @@ class Produk extends BaseController
                     if (!$isDuplicate) {
                         $userId = (int) (session()->get('sales_id') ?? session()->get('user_id') ?? 0);
                         $searchHistoryModel = new SearchHistoryModel();
-                        $searchHistoryModel->recordSearch($userId, $qClean, $totalRows);
+                        $viewMode = $isInternal ? 'internal' : 'eksternal';
+                        $searchHistoryModel->recordSearch($userId, $qClean, $totalRows, $viewMode);
 
                         session()->set([
                             'sales_last_search_keyword' => $qClean,
@@ -168,7 +169,8 @@ class Produk extends BaseController
                 $userId = (int) (session()->get('sales_id') ?? session()->get('user_id') ?? 0);
                 $detailClickModel = new DetailClickHistoryModel();
                 $prodName = $detailData['product']['nama_produk_id'] ?? ($detailData['product']['nama_produk'] ?? ('Produk #' . $id));
-                $detailClickModel->recordClick($userId, (int)$id, $prodName);
+                $viewMode = $isInternal ? 'internal' : 'eksternal';
+                $detailClickModel->recordClick($userId, (int)$id, $prodName, $viewMode);
 
                 session()->set([
                     'sales_last_detail_prod' => (int)$id,
@@ -251,7 +253,8 @@ class Produk extends BaseController
                 $pdfHistoryModel = new PdfHistoryModel();
                 $pdfTypeLabel = $isPdfInternal ? 'PDF Detail (Internal)' : 'PDF Detail (Eksternal)';
                 $prodName = $detailData['product']['nama_produk_id'] ?? ($detailData['product']['nama_produk'] ?? ('Produk #' . $id));
-                $pdfHistoryModel->recordPdf($userId, $pdfTypeLabel, (int)$id, $prodName);
+                $viewMode = $isPdfInternal ? 'internal' : 'eksternal';
+                $pdfHistoryModel->recordPdf($userId, $pdfTypeLabel, (int)$id, $prodName, $viewMode);
 
                 session()->set([
                     'sales_last_pdf_detail_key' => $currKey,
@@ -365,7 +368,8 @@ class Produk extends BaseController
                 $userId = (int) (session()->get('sales_id') ?? session()->get('user_id') ?? 0);
                 $pdfHistoryModel = new PdfHistoryModel();
                 $pdfTypeLabel = $isPdfInternal ? 'Export PDF Daftar (Internal)' : 'Export PDF Daftar (Eksternal)';
-                $pdfHistoryModel->recordPdf($userId, $pdfTypeLabel, null, null);
+                $viewMode = $isPdfInternal ? 'internal' : 'eksternal';
+                $pdfHistoryModel->recordPdf($userId, $pdfTypeLabel, null, null, $viewMode);
 
                 session()->set([
                     'sales_last_pdf_export_key' => $currKey,
@@ -421,8 +425,19 @@ class Produk extends BaseController
         }
 
         try {
+            $rawMode = strtolower(trim((string) ($this->request->getPost('mode') ?? '')));
+            if ($rawMode === '' && isset($json['mode'])) {
+                $rawMode = strtolower(trim((string) $json['mode']));
+            }
+            if ($rawMode === 'eksternal' || $rawMode === 'internal') {
+                $viewMode = $rawMode;
+            } else {
+                $modeInfo = $this->resolveAccessMode();
+                $viewMode = $modeInfo['is_internal'] ? 'internal' : 'eksternal';
+            }
+
             $commModel = new CommissionClickHistoryModel();
-            $commModel->recordClick($userId, $productId, $productName ?: ('Produk #' . $productId));
+            $commModel->recordClick($userId, $productId, $productName ?: ('Produk #' . $productId), $viewMode);
 
             session()->set([
                 'sales_last_comm_click_prod' => $productId,

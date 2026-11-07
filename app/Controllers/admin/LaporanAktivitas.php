@@ -2,6 +2,7 @@
 
 namespace App\Controllers\admin;
 
+use App\Libraries\ActivityFilter;
 use App\Models\SalesActivityModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
@@ -595,4 +596,273 @@ class LaporanAktivitas extends AdminAuthBase
         fclose($out);
         exit;
     }
+
+    // =========================================================================
+    // 6. LAPORAN PRODUK TERLARIS
+    // =========================================================================
+
+    public function produkTerlaris()
+    {
+        if ($redirect = $this->checkAuth()) {
+            return $redirect;
+        }
+
+        $filters = ActivityFilter::parse($this->request);
+        $page    = $filters['page'];
+        $offset  = ($page - 1) * $this->perPage;
+
+        $items = $this->activityModel->getProdukTerlarisList($filters, $this->perPage, $offset);
+        $total = $this->activityModel->countProdukTerlaris($filters);
+
+        $totalPages = (int) ceil($total / $this->perPage);
+        $salesList  = $this->activityModel->getSalesOptions();
+
+        $pagination = $this->generatePagination($page, $totalPages, $filters);
+
+        $data = [
+            'title'        => 'Laporan Produk Terlaris - Indonesian Exporter',
+            'pageTitle'    => 'Produk Terlaris',
+            'pageSubtitle' => 'Peringkat produk yang paling banyak diminati sales',
+            'activeMenu'   => 'laporan-produk-terlaris',
+            'filters'      => $filters,
+            'items'        => $items,
+            'total'        => $total,
+            'page'         => $page,
+            'totalPages'   => $totalPages,
+            'from'         => $total > 0 ? $offset + 1 : 0,
+            'to'           => min($offset + $this->perPage, $total),
+            'salesList'    => $salesList,
+            'pagination'   => $pagination,
+        ];
+
+        return view('admin/laporan_aktivitas/produk_terlaris', $data);
+    }
+
+    public function exportProdukTerlaris()
+    {
+        if ($redirect = $this->checkAuth()) {
+            return $redirect;
+        }
+
+        $filters = ActivityFilter::parse($this->request);
+        $rows    = $this->activityModel->getProdukTerlarisList($filters, 0, 0);
+
+        $filename = 'laporan_produk_terlaris_' . date('Ymd_His') . '.csv';
+
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        $out = fopen('php://output', 'w');
+        fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+        fputcsv($out, ['Peringkat', 'Nama Produk', 'Perusahaan', 'Klik Detail', 'Klik Info Komisi', 'Cetak PDF', 'Total Minat', 'Jumlah Sales']);
+
+        $rank = 1;
+        foreach ($rows as $row) {
+            fputcsv($out, [
+                $rank++,
+                $row['nama_produk'] ?? '-',
+                $row['nama_perusahaan'] ?? '-',
+                (int) ($row['click_detail'] ?? 0),
+                (int) ($row['click_komisi'] ?? 0),
+                (int) ($row['print_pdf'] ?? 0),
+                (int) ($row['total_minat'] ?? 0),
+                (int) ($row['total_sales'] ?? 0),
+            ]);
+        }
+
+        fclose($out);
+        exit;
+    }
+
+    // =========================================================================
+    // 7. LAPORAN SALES TERAKTIF
+    // =========================================================================
+
+    public function salesTeraktif()
+    {
+        if ($redirect = $this->checkAuth()) {
+            return $redirect;
+        }
+
+        $filters = ActivityFilter::parse($this->request);
+        $page    = $filters['page'];
+        $offset  = ($page - 1) * $this->perPage;
+
+        $items = $this->activityModel->getSalesTeraktifList($filters, $this->perPage, $offset);
+        $total = $this->activityModel->countSalesTeraktif($filters);
+
+        $totalPages  = (int) ceil($total / $this->perPage);
+        $productList = $this->activityModel->getProductOptions();
+
+        $isModeActive    = ActivityFilter::isModeActive($filters);
+        $isProductActive = ActivityFilter::isProductActive($filters);
+
+        $pagination = $this->generatePagination($page, $totalPages, $filters);
+
+        $data = [
+            'title'           => 'Laporan Sales Teraktif - Indonesian Exporter',
+            'pageTitle'       => 'Sales Teraktif',
+            'pageSubtitle'    => 'Peringkat sales berdasarkan total aktivitas',
+            'activeMenu'      => 'laporan-sales-teraktif',
+            'filters'         => $filters,
+            'items'           => $items,
+            'total'           => $total,
+            'page'            => $page,
+            'totalPages'      => $totalPages,
+            'from'            => $total > 0 ? $offset + 1 : 0,
+            'to'              => min($offset + $this->perPage, $total),
+            'productList'     => $productList,
+            'isModeActive'    => $isModeActive,
+            'isProductActive' => $isProductActive,
+            'pagination'      => $pagination,
+        ];
+
+        return view('admin/laporan_aktivitas/sales_teraktif', $data);
+    }
+
+    public function exportSalesTeraktif()
+    {
+        if ($redirect = $this->checkAuth()) {
+            return $redirect;
+        }
+
+        $filters = ActivityFilter::parse($this->request);
+        $rows    = $this->activityModel->getSalesTeraktifList($filters, 0, 0);
+
+        $isModeActive    = ActivityFilter::isModeActive($filters);
+        $isProductActive = ActivityFilter::isProductActive($filters);
+
+        $filename = 'laporan_sales_teraktif_' . date('Ymd_His') . '.csv';
+
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        $out = fopen('php://output', 'w');
+        fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+        fputcsv($out, ['Peringkat', 'Nama Sales', 'Email', 'Login', 'Pencarian', 'Klik Detail', 'Klik Komisi', 'Cetak PDF', 'Total Aktivitas', 'Produk Paling Sering Dikunjungi', 'Terakhir Aktif']);
+
+        $rank = 1;
+        foreach ($rows as $row) {
+            $loginVal  = ($isModeActive || $isProductActive) ? '-' : (int) ($row['count_login'] ?? 0);
+            $searchVal = $isProductActive ? '-' : (int) ($row['count_search'] ?? 0);
+
+            fputcsv($out, [
+                $rank++,
+                $row['nama_sales'] ?? '-',
+                $row['sales_email'] ?? '-',
+                $loginVal,
+                $searchVal,
+                (int) ($row['count_detail'] ?? 0),
+                (int) ($row['count_comm'] ?? 0),
+                (int) ($row['count_pdf'] ?? 0),
+                (int) ($row['total_aktivitas'] ?? 0),
+                $row['top_visited_product'] ?? '-',
+                self::formatTglIndo($row['last_active'] ?? null),
+            ]);
+        }
+
+        fclose($out);
+        exit;
+    }
+
+    // =========================================================================
+    // 8. LAPORAN AKTIVITAS SALES
+    // =========================================================================
+
+    public function aktivitasSales()
+    {
+        if ($redirect = $this->checkAuth()) {
+            return $redirect;
+        }
+
+        $filters = ActivityFilter::parse($this->request);
+        $page    = $filters['page'];
+        $offset  = ($page - 1) * $this->perPage;
+
+        $items = $this->activityModel->getAktivitasSalesList($filters, $this->perPage, $offset);
+        $total = $this->activityModel->countAktivitasSales($filters);
+
+        $totalPages  = (int) ceil($total / $this->perPage);
+        $salesList   = $this->activityModel->getSalesOptions();
+        $productList = $this->activityModel->getProductOptions();
+
+        $isModeActive    = ActivityFilter::isModeActive($filters);
+        $isProductActive = ActivityFilter::isProductActive($filters);
+
+        $pagination = $this->generatePagination($page, $totalPages, $filters);
+
+        $data = [
+            'title'           => 'Laporan Aktivitas Sales - Indonesian Exporter',
+            'pageTitle'       => 'Aktivitas Sales',
+            'pageSubtitle'    => 'Daftar seluruh aktivitas sales dalam satu daftar',
+            'activeMenu'      => 'laporan-aktivitas-sales',
+            'filters'         => $filters,
+            'items'           => $items,
+            'total'           => $total,
+            'page'            => $page,
+            'totalPages'      => $totalPages,
+            'from'            => $total > 0 ? $offset + 1 : 0,
+            'to'              => min($offset + $this->perPage, $total),
+            'salesList'       => $salesList,
+            'productList'     => $productList,
+            'isModeActive'    => $isModeActive,
+            'isProductActive' => $isProductActive,
+            'pagination'      => $pagination,
+        ];
+
+        return view('admin/laporan_aktivitas/aktivitas_sales', $data);
+    }
+
+    public function exportAktivitasSales()
+    {
+        if ($redirect = $this->checkAuth()) {
+            return $redirect;
+        }
+
+        $filters = ActivityFilter::parse($this->request);
+        $rows    = $this->activityModel->getAktivitasSalesList($filters, 0, 0);
+
+        $filename = 'laporan_aktivitas_sales_' . date('Ymd_His') . '.csv';
+
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        $out = fopen('php://output', 'w');
+        fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+        fputcsv($out, ['No', 'Waktu', 'Nama Sales', 'Mode', 'Aktivitas', 'Produk', 'Perusahaan', 'Keterangan']);
+
+        $no = 1;
+        foreach ($rows as $row) {
+            $modeLabel = '-';
+            if ($row['view_mode'] === 'internal') {
+                $modeLabel = 'Internal';
+            } elseif ($row['view_mode'] === 'eksternal') {
+                $modeLabel = 'Eksternal';
+            }
+
+            fputcsv($out, [
+                $no++,
+                self::formatTglIndo($row['created_at']),
+                $row['nama_sales'] ?? '-',
+                $modeLabel,
+                $row['activity_type'] ?? '-',
+                $row['product_name'] ?? '-',
+                $row['nama_perusahaan'] ?? '-',
+                $row['keterangan'] ?? '-',
+            ]);
+        }
+
+        fclose($out);
+        exit;
+    }
 }
+
