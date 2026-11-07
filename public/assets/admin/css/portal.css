@@ -12730,3 +12730,15 @@ button.close:focus {
     width: 100%;
   }
 }
+
+/* Fix badge text contrast */
+.text-dark {
+  color: #1e293b !important;
+}
+.badge.text-dark,
+.badge.bg-light,
+.badge.border:not([class*="bg-primary"]):not([class*="bg-secondary"]):not([class*="bg-success"]):not([class*="bg-danger"]):not([class*="bg-dark"]) {
+  --bs-badge-color: #1e293b !important;
+  color: #1e293b !important;
+}
+

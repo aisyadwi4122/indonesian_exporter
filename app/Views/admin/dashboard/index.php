@@ -303,7 +303,7 @@ if (!function_exists('formatTglIndo')) {
                                             <tr>
                                                 <td class="cell text-center text-muted"><?= $no++ ?></td>
                                                 <td class="cell">
-                                                    <span class="badge border font-monospace" style="color: #1e293b !important; background-color: #f8fafc; font-size: 13px; font-weight: 600; padding: 5px 9px;">
+                                                    <span class="badge border font-monospace" style="--bs-badge-color: #1e293b; color: #1e293b !important; background-color: #f8fafc; font-size: 13px; font-weight: 600; padding: 5px 9px;">
                                                         <?= esc($row['keyword']) ?>
                                                     </span>
                                                 </td>
@@ -494,7 +494,7 @@ if (!function_exists('formatTglIndo')) {
                                             <tr>
                                                 <td class="cell text-center text-muted"><?= $no++ ?></td>
                                                 <td class="cell">
-                                                    <span class="badge border" style="color: #1e293b !important; background-color: #f8fafc; font-size: 12px; font-weight: 600; padding: 5px 9px;">
+                                                    <span class="badge border" style="--bs-badge-color: #1e293b; color: #1e293b !important; background-color: #f8fafc; font-size: 12px; font-weight: 600; padding: 5px 9px;">
                                                         <?= esc($row['pdf_type']) ?>
                                                     </span>
                                                 </td>

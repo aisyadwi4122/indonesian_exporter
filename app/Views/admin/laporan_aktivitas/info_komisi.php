@@ -89,7 +89,9 @@
                                         <td class="fw-semibold text-dark"><?= esc($row['nama_sales']) ?></td>
                                         <td><?= esc($row['product_name']) ?></td>
                                         <td>
-                                            <span class="badge bg-warning text-dark px-2 py-1"><?= esc($row['nominal_komisi']) ?></span>
+                                            <span class="badge bg-warning px-2 py-1" style="--bs-badge-color: #78350f; color: #78350f !important; font-weight: 600;">
+                                                <?= esc($row['nominal_komisi']) ?>
+                                            </span>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -146,3 +148,4 @@
 </div>
 
 <?= $this->endSection(); ?>
+

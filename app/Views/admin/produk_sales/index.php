@@ -5,7 +5,7 @@
     <div class="container-xl">
         <div class="row g-3 mb-4 align-items-center justify-content-between">
             <div class="col-auto">
-                <h1 class="app-page-title mb-0">Produk Sales</h1>
+                <h1 class="app-page-title mb-0">Produk supplier</h1>
                 <p class="text-muted small mb-0">Kelola katalog produk supplier yang ditampilkan di area Sales & Eksternal.</p>
             </div>
             <div class="col-auto">

@@ -103,7 +103,9 @@
                                         <td class="text-nowrap"><?= App\Controllers\admin\LaporanAktivitas::formatTglIndo($row['created_at']) ?></td>
                                         <td class="fw-semibold text-dark"><?= esc($row['nama_sales']) ?></td>
                                         <td>
-                                            <span class="badge bg-light text-dark border px-2 py-1"><?= esc($row['keyword']) ?></span>
+                                            <span class="badge border font-monospace px-2 py-1" style="--bs-badge-color: #1e293b; color: #1e293b !important; background-color: #f8fafc; font-size: 13px; font-weight: 600;">
+                                                <?= esc($row['keyword']) ?>
+                                            </span>
                                         </td>
                                         <td class="text-center">
                                             <span class="badge bg-secondary"><?= esc($row['result_count']) ?> hasil</span>
@@ -163,3 +165,4 @@
 </div>
 
 <?= $this->endSection(); ?>
+

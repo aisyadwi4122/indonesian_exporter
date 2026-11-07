@@ -121,7 +121,9 @@
                                         <td><?= esc($row['product_name']) ?></td>
                                         <td class="text-muted"><?= esc($row['nama_perusahaan']) ?></td>
                                         <td class="text-center">
-                                            <span class="badge bg-info text-dark px-2 py-1"><?= esc($row['pdf_type']) ?></span>
+                                            <span class="badge border px-2 py-1" style="--bs-badge-color: #1e293b; color: #1e293b !important; background-color: #f8fafc; font-size: 12px; font-weight: 600;">
+                                                <?= esc($row['pdf_type']) ?>
+                                            </span>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -178,3 +180,4 @@
 </div>
 
 <?= $this->endSection(); ?>
+
