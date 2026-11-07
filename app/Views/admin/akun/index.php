@@ -237,6 +237,46 @@
                                                         </button>
                                                     <?php endif; ?>
                                                 </form>
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-danger text-white" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#deleteModal<?= esc($row['tipe']) ?>_<?= esc($row['id']) ?>" 
+                                                        title="Hapus Akun">
+                                                    <i class="fa-solid fa-trash"></i> Hapus
+                                                </button>
+                                            </div>
+
+                                            <!-- Modal Konfirmasi Hapus Akun -->
+                                            <div class="modal fade" id="deleteModal<?= esc($row['tipe']) ?>_<?= esc($row['id']) ?>" tabindex="-1" aria-labelledby="deleteModalLabel<?= esc($row['tipe']) ?>_<?= esc($row['id']) ?>" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content text-start">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title text-danger" id="deleteModalLabel<?= esc($row['tipe']) ?>_<?= esc($row['id']) ?>">
+                                                                <i class="fa-solid fa-triangle-exclamation me-2"></i>Konfirmasi Hapus Akun
+                                                            </h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p class="mb-0 text-dark">
+                                                                Hapus akun <strong><?= esc($row['nama']) ?></strong> (<code><?= esc($row['username']) ?></code>)? Tindakan ini tidak bisa dibatalkan.
+                                                            </p>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Batal</button>
+                                                            <form action="<?= base_url('admin/akun/delete/' . esc($row['tipe']) . '/' . esc($row['id'])) ?>" method="POST" class="d-inline">
+                                                                <?= csrf_field(); ?>
+                                                                <input type="hidden" name="tipe" value="<?= esc($tipe_filter) ?>">
+                                                                <input type="hidden" name="status" value="<?= esc($status_filter) ?>">
+                                                                <input type="hidden" name="akses" value="<?= esc($akses_filter ?? 'all') ?>">
+                                                                <input type="hidden" name="q" value="<?= esc($search_query) ?>">
+                                                                <input type="hidden" name="page" value="<?= esc($current_page) ?>">
+                                                                <button type="submit" class="btn btn-danger text-white">
+                                                                    <i class="fa-solid fa-trash me-1"></i> Hapus
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>

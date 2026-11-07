@@ -615,4 +615,112 @@ class Akun extends AdminAuthBase
 
         return redirect()->to(base_url('admin/akun/index'));
     }
+
+    /**
+     * Menghapus akun sales atau supplier
+     * Route: POST admin/akun/delete/{tipe}/{id}
+     */
+    public function delete($tipe = null, $id = null)
+    {
+        if ($redirect = $this->checkAuth()) {
+            return $redirect;
+        }
+
+        // Siapkan redirect URL dengan mempertahankan tab, filter, dan pencarian yang aktif
+        $redirectParams = [];
+        $tipeParam = (string)$this->request->getPost('tipe');
+        if ($tipeParam !== '' && $tipeParam !== 'all') {
+            $redirectParams['tipe'] = $tipeParam;
+        }
+        $statusParam = (string)$this->request->getPost('status');
+        if ($statusParam !== '' && $statusParam !== 'all') {
+            $redirectParams['status'] = $statusParam;
+        }
+        $aksesParam = (string)$this->request->getPost('akses');
+        if ($aksesParam !== '' && $aksesParam !== 'all') {
+            $redirectParams['akses'] = $aksesParam;
+        }
+        $qParam = trim((string)$this->request->getPost('q'));
+        if ($qParam !== '') {
+            $redirectParams['q'] = $qParam;
+        }
+        $pageParam = (int)$this->request->getPost('page');
+        if ($pageParam > 1) {
+            $redirectParams['page'] = $pageParam;
+        }
+
+        $redirectUrl = base_url('admin/akun/index');
+        if (!empty($redirectParams)) {
+            $redirectUrl .= '?' . http_build_query($redirectParams);
+        }
+
+        if (strtolower($this->request->getMethod()) !== 'post') {
+            session()->setFlashdata('error', 'Metode permintaan tidak diizinkan.');
+            return redirect()->to($redirectUrl);
+        }
+
+        $tipe = strtolower((string)$tipe);
+        if (!in_array($tipe, ['sales', 'supplier'], true) || empty($id)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        $id = (int)$id;
+        $adminUser = session()->get('username') ?? 'admin';
+
+        if ($tipe === 'sales') {
+            $account = $this->salesModel->find($id);
+            if (!$account) {
+                session()->setFlashdata('error', 'Akun Sales tidak ditemukan.');
+                return redirect()->to($redirectUrl);
+            }
+
+            // Aturan pengaman: Akun yang sedang login tidak boleh menghapus dirinya sendiri
+            $loggedUsername = (string)session()->get('username');
+            $loggedSalesId  = (int)session()->get('id_sales');
+            if (
+                ($loggedSalesId > 0 && $loggedSalesId === $id) ||
+                ($loggedUsername !== '' && strtolower($loggedUsername) === strtolower((string)$account['username']))
+            ) {
+                session()->setFlashdata('error', 'Anda tidak dapat menghapus akun yang sedang Anda gunakan untuk login.');
+                return redirect()->to($redirectUrl);
+            }
+
+            try {
+                $this->salesModel->delete($id);
+                log_message('info', "Admin '{$adminUser}' berhasil menghapus akun Sales '{$account['username']}' (ID: {$id}).");
+                session()->setFlashdata('success', 'Akun berhasil dihapus');
+            } catch (\Throwable $e) {
+                log_message('error', "Gagal menghapus akun Sales ID {$id}: " . $e->getMessage());
+                session()->setFlashdata('error', 'Gagal menghapus akun: ' . $e->getMessage());
+            }
+        } else {
+            $account = $this->supplierUserModel->find($id);
+            if (!$account) {
+                session()->setFlashdata('error', 'Akun Supplier tidak ditemukan.');
+                return redirect()->to($redirectUrl);
+            }
+
+            // Aturan pengaman: Akun yang sedang login tidak boleh menghapus dirinya sendiri
+            $loggedUsername    = (string)session()->get('username');
+            $loggedSupplierId  = (int)session()->get('id_supplier_user');
+            if (
+                ($loggedSupplierId > 0 && $loggedSupplierId === $id) ||
+                ($loggedUsername !== '' && strtolower($loggedUsername) === strtolower((string)$account['username']))
+            ) {
+                session()->setFlashdata('error', 'Anda tidak dapat menghapus akun yang sedang Anda gunakan untuk login.');
+                return redirect()->to($redirectUrl);
+            }
+
+            try {
+                $this->supplierUserModel->delete($id);
+                log_message('info', "Admin '{$adminUser}' berhasil menghapus akun Supplier '{$account['username']}' (ID: {$id}).");
+                session()->setFlashdata('success', 'Akun berhasil dihapus');
+            } catch (\Throwable $e) {
+                log_message('error', "Gagal menghapus akun Supplier ID {$id}: " . $e->getMessage());
+                session()->setFlashdata('error', 'Gagal menghapus akun: ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->to($redirectUrl);
+    }
 }

@@ -211,6 +211,7 @@ $routes->post('admin/akun/proses_tambah', 'admin\Akun::proses_tambah');
 $routes->get('admin/akun/edit/(:segment)/(:num)', 'admin\Akun::edit/$1/$2');
 $routes->post('admin/akun/proses_edit/(:segment)/(:num)', 'admin\Akun::proses_edit/$1/$2');
 $routes->post('admin/akun/toggle/(:segment)/(:num)', 'admin\Akun::toggle/$1/$2');
+$routes->post('admin/akun/delete/(:segment)/(:num)', 'admin\Akun::delete/$1/$2');
 
 // REDIRECT ROUTE LAMA AKUN SALES KE MODUL BARU
 $routes->get('admin/akun_sales', function () {
