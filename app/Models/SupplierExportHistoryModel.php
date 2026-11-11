@@ -100,4 +100,74 @@ class SupplierExportHistoryModel extends Model
 
         return isset($row['total']) && $row['total'] !== null ? (float) $row['total'] : 0.0;
     }
+
+    /**
+     * Mengambil ringkasan data turunan ekspor berdasarkan id_supplier dari tb_history_export_supplier.
+     * Mengembalikan array dengan key: pernah_ekspor, kategori_ekspor, frekuensi_ekspor, total_transaksi.
+     */
+    public function getSummaryBySupplier(?int $idSupplier): array
+    {
+        static $cache = [];
+
+        if (empty($idSupplier)) {
+            return [
+                'pernah_ekspor'    => 'Belum',
+                'kategori_ekspor'  => '-',
+                'frekuensi_ekspor' => '-',
+                'total_transaksi'  => 0,
+            ];
+        }
+
+        if (isset($cache[$idSupplier])) {
+            return $cache[$idSupplier];
+        }
+
+        $rows = $this->select('tahun, jenis_ekspor')
+            ->where('id_supplier', $idSupplier)
+            ->findAll();
+
+        if (empty($rows)) {
+            return $cache[$idSupplier] = [
+                'pernah_ekspor'    => 'Belum',
+                'kategori_ekspor'  => '-',
+                'frekuensi_ekspor' => '-',
+                'total_transaksi'  => 0,
+            ];
+        }
+
+        $totalTransaksi = count($rows);
+        $kategoriList   = [];
+        $years          = [];
+
+        foreach ($rows as $r) {
+            $cat = trim((string)($r['jenis_ekspor'] ?? ''));
+            if ($cat !== '' && $cat !== '-' && !in_array($cat, $kategoriList, true)) {
+                $kategoriList[] = $cat;
+            }
+            if (!empty($r['tahun'])) {
+                $y = (int)$r['tahun'];
+                if ($y > 0 && !in_array($y, $years, true)) {
+                    $years[] = $y;
+                }
+            }
+        }
+
+        $kategoriEkspor = !empty($kategoriList) ? implode(', ', $kategoriList) : '-';
+
+        if (!empty($years)) {
+            $minY = min($years);
+            $maxY = max($years);
+            $yearSpan = ($minY === $maxY) ? "tahun {$minY}" : "tahun {$minY}-{$maxY}";
+            $frekuensiEkspor = "{$totalTransaksi} transaksi tercatat ({$yearSpan})";
+        } else {
+            $frekuensiEkspor = "{$totalTransaksi} transaksi tercatat";
+        }
+
+        return $cache[$idSupplier] = [
+            'pernah_ekspor'    => 'Ya',
+            'kategori_ekspor'  => $kategoriEkspor,
+            'frekuensi_ekspor' => $frekuensiEkspor,
+            'total_transaksi'  => $totalTransaksi,
+        ];
+    }
 }

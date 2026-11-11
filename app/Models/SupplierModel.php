@@ -26,7 +26,6 @@ class SupplierModel extends Model
         'jenis_perusahaan',
         'kapasitas_produksi',
         'jumlah_pegawai',
-        'frekuensi_ekspor',
         'pameran_internasional',
         'keunggulan_produk',
         'link_foto_usaha',
@@ -34,13 +33,6 @@ class SupplierModel extends Model
         'link_dokumen_legalitas',
         'sertifikasi',
         'link_dokumen_sertifikat',
-        'pernah_ekspor',
-        'kategori_ekspor',
-        'ringkasan_ekspor_tanggal',
-        'ringkasan_ekspor_produk',
-        'ringkasan_ekspor_kapasitas',
-        'ringkasan_ekspor_negara',
-        'ringkasan_ekspor_nilai',
         'sumber_tahun',
     ];
 

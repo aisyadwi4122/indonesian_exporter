@@ -561,18 +561,10 @@ class Produk extends BaseController
                     'kapasitas_produksi'        => $kapasitas,
                     'produk_dipasarkan'         => $ecp['produk_dipasarkan'] ?? '',
                     'jumlah_pegawai'            => '',
-                    'frekuensi_ekspor'          => '',
                     'pameran_internasional'     => '',
                     'keunggulan_produk'         => '',
                     'legalitas'                 => '',
                     'sertifikasi'               => '',
-                    'pernah_ekspor'             => 'Sudah',
-                    'kategori_ekspor'           => $ecp['kategori_produk'] ?? '',
-                    'ringkasan_ekspor_tanggal'  => ($isInternal && !empty($ecp['tahun'])) ? (string)$ecp['tahun'] : '',
-                    'ringkasan_ekspor_produk'   => ($isInternal && !empty($ecp['produk_ekspor'])) ? $ecp['produk_ekspor'] : '',
-                    'ringkasan_ekspor_kapasitas'=> ($isInternal && !empty($ecp['kuantitas_ekspor'])) ? $ecp['kuantitas_ekspor'] : '',
-                    'ringkasan_ekspor_negara'   => ($isInternal && !empty($ecp['negara_tujuan'])) ? $ecp['negara_tujuan'] : '',
-                    'ringkasan_ekspor_nilai'    => ($isInternal && ($nilaiUsd > 0)) ? ('$' . number_format($nilaiUsd, 0, ',', '.') . ' USD') : '',
                     'kode_produk'               => $kodeProduk,
                 ];
 

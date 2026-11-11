@@ -78,16 +78,34 @@ class Perusahaan extends SupplierBase
                     'max_length' => 'Nomor HP maksimal 30 karakter.',
                 ],
             ],
+            'link_dokumen_legalitas' => [
+                'rules'  => 'permit_empty|valid_url_strict[http,https]|max_length[1000]',
+                'errors' => [
+                    'valid_url_strict' => 'Link dokumen legalitas harus berupa URL valid (diawali http:// atau https://).',
+                    'max_length'       => 'Link dokumen legalitas maksimal 1000 karakter.',
+                ],
+            ],
+            'link_dokumen_sertifikat' => [
+                'rules'  => 'permit_empty|valid_url_strict[http,https]|max_length[1000]',
+                'errors' => [
+                    'valid_url_strict' => 'Link dokumen sertifikat harus berupa URL valid (diawali http:// atau https://).',
+                    'max_length'       => 'Link dokumen sertifikat maksimal 1000 karakter.',
+                ],
+            ],
         ];
 
         $namaPerusahaan = trim((string)($this->request->getPost('nama_perusahaan') ?? $_POST['nama_perusahaan'] ?? ''));
         $email          = trim((string)($this->request->getPost('email') ?? $_POST['email'] ?? ''));
         $noHp           = trim((string)($this->request->getPost('no_hp') ?? $_POST['no_hp'] ?? ''));
+        $linkLegalitas  = trim((string)($this->request->getPost('link_dokumen_legalitas') ?? $_POST['link_dokumen_legalitas'] ?? ''));
+        $linkSertifikat = trim((string)($this->request->getPost('link_dokumen_sertifikat') ?? $_POST['link_dokumen_sertifikat'] ?? ''));
 
         $dataToValidate = [
-            'nama_perusahaan' => $namaPerusahaan,
-            'email'           => $email,
-            'no_hp'           => $noHp,
+            'nama_perusahaan'         => $namaPerusahaan,
+            'email'                   => $email,
+            'no_hp'                   => $noHp,
+            'link_dokumen_legalitas'  => $linkLegalitas,
+            'link_dokumen_sertifikat' => $linkSertifikat,
         ];
 
         if (!$this->validateData($dataToValidate, $rules)) {
@@ -125,21 +143,13 @@ class Perusahaan extends SupplierBase
             'jenis_perusahaan'           => $getPostVal('jenis_perusahaan'),
             'kapasitas_produksi'         => $getPostVal('kapasitas_produksi'),
             'jumlah_pegawai'             => $getPostVal('jumlah_pegawai'),
-            'frekuensi_ekspor'           => $getPostVal('frekuensi_ekspor'),
             'pameran_internasional'      => $getPostVal('pameran_internasional'),
             'keunggulan_produk'          => $getPostVal('keunggulan_produk'),
             'link_foto_usaha'            => $getPostVal('link_foto_usaha'),
             'legalitas'                  => $getPostVal('legalitas'),
-            'link_dokumen_legalitas'     => $getPostVal('link_dokumen_legalitas'),
+            'link_dokumen_legalitas'     => $linkLegalitas,
             'sertifikasi'                => $getPostVal('sertifikasi'),
-            'link_dokumen_sertifikat'    => $getPostVal('link_dokumen_sertifikat'),
-            'pernah_ekspor'              => $getPostVal('pernah_ekspor'),
-            'kategori_ekspor'            => $getPostVal('kategori_ekspor'),
-            'ringkasan_ekspor_tanggal'   => $getPostVal('ringkasan_ekspor_tanggal'),
-            'ringkasan_ekspor_produk'    => $getPostVal('ringkasan_ekspor_produk'),
-            'ringkasan_ekspor_kapasitas' => $getPostVal('ringkasan_ekspor_kapasitas'),
-            'ringkasan_ekspor_negara'    => $getPostVal('ringkasan_ekspor_negara'),
-            'ringkasan_ekspor_nilai'     => $getPostVal('ringkasan_ekspor_nilai'),
+            'link_dokumen_sertifikat'    => $linkSertifikat,
         ];
 
         if (empty($supplierId)) {

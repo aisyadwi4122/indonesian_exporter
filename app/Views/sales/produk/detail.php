@@ -809,6 +809,10 @@ if ($is_internal && $rawIg !== '') {
     <!-- ================= TAB 2: DATA PERUSAHAAN / PROFIL USAHA ================= -->
     <div class="tab-pane fade" id="tab-perusahaan" role="tabpanel" aria-labelledby="tab-perusahaan-btn">
         <div class="sales-card mb-4">
+            <?php
+            $supplierId = !empty($supplier['id_supplier']) ? (int)$supplier['id_supplier'] : 0;
+            $exportSummary = (new \App\Models\SupplierExportHistoryModel())->getSummaryBySupplier($supplierId);
+            ?>
             <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom flex-wrap gap-2">
                 <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 17px;">
                     <?php if ($is_internal): ?>
@@ -923,7 +927,7 @@ if ($is_internal && $rawIg !== '') {
                         </div>
                         <div class="row info-row">
                             <div class="col-5 label-col">Frekuensi Ekspor</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['frekuensi_ekspor']) ? $supplier['frekuensi_ekspor'] : '-') ?></div>
+                            <div class="col-7 value-col"><?= esc($exportSummary['frekuensi_ekspor']) ?></div>
                         </div>
                     </div>
                 </div>
@@ -954,11 +958,11 @@ if ($is_internal && $rawIg !== '') {
                     <div class="col-md-6">
                         <div class="row info-row">
                             <div class="col-5 label-col">Pernah Ekspor</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['pernah_ekspor']) ? $supplier['pernah_ekspor'] : '-') ?></div>
+                            <div class="col-7 value-col"><?= esc($exportSummary['pernah_ekspor']) ?></div>
                         </div>
                         <div class="row info-row">
                             <div class="col-5 label-col">Kategori Ekspor</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['kategori_ekspor']) ? $supplier['kategori_ekspor'] : '-') ?></div>
+                            <div class="col-7 value-col"><?= esc($exportSummary['kategori_ekspor']) ?></div>
                         </div>
                         <div class="row info-row">
                             <div class="col-5 label-col">Link Foto Usaha</div>
@@ -981,9 +985,13 @@ if ($is_internal && $rawIg !== '') {
                                 <?php if (!empty($supplier['link_dokumen_legalitas'])): ?>
                                     <?php $links = array_filter(array_map('trim', explode(',', $supplier['link_dokumen_legalitas']))); ?>
                                     <?php foreach ($links as $idx => $link): ?>
-                                        <a href="<?= esc($link) ?>" target="_blank" rel="noopener" class="text-success text-decoration-none d-inline-block me-2 mb-1">
-                                            <i class="fa-solid fa-arrow-up-right-from-square me-1"></i><?= count($links) > 1 ? 'Dokumen ' . ($idx + 1) : 'Buka Dokumen' ?>
-                                        </a>
+                                        <?php if (preg_match('#^https?://#i', $link)): ?>
+                                            <a href="<?= esc($link) ?>" target="_blank" rel="noopener" class="text-success text-decoration-none d-inline-block me-2 mb-1">
+                                                <i class="fa-solid fa-arrow-up-right-from-square me-1"></i><?= count($links) > 1 ? 'Dokumen ' . ($idx + 1) : 'Buka Dokumen' ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="d-inline-block me-2 mb-1 text-muted"><?= esc($link) ?></span>
+                                        <?php endif; ?>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     -
@@ -996,9 +1004,13 @@ if ($is_internal && $rawIg !== '') {
                                 <?php if (!empty($supplier['link_dokumen_sertifikat'])): ?>
                                     <?php $links = array_filter(array_map('trim', explode(',', $supplier['link_dokumen_sertifikat']))); ?>
                                     <?php foreach ($links as $idx => $link): ?>
-                                        <a href="<?= esc($link) ?>" target="_blank" rel="noopener" class="text-success text-decoration-none d-inline-block me-2 mb-1">
-                                            <i class="fa-solid fa-arrow-up-right-from-square me-1"></i><?= count($links) > 1 ? 'Sertifikat ' . ($idx + 1) : 'Buka Sertifikat' ?>
-                                        </a>
+                                        <?php if (preg_match('#^https?://#i', $link)): ?>
+                                            <a href="<?= esc($link) ?>" target="_blank" rel="noopener" class="text-success text-decoration-none d-inline-block me-2 mb-1">
+                                                <i class="fa-solid fa-arrow-up-right-from-square me-1"></i><?= count($links) > 1 ? 'Sertifikat ' . ($idx + 1) : 'Buka Sertifikat' ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="d-inline-block me-2 mb-1 text-muted"><?= esc($link) ?></span>
+                                        <?php endif; ?>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     -
@@ -1032,50 +1044,12 @@ if ($is_internal && $rawIg !== '') {
                         </div>
                         <div class="row info-row">
                             <div class="col-5 label-col">Pernah Ekspor</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['pernah_ekspor']) ? $supplier['pernah_ekspor'] : '-') ?></div>
+                            <div class="col-7 value-col"><?= esc($exportSummary['pernah_ekspor']) ?></div>
                         </div>
                     </div>
                 </div>
             <?php endif; ?>
 
-            <?php if ($is_internal): ?>
-            <!-- Bagian 3: Ringkasan Ekspor Terakhir (hanya untuk Sales Internal) -->
-            <h6 class="fw-bold mb-3 pb-2 border-bottom text-dark d-flex align-items-center gap-2" style="font-size: 15px;">
-                <i class="fa-solid fa-plane-departure text-success"></i>Ekspor Terakhir
-            </h6>
-            <div class="row g-3">
-                <div class="col-sm-6 col-lg">
-                    <div class="p-3 rounded-2 border bg-light text-center">
-                        <small class="text-muted d-block mb-1">Tanggal</small>
-                        <span class="fw-semibold text-dark"><?= esc(!empty($supplier['ringkasan_ekspor_tanggal']) ? $supplier['ringkasan_ekspor_tanggal'] : '-') ?></span>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg">
-                    <div class="p-3 rounded-2 border bg-light text-center">
-                        <small class="text-muted d-block mb-1">Produk</small>
-                        <span class="fw-semibold text-dark text-truncate d-block" title="<?= esc($supplier['ringkasan_ekspor_produk'] ?? '-') ?>"><?= esc(!empty($supplier['ringkasan_ekspor_produk']) ? $supplier['ringkasan_ekspor_produk'] : '-') ?></span>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg">
-                    <div class="p-3 rounded-2 border bg-light text-center">
-                        <small class="text-muted d-block mb-1">Kapasitas</small>
-                        <span class="fw-semibold text-dark"><?= esc(!empty($supplier['ringkasan_ekspor_kapasitas']) ? $supplier['ringkasan_ekspor_kapasitas'] : '-') ?></span>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg">
-                    <div class="p-3 rounded-2 border bg-light text-center">
-                        <small class="text-muted d-block mb-1">Negara Tujuan</small>
-                        <span class="fw-semibold text-dark"><?= esc(!empty($supplier['ringkasan_ekspor_negara']) ? $supplier['ringkasan_ekspor_negara'] : '-') ?></span>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg">
-                    <div class="p-3 rounded-2 border bg-light text-center">
-                        <small class="text-muted d-block mb-1">Nilai Ekspor</small>
-                        <span class="fw-bold text-success"><?= esc(!empty($supplier['ringkasan_ekspor_nilai']) ? $supplier['ringkasan_ekspor_nilai'] : '-') ?></span>
-                    </div>
-                </div>
-            </div>
-            <?php endif; ?>
         </div>
     </div>
 

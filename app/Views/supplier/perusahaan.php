@@ -163,7 +163,7 @@
         </div>
 
         <div class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <label for="kapasitas_produksi" class="form-label">Kapasitas Produksi</label>
                 <input type="text" 
                        class="form-control" 
@@ -173,7 +173,7 @@
                        value="<?= esc(old('kapasitas_produksi', $perusahaan['kapasitas_produksi'] ?? '')) ?>">
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <label for="jumlah_pegawai" class="form-label">Jumlah Pegawai</label>
                 <input type="text" 
                        class="form-control" 
@@ -181,16 +181,6 @@
                        name="jumlah_pegawai" 
                        placeholder="Contoh: 50 - 100 Orang" 
                        value="<?= esc(old('jumlah_pegawai', $perusahaan['jumlah_pegawai'] ?? '')) ?>">
-            </div>
-
-            <div class="col-md-4">
-                <label for="frekuensi_ekspor" class="form-label">Frekuensi Ekspor</label>
-                <input type="text" 
-                       class="form-control" 
-                       id="frekuensi_ekspor" 
-                       name="frekuensi_ekspor" 
-                       placeholder="Contoh: 2 - 4 Kontainer / Bulan" 
-                       value="<?= esc(old('frekuensi_ekspor', $perusahaan['frekuensi_ekspor'] ?? '')) ?>">
             </div>
 
             <div class="col-12">
@@ -264,11 +254,11 @@
         </div>
     </div>
 
-    <!-- 4. LEGALITAS, SERTIFIKASI & PENGALAMAN EKSPOR -->
+    <!-- 4. LEGALITAS & SERTIFIKASI -->
     <div class="profile-card">
         <div class="profile-section-title">
             <i class="fa-solid fa-certificate"></i>
-            <span>Legalitas, Sertifikasi & Pengalaman Ekspor</span>
+            <span>Legalitas & Sertifikasi</span>
         </div>
 
         <div class="row g-3">
@@ -290,27 +280,7 @@
                           placeholder="Contoh: Halal MUI, BPOM, HACCP, ISO 22000, FDA"><?= esc(old('sertifikasi', $perusahaan['sertifikasi'] ?? '')) ?></textarea>
             </div>
 
-            <div class="col-md-4">
-                <label for="pernah_ekspor" class="form-label">Pernah Ekspor?</label>
-                <select class="form-select" id="pernah_ekspor" name="pernah_ekspor">
-                    <?php $curPernah = old('pernah_ekspor', $perusahaan['pernah_ekspor'] ?? ''); ?>
-                    <option value="">-- Pilih Status --</option>
-                    <option value="Ya" <?= strtolower($curPernah) === 'ya' ? 'selected' : '' ?>>Ya</option>
-                    <option value="Belum" <?= strtolower($curPernah) === 'belum' ? 'selected' : '' ?>>Belum</option>
-                </select>
-            </div>
-
-            <div class="col-md-4">
-                <label for="kategori_ekspor" class="form-label">Kategori Ekspor</label>
-                <input type="text" 
-                       class="form-control" 
-                       id="kategori_ekspor" 
-                       name="kategori_ekspor" 
-                       placeholder="Contoh: Makanan Olahan / Kerajinan" 
-                       value="<?= esc(old('kategori_ekspor', $perusahaan['kategori_ekspor'] ?? '')) ?>">
-            </div>
-
-            <div class="col-md-4">
+            <div class="col-12">
                 <label for="pameran_internasional" class="form-label">Pameran Internasional</label>
                 <input type="text" 
                        class="form-control" 
@@ -358,66 +328,6 @@
                        name="link_dokumen_sertifikat" 
                        placeholder="Link cloud dokumen sertifikasi produk" 
                        value="<?= esc(old('link_dokumen_sertifikat', $perusahaan['link_dokumen_sertifikat'] ?? '')) ?>">
-            </div>
-        </div>
-    </div>
-
-    <!-- 6. RINGKASAN EKSPOR TERAKHIR -->
-    <div class="profile-card">
-        <div class="profile-section-title">
-            <i class="fa-solid fa-plane-departure"></i>
-            <span>Ringkasan Ekspor Terakhir</span>
-        </div>
-
-        <div class="row g-3">
-            <div class="col-md-3">
-                <label for="ringkasan_ekspor_tanggal" class="form-label">Tanggal / Periode</label>
-                <input type="text" 
-                       class="form-control" 
-                       id="ringkasan_ekspor_tanggal" 
-                       name="ringkasan_ekspor_tanggal" 
-                       placeholder="Contoh: 2024 / Q1 2024" 
-                       value="<?= esc(old('ringkasan_ekspor_tanggal', $perusahaan['ringkasan_ekspor_tanggal'] ?? '')) ?>">
-            </div>
-
-            <div class="col-md-3">
-                <label for="ringkasan_ekspor_produk" class="form-label">Produk Diekspor</label>
-                <input type="text" 
-                       class="form-control" 
-                       id="ringkasan_ekspor_produk" 
-                       name="ringkasan_ekspor_produk" 
-                       placeholder="Contoh: Kopi Robusta" 
-                       value="<?= esc(old('ringkasan_ekspor_produk', $perusahaan['ringkasan_ekspor_produk'] ?? '')) ?>">
-            </div>
-
-            <div class="col-md-2">
-                <label for="ringkasan_ekspor_kapasitas" class="form-label">Kapasitas</label>
-                <input type="text" 
-                       class="form-control" 
-                       id="ringkasan_ekspor_kapasitas" 
-                       name="ringkasan_ekspor_kapasitas" 
-                       placeholder="Contoh: 1 Kontainer 20ft" 
-                       value="<?= esc(old('ringkasan_ekspor_kapasitas', $perusahaan['ringkasan_ekspor_kapasitas'] ?? '')) ?>">
-            </div>
-
-            <div class="col-md-2">
-                <label for="ringkasan_ekspor_negara" class="form-label">Negara Tujuan</label>
-                <input type="text" 
-                       class="form-control" 
-                       id="ringkasan_ekspor_negara" 
-                       name="ringkasan_ekspor_negara" 
-                       placeholder="Contoh: Jepang" 
-                       value="<?= esc(old('ringkasan_ekspor_negara', $perusahaan['ringkasan_ekspor_negara'] ?? '')) ?>">
-            </div>
-
-            <div class="col-md-2">
-                <label for="ringkasan_ekspor_nilai" class="form-label">Nilai Ekspor</label>
-                <input type="text" 
-                       class="form-control" 
-                       id="ringkasan_ekspor_nilai" 
-                       name="ringkasan_ekspor_nilai" 
-                       placeholder="Contoh: USD 25,000" 
-                       value="<?= esc(old('ringkasan_ekspor_nilai', $perusahaan['ringkasan_ekspor_nilai'] ?? '')) ?>">
             </div>
         </div>
     </div>

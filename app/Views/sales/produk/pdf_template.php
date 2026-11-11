@@ -277,6 +277,9 @@ foreach ($items as $index => $item):
         $contactInfo = [];
         $companyTitle = !empty($is_internal) ? 'Data Perusahaan' : 'Profil Usaha';
         if (!empty($supplier)) {
+            $supplierId = !empty($supplier['id_supplier']) ? (int)$supplier['id_supplier'] : 0;
+            $exportSummary = (new \App\Models\SupplierExportHistoryModel())->getSummaryBySupplier($supplierId);
+
             if (!empty($is_internal)) {
                 $contactFields = [
                     'No. HP'      => $supplier['no_hp'] ?? null,
@@ -297,13 +300,13 @@ foreach ($items as $index => $item):
                     'Jenis Perusahaan'       => $supplier['jenis_perusahaan'] ?? null,
                     'Kapasitas Produksi'     => $supplier['kapasitas_produksi'] ?? null,
                     'Jumlah Pegawai'         => $supplier['jumlah_pegawai'] ?? null,
-                    'Frekuensi Ekspor'       => $supplier['frekuensi_ekspor'] ?? null,
+                    'Frekuensi Ekspor'       => $exportSummary['frekuensi_ekspor'],
                     'Pameran Internasional'  => $supplier['pameran_internasional'] ?? null,
                     'Keunggulan Produk'      => $supplier['keunggulan_produk'] ?? null,
                     'Legalitas Usaha'        => $supplier['legalitas'] ?? null,
                     'Sertifikasi Usaha'      => $supplier['sertifikasi'] ?? null,
-                    'Pernah Ekspor'          => $supplier['pernah_ekspor'] ?? null,
-                    'Kategori Ekspor'        => $supplier['kategori_ekspor'] ?? null,
+                    'Pernah Ekspor'          => $exportSummary['pernah_ekspor'],
+                    'Kategori Ekspor'        => $exportSummary['kategori_ekspor'],
                 ];
             } else {
                 // Mode eksternal: HANYA 5 field profil usaha (selaras dengan tab Profil Usaha Eksternal)
@@ -312,7 +315,7 @@ foreach ($items as $index => $item):
                     'Domisili Usaha'         => $supplier['domisili_usaha'] ?? null,
                     'Produk yang Dipasarkan' => $supplier['produk_dipasarkan'] ?? null,
                     'Jumlah Pegawai'         => $supplier['jumlah_pegawai'] ?? null,
-                    'Pernah Ekspor'          => $supplier['pernah_ekspor'] ?? null,
+                    'Pernah Ekspor'          => $exportSummary['pernah_ekspor'],
                 ];
             }
             foreach ($fields as $label => $val) {

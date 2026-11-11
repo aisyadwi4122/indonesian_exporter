@@ -420,12 +420,7 @@ class SupplierProductModel extends Model
                 $data['supplier']['legalitas'],
                 $data['supplier']['link_dokumen_legalitas'],
                 $data['supplier']['link_dokumen_sertifikat'],
-                $data['supplier']['link_foto_usaha'],
-                $data['supplier']['ringkasan_ekspor_tanggal'],
-                $data['supplier']['ringkasan_ekspor_produk'],
-                $data['supplier']['ringkasan_ekspor_kapasitas'],
-                $data['supplier']['ringkasan_ekspor_negara'],
-                $data['supplier']['ringkasan_ekspor_nilai']
+                $data['supplier']['link_foto_usaha']
             );
 
             // Bersihkan sisa teks bebas di profil usaha jika memuat nama perusahaan/merek
@@ -483,12 +478,7 @@ class SupplierProductModel extends Model
             $data['link_dokumen_legalitas'],
             $data['link_dokumen_sertifikat'],
             $data['link_foto_usaha'],
-            $data['komisi'],
-            $data['ringkasan_ekspor_tanggal'],
-            $data['ringkasan_ekspor_produk'],
-            $data['ringkasan_ekspor_kapasitas'],
-            $data['ringkasan_ekspor_negara'],
-            $data['ringkasan_ekspor_nilai']
+            $data['komisi']
         );
 
         return $data;
