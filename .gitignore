@@ -126,3 +126,6 @@ nb-configuration.xml
 /phpunit*.xml
 
 /public/uploads/supplier/
+# data sementara dan cadangan
+writable/backup/
+writable/laporan_*.csv
