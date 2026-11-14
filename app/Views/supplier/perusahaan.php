@@ -144,35 +144,6 @@
                        value="<?= esc(old('lokasi_pabrik_gudang', $perusahaan['lokasi_pabrik_gudang'] ?? '')) ?>">
             </div>
 
-            <div class="col-12">
-                <label for="produk_dipasarkan" class="form-label">Produk yang Dipasarkan</label>
-                <textarea class="form-control" 
-                          id="produk_dipasarkan" 
-                          name="produk_dipasarkan" 
-                          rows="2" 
-                          placeholder="Jelaskan jenis komoditas atau kelompok produk utama yang dihasilkan"><?= esc(old('produk_dipasarkan', $perusahaan['produk_dipasarkan'] ?? '')) ?></textarea>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. KAPASITAS & OPERASIONAL -->
-    <div class="profile-card">
-        <div class="profile-section-title">
-            <i class="fa-solid fa-industry"></i>
-            <span>Kapasitas Produksi & Operasional</span>
-        </div>
-
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label for="kapasitas_produksi" class="form-label">Kapasitas Produksi</label>
-                <input type="text" 
-                       class="form-control" 
-                       id="kapasitas_produksi" 
-                       name="kapasitas_produksi" 
-                       placeholder="Contoh: 50 Ton / Bulan" 
-                       value="<?= esc(old('kapasitas_produksi', $perusahaan['kapasitas_produksi'] ?? '')) ?>">
-            </div>
-
             <div class="col-md-6">
                 <label for="jumlah_pegawai" class="form-label">Jumlah Pegawai</label>
                 <input type="text" 
@@ -182,19 +153,10 @@
                        placeholder="Contoh: 50 - 100 Orang" 
                        value="<?= esc(old('jumlah_pegawai', $perusahaan['jumlah_pegawai'] ?? '')) ?>">
             </div>
-
-            <div class="col-12">
-                <label for="keunggulan_produk" class="form-label">Keunggulan Produk / Kelebihan Usaha</label>
-                <textarea class="form-control" 
-                          id="keunggulan_produk" 
-                          name="keunggulan_produk" 
-                          rows="2" 
-                          placeholder="Jelaskan keunggulan kompetitif, standar mutu, atau diferensiasi produk Anda"><?= esc(old('keunggulan_produk', $perusahaan['keunggulan_produk'] ?? '')) ?></textarea>
-            </div>
         </div>
     </div>
 
-    <!-- 3. KONTAK & MEDIA SOSIAL -->
+    <!-- 2. KONTAK & MEDIA SOSIAL -->
     <div class="profile-card">
         <div class="profile-section-title">
             <i class="fa-solid fa-address-book"></i>
@@ -254,7 +216,7 @@
         </div>
     </div>
 
-    <!-- 4. LEGALITAS & SERTIFIKASI -->
+    <!-- 3. LEGALITAS & SERTIFIKASI -->
     <div class="profile-card">
         <div class="profile-section-title">
             <i class="fa-solid fa-certificate"></i>
@@ -280,19 +242,10 @@
                           placeholder="Contoh: Halal MUI, BPOM, HACCP, ISO 22000, FDA"><?= esc(old('sertifikasi', $perusahaan['sertifikasi'] ?? '')) ?></textarea>
             </div>
 
-            <div class="col-12">
-                <label for="pameran_internasional" class="form-label">Pameran Internasional</label>
-                <input type="text" 
-                       class="form-control" 
-                       id="pameran_internasional" 
-                       name="pameran_internasional" 
-                       placeholder="Contoh: Trade Expo Indonesia, Gulfood" 
-                       value="<?= esc(old('pameran_internasional', $perusahaan['pameran_internasional'] ?? '')) ?>">
-            </div>
         </div>
     </div>
 
-    <!-- 5. TAUTAN DOKUMEN & FOTO -->
+    <!-- 4. TAUTAN DOKUMEN & FOTO -->
     <div class="profile-card">
         <div class="profile-section-title">
             <i class="fa-solid fa-cloud-arrow-up"></i>

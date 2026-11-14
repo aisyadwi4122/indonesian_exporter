@@ -28,7 +28,6 @@ class SupplierProdukModel extends Model
         'legalitas',
         'sertifikasi',
         'foto_produk',
-        'pernah_ekspor',
         'harga_moq',
         'komisi',
     ];

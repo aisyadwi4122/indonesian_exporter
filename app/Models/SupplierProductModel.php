@@ -75,9 +75,10 @@ class SupplierProductModel extends Model
             $keyword = trim((string) $filter['keyword']);
             $this->groupStart()
                 ->like('tb_produk_supplier.nama_produk', $keyword)
+                ->orLike('tb_produk_supplier.spesifikasi', $keyword)
+                ->orLike('tb_produk_supplier.deskripsi', $keyword)
                 ->orLike('tb_supplier.nama_perusahaan', $keyword)
                 ->orLike('tb_produk_supplier.lokasi_barang', $keyword)
-                ->orLike('tb_supplier.produk_dipasarkan', $keyword)
             ->groupEnd();
         }
 

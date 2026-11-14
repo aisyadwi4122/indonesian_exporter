@@ -908,19 +908,11 @@ if ($is_internal && $rawIg !== '') {
                             <div class="col-7 value-col"><?= esc(!empty($supplier['domisili_usaha']) ? $supplier['domisili_usaha'] : '-') ?></div>
                         </div>
                         <div class="row info-row">
-                            <div class="col-5 label-col">Produk yang Dipasarkan</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['produk_dipasarkan']) ? $supplier['produk_dipasarkan'] : '-') ?></div>
-                        </div>
-                        <div class="row info-row">
                             <div class="col-5 label-col">Jenis Perusahaan</div>
                             <div class="col-7 value-col"><?= esc(!empty($supplier['jenis_perusahaan']) ? $supplier['jenis_perusahaan'] : '-') ?></div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="row info-row">
-                            <div class="col-5 label-col">Kapasitas Produksi</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['kapasitas_produksi']) ? $supplier['kapasitas_produksi'] : '-') ?></div>
-                        </div>
                         <div class="row info-row">
                             <div class="col-5 label-col">Jumlah Pegawai</div>
                             <div class="col-7 value-col"><?= esc(!empty($supplier['jumlah_pegawai']) ? $supplier['jumlah_pegawai'] : '-') ?></div>
@@ -938,14 +930,6 @@ if ($is_internal && $rawIg !== '') {
                 </h6>
                 <div class="row g-4 mb-4">
                     <div class="col-md-6">
-                        <div class="row info-row">
-                            <div class="col-5 label-col">Pameran Internasional</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['pameran_internasional']) ? $supplier['pameran_internasional'] : '-') ?></div>
-                        </div>
-                        <div class="row info-row">
-                            <div class="col-5 label-col">Keunggulan Produk</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['keunggulan_produk']) ? $supplier['keunggulan_produk'] : '-') ?></div>
-                        </div>
                         <div class="row info-row">
                             <div class="col-5 label-col">Legalitas</div>
                             <div class="col-7 value-col"><?= esc(!empty($supplier['legalitas']) ? $supplier['legalitas'] : '-') ?></div>
@@ -1031,10 +1015,6 @@ if ($is_internal && $rawIg !== '') {
                         <div class="row info-row">
                             <div class="col-5 label-col">Domisili Usaha</div>
                             <div class="col-7 value-col"><?= esc(!empty($supplier['domisili_usaha']) ? $supplier['domisili_usaha'] : '-') ?></div>
-                        </div>
-                        <div class="row info-row">
-                            <div class="col-5 label-col">Produk yang Dipasarkan</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['produk_dipasarkan']) ? $supplier['produk_dipasarkan'] : '-') ?></div>
                         </div>
                     </div>
                     <div class="col-md-6">
