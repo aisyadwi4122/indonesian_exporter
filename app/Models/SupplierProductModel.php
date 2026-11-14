@@ -516,5 +516,25 @@ class SupplierProductModel extends Model
 
         return $builder->orderBy('id_produk_supplier', 'DESC');
     }
+
+    /**
+     * Mengambil daftar produk lain milik supplier yang sama, mengecualikan produk yang sedang aktif.
+     *
+     * @param int $idSupplier
+     * @param int $excludeIdProduk
+     * @return array
+     */
+    public function getOtherProductsBySupplier(int $idSupplier, int $excludeIdProduk): array
+    {
+        if ($idSupplier <= 0) {
+            return [];
+        }
+
+        return $this->select('id_produk_supplier, id_supplier, nama_produk, foto_1')
+            ->where('id_supplier', $idSupplier)
+            ->where('id_produk_supplier !=', $excludeIdProduk)
+            ->orderBy('nama_produk', 'ASC')
+            ->findAll();
+    }
 }
 

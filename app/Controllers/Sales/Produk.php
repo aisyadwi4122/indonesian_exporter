@@ -594,6 +594,7 @@ class Produk extends BaseController
                     'years'          => $years,
                     'totalNilai'     => $totalNilai,
                     'fotos'          => $fotos,
+                    'produkLain'     => [],
                 ];
             }
         }
@@ -606,6 +607,9 @@ class Produk extends BaseController
 
         if ($produkSupplier) {
             $supplier = $supplierModel->find($produkSupplier['id_supplier']);
+            $produkLain = !empty($produkSupplier['id_supplier'])
+                ? $supplierProductModel->getOtherProductsBySupplier((int)$produkSupplier['id_supplier'], (int)$produkSupplier['id_produk_supplier'])
+                : [];
 
             $histories = [];
             $years = [];
@@ -677,6 +681,7 @@ class Produk extends BaseController
             $histories      = [];     // array: baris tb_history_export_supplier
             $years          = [];     // array tahun yang tersedia
             $totalNilai     = 0.0;
+            $produkLain     = [];
         }
 
         return [
@@ -687,6 +692,7 @@ class Produk extends BaseController
             'years'          => $years,
             'totalNilai'     => $totalNilai,
             'fotos'          => $fotos,
+            'produkLain'     => $produkLain,
         ];
     }
 

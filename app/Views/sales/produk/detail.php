@@ -669,6 +669,49 @@ if ($is_internal && $rawIg !== '') {
                     <?php endif; ?>
                 </div>
 
+                <?php if (!empty($produkLain) && is_array($produkLain)): ?>
+                    <?php
+                        $blokTitle = $is_internal 
+                            ? ('Produk lain dari ' . (!empty($supplier['nama_perusahaan']) ? $supplier['nama_perusahaan'] : 'supplier ini'))
+                            : 'Produk lain dari supplier ini';
+                        $totalLain = count($produkLain);
+                    ?>
+                    <div class="sales-card p-3 mb-4">
+                        <h6 class="fw-bold mb-3 pb-2 border-bottom text-dark d-flex align-items-center gap-2" style="font-size: 14.5px;">
+                            <i class="fa-solid fa-boxes-stacked text-success"></i><?= esc($blokTitle) ?>
+                        </h6>
+                        <div class="row g-2 row-cols-2 row-cols-lg-3"<?= $totalLain > 12 ? ' style="max-height: 520px; overflow-y: auto; overflow-x: hidden;"' : '' ?>>
+                            <?php foreach ($produkLain as $pLain): ?>
+                                <?php
+                                    $pLainId = (int)($pLain['id_produk_supplier'] ?? 0);
+                                    $pLainPhoto = \App\Models\SupplierProductModel::photoUrl($pLain, 1);
+                                    $pLainImg = !empty($pLainPhoto) ? $pLainPhoto : base_url('assets/img/logo.png');
+                                    $pLainIsPlaceholder = empty($pLainPhoto);
+                                    $pLainDetailUrl = base_url('sales/produk-supplier/' . $pLainId . (!empty($is_preview) ? '?mode=eksternal' : ''));
+                                ?>
+                                <div class="col">
+                                    <a href="<?= esc($pLainDetailUrl, 'attr') ?>" class="text-decoration-none text-dark d-block h-100" title="<?= esc($pLain['nama_produk'] ?? '') ?>">
+                                        <div class="card h-100 border shadow-none" style="border-radius: 8px; overflow: hidden; transition: transform 0.15s ease, box-shadow 0.15s ease; border-color: #e2e8f0 !important;" onmouseover="this.style.boxShadow='0 4px 10px rgba(0,0,0,0.08)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='none'; this.style.transform='none';">
+                                            <div style="height: 90px; background-color: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                                <img src="<?= esc($pLainImg) ?>" 
+                                                     alt="<?= esc($pLain['nama_produk'] ?? 'Produk') ?>" 
+                                                     loading="lazy" 
+                                                     referrerpolicy="no-referrer"
+                                                     style="width: 100%; height: 100%; object-fit: <?= $pLainIsPlaceholder ? 'contain' : 'cover' ?>; padding: <?= $pLainIsPlaceholder ? '12px' : '0' ?>;" 
+                                                     onerror="this.onerror=null; this.src='<?= base_url('assets/img/logo.png') ?>'; this.style.objectFit='contain'; this.style.padding='12px';">
+                                            </div>
+                                            <div class="p-2">
+                                                <div class="fw-semibold" style="font-size: 11.5px; line-height: 1.3; color: #1e293b; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 30px;">
+                                                    <?= esc($pLain['nama_produk'] ?? '-') ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
             </div>
 
