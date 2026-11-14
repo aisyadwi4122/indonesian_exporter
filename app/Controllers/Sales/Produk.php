@@ -35,8 +35,29 @@ class Produk extends BaseController
         }
         $perPage = 16;
 
-        // Ambil data produk terpadu 127 produk (10 Supplier IE + 117 ECP)
-        $allItems = $productSalesModel->getUnifiedProducts('');
+        // Parameter URL filter baru
+        $perusahaanRaw = trim((string)($this->request->getGet('perusahaan') ?? ''));
+        $lokasiRaw = trim((string)($this->request->getGet('lokasi') ?? ''));
+
+        // Batasi panjang input (maksimal 200 karakter)
+        if (mb_strlen($perusahaanRaw) > 200) {
+            $perusahaanRaw = mb_substr($perusahaanRaw, 0, 200);
+        }
+        if (mb_strlen($lokasiRaw) > 200) {
+            $lokasiRaw = mb_substr($lokasiRaw, 0, 200);
+        }
+
+        // Filter perusahaan: HANYA berlaku jika mode internal. Pada mode eksternal DIABAIKAN di server.
+        $perusahaanKey = '';
+        if ($isInternal && $perusahaanRaw !== '') {
+            $perusahaanKey = preg_replace('/[^a-z0-9]/', '', strtolower($perusahaanRaw));
+        }
+
+        // Filter lokasi: berlaku di kedua mode.
+        $lokasiFilter = $lokasiRaw !== '' ? $lokasiRaw : '';
+
+        // Ambil data produk terpadu dengan filter perusahaan dan lokasi aktif
+        $allItems = $productSalesModel->getUnifiedProducts('', $perusahaanKey, $lokasiFilter);
 
         if ($q !== '') {
             $qLower = strtolower($q);
@@ -119,19 +140,44 @@ class Produk extends BaseController
             unset($p);
         }
 
+        // Tentukan nama perusahaan yang ditampilkan pada bilah filter (diambil dari data hasil, bukan input mentah)
+        $activePerusahaanDisplay = '';
+        if ($isInternal && $perusahaanKey !== '') {
+            foreach ($allItems as $item) {
+                if (!empty($item['nama_perusahaan']) && $item['nama_perusahaan'] !== '-') {
+                    $activePerusahaanDisplay = $item['nama_perusahaan'];
+                    break;
+                }
+            }
+            if ($activePerusahaanDisplay === '') {
+                $dbConn = \Config\Database::connect();
+                $supRow = $dbConn->table('tb_supplier')
+                    ->select('nama_perusahaan')
+                    ->where('nama_kunci', $perusahaanKey)
+                    ->get()
+                    ->getRowArray();
+                if ($supRow && !empty($supRow['nama_perusahaan'])) {
+                    $activePerusahaanDisplay = $supRow['nama_perusahaan'];
+                }
+            }
+        }
+
         $data = [
-            'title'        => 'Produk Supplier Sales - Indonesian Exporter',
-            'page_title'   => 'Produk Supplier',
-            'activeMenu'   => 'produk-supplier',
-            'products'     => $products,
-            'q'            => $q,
-            'is_internal'  => $isInternal,
-            'is_preview'   => $isPreview,
-            'account_tipe' => $accountTipe,
-            'pager'        => $pager,
-            'totalRows'    => $totalRows,
-            'startRow'     => $startRow,
-            'endRow'       => $endRow,
+            'title'                   => 'Produk Supplier Sales - Indonesian Exporter',
+            'page_title'              => 'Produk Supplier',
+            'activeMenu'              => 'produk-supplier',
+            'products'                => $products,
+            'q'                       => $q,
+            'perusahaan'              => $isInternal ? $perusahaanKey : '',
+            'activePerusahaanDisplay' => $activePerusahaanDisplay,
+            'lokasi'                  => $lokasiFilter,
+            'is_internal'             => $isInternal,
+            'is_preview'              => $isPreview,
+            'account_tipe'            => $accountTipe,
+            'pager'                   => $pager,
+            'totalRows'               => $totalRows,
+            'startRow'                => $startRow,
+            'endRow'                  => $endRow,
         ];
 
         return view('sales/produk/index', $data);
@@ -286,7 +332,18 @@ class Produk extends BaseController
         $productSalesModel = new ProdukSalesModel();
         $q = trim((string)($this->request->getGet('q') ?? ''));
 
-        $allItems = $productSalesModel->getUnifiedProducts('');
+        $perusahaanRaw = trim((string)($this->request->getGet('perusahaan') ?? ''));
+        $lokasiRaw = trim((string)($this->request->getGet('lokasi') ?? ''));
+        if (mb_strlen($perusahaanRaw) > 200) {
+            $perusahaanRaw = mb_substr($perusahaanRaw, 0, 200);
+        }
+        if (mb_strlen($lokasiRaw) > 200) {
+            $lokasiRaw = mb_substr($lokasiRaw, 0, 200);
+        }
+        $perusahaanKey = ($isPdfInternal && $perusahaanRaw !== '') ? preg_replace('/[^a-z0-9]/', '', strtolower($perusahaanRaw)) : '';
+        $lokasiFilter = $lokasiRaw !== '' ? $lokasiRaw : '';
+
+        $allItems = $productSalesModel->getUnifiedProducts('', $perusahaanKey, $lokasiFilter);
 
         if ($q !== '') {
             $qLower = strtolower($q);

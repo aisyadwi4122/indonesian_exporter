@@ -46,21 +46,44 @@ class ProdukSalesModel extends SupplierProductModel
     /**
      * Mengambil daftar produk terpadu 127 produk (10 Supplier IE di awal + 117 ECP)
      * Sama persis dengan data dan urutan yang tampil di halaman Sales.
+     * Mendukung filter kata kunci ($q), nama perusahaan ($perusahaan), dan lokasi ($lokasi).
      *
      * @param string $q Kata kunci pencarian
+     * @param string $perusahaan Kunci perusahaan ternormalisasi (nama_kunci)
+     * @param string $lokasi Teks lokasi pencocokan persis (case-insensitive & trimmed)
      * @return array
      */
-    public function getUnifiedProducts(string $q = ''): array
+    public function getUnifiedProducts(string $q = '', string $perusahaan = '', string $lokasi = ''): array
     {
         $items = [];
         $db = \Config\Database::connect();
         $q = trim($q);
+        $perusahaan = trim($perusahaan);
+        $lokasi = trim($lokasi);
 
-        // 1. Ambil data Supplier Produk (10 produk dari tb_produk_supplier join tb_supplier)
+        // 1. Ambil data Supplier Produk (dari tb_produk_supplier join tb_supplier)
         $spBuilder = $db->table('tb_produk_supplier')
-            ->select('tb_produk_supplier.*, tb_supplier.nama_perusahaan, tb_supplier.domisili_usaha')
+            ->select('tb_produk_supplier.*, tb_supplier.nama_perusahaan, tb_supplier.nama_kunci, tb_supplier.domisili_usaha')
             ->join('tb_supplier', 'tb_supplier.id_supplier = tb_produk_supplier.id_supplier', 'left')
             ->orderBy('tb_produk_supplier.id_produk_supplier', 'ASC');
+
+        if ($perusahaan !== '') {
+            $spBuilder->where('tb_supplier.nama_kunci', $perusahaan);
+        }
+
+        if ($lokasi !== '') {
+            $locNorm = strtolower($lokasi);
+            $spBuilder->groupStart()
+                ->where('LOWER(TRIM(tb_produk_supplier.lokasi_barang))', $locNorm)
+                ->orGroupStart()
+                    ->groupStart()
+                        ->where('tb_produk_supplier.lokasi_barang IS NULL', null, false)
+                        ->orWhere('TRIM(tb_produk_supplier.lokasi_barang)', '')
+                    ->groupEnd()
+                    ->where('LOWER(TRIM(tb_supplier.domisili_usaha))', $locNorm)
+                ->groupEnd()
+            ->groupEnd();
+        }
 
         $spRows = $spBuilder->get()->getResultArray();
         foreach ($spRows as $r) {
@@ -68,10 +91,15 @@ class ProdukSalesModel extends SupplierProductModel
             $kode = self::getKodeProduk($idProd);
             $photoUrl = self::photoUrl($r, 1);
             $namaPerusahaan = !empty($r['nama_perusahaan']) ? $r['nama_perusahaan'] : '-';
-            $lokasi = !empty($r['lokasi_barang']) ? $r['lokasi_barang'] : (!empty($r['domisili_usaha']) ? $r['domisili_usaha'] : '-');
+            $namaKunci = !empty($r['nama_kunci']) ? $r['nama_kunci'] : SupplierModel::makeKey($namaPerusahaan);
+            $lokasiItem = !empty($r['lokasi_barang']) ? trim($r['lokasi_barang']) : (!empty($r['domisili_usaha']) ? trim($r['domisili_usaha']) : '-');
+
+            if ($lokasi !== '' && strtolower(trim($lokasiItem)) !== strtolower($lokasi)) {
+                continue;
+            }
 
             if ($q !== '') {
-                $haystack = strtolower($kode . ' ' . $r['nama_produk'] . ' ' . $namaPerusahaan . ' ' . $lokasi . ' ' . ($r['spesifikasi'] ?? ''));
+                $haystack = strtolower($kode . ' ' . $r['nama_produk'] . ' ' . $namaPerusahaan . ' ' . $lokasiItem . ' ' . ($r['spesifikasi'] ?? ''));
                 if (strpos($haystack, strtolower($q)) === false) {
                     continue;
                 }
@@ -84,8 +112,9 @@ class ProdukSalesModel extends SupplierProductModel
                 'kode_produk'        => $kode,
                 'nama_produk'        => $r['nama_produk'] ?: 'Produk Supplier',
                 'nama_perusahaan'    => $namaPerusahaan,
+                'nama_kunci'         => $namaKunci,
                 'domisili_usaha'     => $r['domisili_usaha'] ?? '',
-                'lokasi_barang'      => $lokasi,
+                'lokasi_barang'      => $lokasiItem,
                 'deskripsi'          => $r['deskripsi'] ?? '',
                 'spesifikasi'        => $r['spesifikasi'] ?? '',
                 'kapasitas_produksi' => $r['kapasitas_produksi'] ?? '',
@@ -101,6 +130,21 @@ class ProdukSalesModel extends SupplierProductModel
 
         // 2. Ambil data ECP (117 produk dari tb_ecp_ekspor)
         $ecpBuilder = $db->table('tb_ecp_ekspor')->orderBy('id_ecp', 'ASC');
+
+        if ($lokasi !== '') {
+            $locNorm = strtolower($lokasi);
+            $ecpBuilder->groupStart()
+                ->where('LOWER(TRIM(domisili))', $locNorm)
+                ->orGroupStart()
+                    ->groupStart()
+                        ->where('domisili IS NULL', null, false)
+                        ->orWhere('TRIM(domisili)', '')
+                    ->groupEnd()
+                    ->where('LOWER(TRIM(wilayah_ecp))', $locNorm)
+                ->groupEnd()
+            ->groupEnd();
+        }
+
         $ecpRows = $ecpBuilder->get()->getResultArray();
         foreach ($ecpRows as $r) {
             $idEcp = (int)$r['id_ecp'];
@@ -108,11 +152,20 @@ class ProdukSalesModel extends SupplierProductModel
             $kode = 'ECP-' . str_pad((string)$idEcp, 4, '0', STR_PAD_LEFT);
             $namaProduk = !empty($r['produk_ekspor']) ? $r['produk_ekspor'] : (!empty($r['produk_dipasarkan']) ? $r['produk_dipasarkan'] : 'Produk Ekspor');
             $namaPerusahaan = !empty($r['nama_perusahaan']) ? $r['nama_perusahaan'] : '-';
-            $lokasi = !empty($r['domisili']) ? $r['domisili'] : (!empty($r['wilayah_ecp']) ? $r['wilayah_ecp'] : '-');
+            $namaKunci = SupplierModel::makeKey($namaPerusahaan);
+            $lokasiItem = !empty($r['domisili']) ? trim($r['domisili']) : (!empty($r['wilayah_ecp']) ? trim($r['wilayah_ecp']) : '-');
             $spesifikasi = !empty($r['kategori_produk']) ? ('Kategori: ' . $r['kategori_produk'] . (!empty($r['merk_dagang']) ? ' | Merk: ' . $r['merk_dagang'] : '')) : ($r['produk_dipasarkan'] ?: '');
 
+            if ($perusahaan !== '' && $namaKunci !== $perusahaan) {
+                continue;
+            }
+
+            if ($lokasi !== '' && strtolower(trim($lokasiItem)) !== strtolower($lokasi)) {
+                continue;
+            }
+
             if ($q !== '') {
-                $haystack = strtolower($kode . ' ' . $namaProduk . ' ' . $namaPerusahaan . ' ' . $lokasi . ' ' . $spesifikasi);
+                $haystack = strtolower($kode . ' ' . $namaProduk . ' ' . $namaPerusahaan . ' ' . $lokasiItem . ' ' . $spesifikasi);
                 if (strpos($haystack, strtolower($q)) === false) {
                     continue;
                 }
@@ -125,8 +178,9 @@ class ProdukSalesModel extends SupplierProductModel
                 'kode_produk'        => $kode,
                 'nama_produk'        => $namaProduk,
                 'nama_perusahaan'    => $namaPerusahaan,
+                'nama_kunci'         => $namaKunci,
                 'domisili_usaha'     => $r['domisili'] ?: ($r['wilayah_ecp'] ?: ''),
-                'lokasi_barang'      => $lokasi,
+                'lokasi_barang'      => $lokasiItem,
                 'deskripsi'          => $r['produk_dipasarkan'] ?? '',
                 'spesifikasi'        => $spesifikasi,
                 'kapasitas_produksi' => !empty($r['kapasitas_produksi']) ? $r['kapasitas_produksi'] : (!empty($r['kuantitas_ekspor']) ? 'Ekspor: ' . $r['kuantitas_ekspor'] : '-'),

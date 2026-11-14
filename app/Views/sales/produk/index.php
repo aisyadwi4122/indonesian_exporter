@@ -206,6 +206,18 @@ body {
         </div>
         <div>
             <?php if ($account_tipe === 'internal' && !$is_preview): ?>
+                <?php
+                    $extraPdfQuery = '';
+                    if (!empty($q)) {
+                        $extraPdfQuery .= '&q=' . urlencode($q);
+                    }
+                    if ($is_internal && !empty($perusahaan)) {
+                        $extraPdfQuery .= '&perusahaan=' . urlencode($perusahaan);
+                    }
+                    if (!empty($lokasi)) {
+                        $extraPdfQuery .= '&lokasi=' . urlencode($lokasi);
+                    }
+                ?>
                 <!-- Dua pilihan PDF untuk akun internal: Eksternal (default) & Internal -->
                 <div class="dropdown d-inline-block">
                     <button class="btn btn-sales-primary shadow-sm dropdown-toggle" type="button" id="pdfDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -213,7 +225,7 @@ body {
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="pdfDropdown" style="min-width: 290px;">
                         <li>
-                            <a class="dropdown-item py-2" id="btnExportPdfEksternal" href="<?= base_url('sales/produk-supplier/pdf?tipe_pdf=eksternal' . (!empty($q) ? '&q=' . urlencode($q) : '')) ?>" target="_blank">
+                            <a class="dropdown-item py-2" id="btnExportPdfEksternal" href="<?= base_url('sales/produk-supplier/pdf?tipe_pdf=eksternal' . $extraPdfQuery) ?>" target="_blank">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <span class="fw-bold text-dark"><i class="fa-solid fa-file-pdf text-success me-2"></i>PDF Eksternal</span>
                                     <span class="badge bg-success" style="font-size: 10px;">Default</span>
@@ -223,7 +235,7 @@ body {
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                            <a class="dropdown-item py-2" id="btnExportPdfInternal" href="<?= base_url('sales/produk-supplier/pdf?tipe_pdf=internal' . (!empty($q) ? '&q=' . urlencode($q) : '')) ?>" target="_blank">
+                            <a class="dropdown-item py-2" id="btnExportPdfInternal" href="<?= base_url('sales/produk-supplier/pdf?tipe_pdf=internal' . $extraPdfQuery) ?>" target="_blank">
                                 <div class="fw-bold text-dark"><i class="fa-solid fa-file-shield text-warning me-2"></i>PDF Internal</div>
                                 <small class="text-muted d-block mt-1">Lengkap dengan data supplier, legalitas & komisi</small>
                             </a>
@@ -231,8 +243,17 @@ body {
                     </ul>
                 </div>
             <?php else: ?>
+                <?php
+                    $extraPdfQuery = '';
+                    if (!empty($q)) {
+                        $extraPdfQuery .= '&q=' . urlencode($q);
+                    }
+                    if (!empty($lokasi)) {
+                        $extraPdfQuery .= '&lokasi=' . urlencode($lokasi);
+                    }
+                ?>
                 <!-- Akun eksternal atau dalam pratinjau: HANYA PDF Eksternal -->
-                <a href="<?= base_url('sales/produk-supplier/pdf' . (!empty($q) ? '?q=' . urlencode($q) : '')) ?>" 
+                <a href="<?= base_url('sales/produk-supplier/pdf' . (!empty($extraPdfQuery) ? '?' . ltrim($extraPdfQuery, '&') : '')) ?>" 
                    id="btnExportPdf"
                    class="btn btn-sales-primary shadow-sm" 
                    target="_blank">
@@ -248,6 +269,12 @@ body {
     <form method="GET" action="<?= base_url('sales/produk-supplier') ?>" class="row g-2 align-items-center">
         <?php if ($is_preview): ?>
             <input type="hidden" name="mode" value="eksternal">
+        <?php endif; ?>
+        <?php if (!empty($perusahaan) && $is_internal): ?>
+            <input type="hidden" name="perusahaan" value="<?= esc($perusahaan, 'attr') ?>">
+        <?php endif; ?>
+        <?php if (!empty($lokasi)): ?>
+            <input type="hidden" name="lokasi" value="<?= esc($lokasi, 'attr') ?>">
         <?php endif; ?>
         <div class="col">
             <div class="input-group">
@@ -266,7 +293,7 @@ body {
                 <i class="fa-solid fa-magnifying-glass me-1"></i> Cari
             </button>
         </div>
-        <?php if (!empty($q)): ?>
+        <?php if (!empty($q) || (!empty($perusahaan) && $is_internal) || !empty($lokasi)): ?>
         <div class="col-auto">
             <a href="<?= base_url('sales/produk-supplier' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sales-secondary" style="font-size: 13.5px;">
                 <i class="fa-solid fa-xmark me-1"></i> Reset
@@ -275,6 +302,34 @@ body {
         <?php endif; ?>
     </form>
 </div>
+
+<!-- Bilah Informasi Filter Aktif -->
+<?php if ((!empty($activePerusahaanDisplay) && $is_internal) || !empty($lokasi)): ?>
+<div class="sales-card mb-3 py-2 px-3 d-flex flex-wrap align-items-center justify-content-between gap-2" style="background-color: #f8fafc; border-left: 4px solid #16a34a;">
+    <div class="d-flex align-items-center flex-wrap gap-2" style="font-size: 13.5px;">
+        <span class="text-muted fw-semibold">
+            <i class="fa-solid fa-filter text-success me-1"></i>Menampilkan produk dari:
+        </span>
+        <?php if (!empty($activePerusahaanDisplay) && $is_internal): ?>
+            <span class="badge bg-white text-dark border px-2 py-1 d-inline-flex align-items-center gap-1 shadow-sm">
+                <i class="fa-solid fa-building text-success"></i>
+                <strong><?= esc($activePerusahaanDisplay) ?></strong>
+            </span>
+        <?php endif; ?>
+        <?php if (!empty($lokasi)): ?>
+            <span class="badge bg-white text-dark border px-2 py-1 d-inline-flex align-items-center gap-1 shadow-sm">
+                <i class="fa-solid fa-location-dot text-danger"></i>
+                <strong><?= esc($lokasi) ?></strong>
+            </span>
+        <?php endif; ?>
+    </div>
+    <div>
+        <a href="<?= base_url('sales/produk-supplier' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sm btn-outline-secondary" style="font-size: 12.5px; border-radius: 6px;">
+            <i class="fa-solid fa-xmark me-1 text-danger"></i>Hapus filter
+        </a>
+    </div>
+</div>
+<?php endif; ?>
 
 <!-- Keterangan Jumlah Produk -->
 <?php if (!empty($totalRows) && $totalRows > 0): ?>
@@ -288,8 +343,18 @@ body {
     <div class="mb-3">
         <i class="fa-solid fa-box-open text-muted" style="font-size: 48px;"></i>
     </div>
-    <h5 class="fw-semibold text-dark mb-1">Produk supplier tidak ditemukan</h5>
-    <p class="text-muted mb-0" style="font-size: 14px;">Coba gunakan kata kunci pencarian yang lain.</p>
+    <h5 class="fw-semibold text-dark mb-1">Tidak ada produk</h5>
+    <p class="text-muted mb-0" style="font-size: 14px;">
+        <?php if ((!empty($activePerusahaanDisplay) && $is_internal) || !empty($lokasi)): ?>
+            Tidak ada produk yang sesuai dengan filter yang dipilih.
+            <br>
+            <a href="<?= base_url('sales/produk-supplier' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sm btn-sales-primary mt-3">
+                <i class="fa-solid fa-arrow-rotate-left me-1"></i>Hapus filter & Tampilkan Semua
+            </a>
+        <?php else: ?>
+            Coba gunakan kata kunci pencarian yang lain.
+        <?php endif; ?>
+    </p>
 </div>
 
 <!-- Daftar Kartu Produk -->
@@ -350,7 +415,14 @@ body {
                         <?php if ($is_internal): ?>
                             <?php if (!empty($supplier)): ?>
                             <div class="mb-1 text-truncate" style="font-size: 11.5px; font-weight: 600; color: #16a34a;" title="<?= esc($supplier) ?>">
-                                <i class="fa-solid fa-building me-1"></i><?= esc($supplier) ?>
+                                <i class="fa-solid fa-building me-1"></i>
+                                <?php if (!empty($p['nama_kunci'])): ?>
+                                    <a href="<?= base_url('sales/produk-supplier?perusahaan=' . urlencode($p['nama_kunci'])) ?>" class="text-decoration-none" style="color: inherit;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" title="Filter produk dari <?= esc($supplier, 'attr') ?>">
+                                        <?= esc($supplier) ?>
+                                    </a>
+                                <?php else: ?>
+                                    <?= esc($supplier) ?>
+                                <?php endif; ?>
                                 <span class="text-muted fw-normal ms-1">(<?= esc($kodeProduk) ?>)</span>
                             </div>
                             <?php if (!empty($p['no_hp'])): ?>
@@ -379,9 +451,12 @@ body {
                                 <?= esc($nama) ?>
                             </a>
                         </h5>
-                        <?php if (!empty($lokasi)): ?>
+                        <?php if (!empty($lokasi) && $lokasi !== '-'): ?>
                         <div class="text-muted mb-2 small text-truncate" style="font-size: 12px;">
-                            <i class="fa-solid fa-location-dot me-1 text-secondary"></i><?= esc($lokasi) ?>
+                            <i class="fa-solid fa-location-dot me-1 text-secondary"></i>
+                            <a href="<?= base_url('sales/produk-supplier?lokasi=' . urlencode($lokasi) . ($is_preview ? '&mode=eksternal' : '')) ?>" class="text-muted text-decoration-none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" title="Filter produk di <?= esc($lokasi, 'attr') ?>">
+                                <?= esc($lokasi) ?>
+                            </a>
                         </div>
                         <?php endif; ?>
                         <p class="text-muted mb-3 flex-grow-1" style="font-size: 13px; line-height: 1.5;">

@@ -522,8 +522,14 @@ if ($is_internal && $rawIg !== '') {
                 </span>
             </div>
             <?php if ($is_internal && !empty($product['nama_produk_en'])): ?>
+                <?php
+                    $compKey = !empty($supplier['nama_kunci']) ? $supplier['nama_kunci'] : \App\Models\SupplierModel::makeKey($product['nama_produk_en']);
+                ?>
                 <p class="mb-0" style="font-size: 14.5px;">
-                    <i class="fa-solid fa-building me-1 text-light opacity-75"></i><?= esc($product['nama_produk_en']) ?>
+                    <i class="fa-solid fa-building me-1 text-light opacity-75"></i>
+                    <a href="<?= base_url('sales/produk-supplier?perusahaan=' . urlencode($compKey)) ?>" class="text-white text-decoration-underline" title="Lihat semua produk dari <?= esc($product['nama_produk_en'], 'attr') ?>">
+                        <?= esc($product['nama_produk_en']) ?>
+                    </a>
                 </p>
             <?php else: ?>
                 <p class="mb-0" style="font-size: 14.5px; opacity: 0.9;">
@@ -860,7 +866,16 @@ if ($is_internal && $rawIg !== '') {
                 <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 17px;">
                     <?php if ($is_internal): ?>
                         <i class="fa-solid fa-building text-success"></i>
-                        <?= esc(!empty($supplier['nama_perusahaan']) ? $supplier['nama_perusahaan'] : 'Belum ada data perusahaan') ?>
+                        <?php if (!empty($supplier['nama_perusahaan'])): ?>
+                            <?php
+                                $compKey = !empty($supplier['nama_kunci']) ? $supplier['nama_kunci'] : \App\Models\SupplierModel::makeKey($supplier['nama_perusahaan']);
+                            ?>
+                            <a href="<?= base_url('sales/produk-supplier?perusahaan=' . urlencode($compKey)) ?>" class="text-dark text-decoration-underline" title="Lihat semua produk dari <?= esc($supplier['nama_perusahaan'], 'attr') ?>">
+                                <?= esc($supplier['nama_perusahaan']) ?>
+                            </a>
+                        <?php else: ?>
+                            Belum ada data perusahaan
+                        <?php endif; ?>
                     <?php else: ?>
                         <i class="fa-solid fa-briefcase text-success"></i>
                         Profil Usaha Rekanan (<?= esc($product['kode_produk'] ?? '') ?>)
