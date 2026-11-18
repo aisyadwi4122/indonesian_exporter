@@ -8,11 +8,6 @@
                 <h1 class="app-page-title mb-0">Produk supplier</h1>
                 <p class="text-muted small mb-0">Kelola katalog produk supplier yang ditampilkan di area Sales & Eksternal.</p>
             </div>
-            <div class="col-auto">
-                <a href="<?= base_url('admin/produk_sales/tambah') ?>" class="btn btn-primary text-white">
-                    <i class="fa-solid fa-plus me-1"></i> Tambah Produk Sales
-                </a>
-            </div>
         </div><!--//row-->
 
         <!-- Flash Messages -->

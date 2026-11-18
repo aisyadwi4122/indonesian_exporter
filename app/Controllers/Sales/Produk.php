@@ -643,6 +643,11 @@ class Produk extends BaseController
                     $totalNilai = $nilaiUsd;
                 }
 
+                $produkSalesModel = new ProdukSalesModel();
+                $produkLain = ($namaPerusahaan !== '' && $namaPerusahaan !== '-')
+                    ? $produkSalesModel->getOtherUnifiedProductsByCompany($namaPerusahaan, $id)
+                    : [];
+
                 return [
                     'product'        => $product,
                     'produkSupplier' => $produkSupplier,
@@ -651,7 +656,7 @@ class Produk extends BaseController
                     'years'          => $years,
                     'totalNilai'     => $totalNilai,
                     'fotos'          => $fotos,
-                    'produkLain'     => [],
+                    'produkLain'     => $produkLain,
                 ];
             }
         }
@@ -664,9 +669,12 @@ class Produk extends BaseController
 
         if ($produkSupplier) {
             $supplier = $supplierModel->find($produkSupplier['id_supplier']);
-            $produkLain = !empty($produkSupplier['id_supplier'])
-                ? $supplierProductModel->getOtherProductsBySupplier((int)$produkSupplier['id_supplier'], (int)$produkSupplier['id_produk_supplier'])
-                : [];
+            $produkSalesModel = new ProdukSalesModel();
+            $produkLain = $produkSalesModel->getOtherUnifiedProductsByCompany(
+                (string)($supplier['nama_perusahaan'] ?? ''),
+                (int)$produkSupplier['id_produk_supplier'],
+                (int)($produkSupplier['id_supplier'] ?? 0)
+            );
 
             $histories = [];
             $years = [];

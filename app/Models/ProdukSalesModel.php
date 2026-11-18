@@ -198,6 +198,101 @@ class ProdukSalesModel extends SupplierProductModel
     }
 
     /**
+     * Mengambil semua produk lain milik perusahaan yang sama dari tb_produk_supplier
+     * DAN tb_ecp_ekspor dengan format seragam, mengecualikan produk yang sedang dibuka.
+     * Pencocokan nama perusahaan dilakukan dengan normalisasi di kedua sisi via SupplierModel::makeKey().
+     *
+     * @param string $namaPerusahaan Nama perusahaan produk yang sedang dibuka
+     * @param int    $excludeId      ID produk yang sedang dibuka (ID virtual 10000+id_ecp jika ECP)
+     * @param int    $idSupplier     Opsional: id_supplier jika produk aktif berasal dari tb_produk_supplier
+     * @return array
+     */
+    public function getOtherUnifiedProductsByCompany(string $namaPerusahaan, int $excludeId, int $idSupplier = 0): array
+    {
+        $targetKey = SupplierModel::makeKey($namaPerusahaan);
+        if ($targetKey === '' && $idSupplier <= 0) {
+            return [];
+        }
+
+        $db = \Config\Database::connect();
+        $results = [];
+        $seenIds = [];
+
+        // 1. Produk dari tb_produk_supplier (join tb_supplier untuk mendapatkan nama_perusahaan)
+        $spRows = $db->table('tb_produk_supplier')
+            ->select('tb_produk_supplier.id_produk_supplier, tb_produk_supplier.id_supplier, tb_produk_supplier.nama_produk, tb_produk_supplier.foto_1, tb_supplier.nama_perusahaan')
+            ->join('tb_supplier', 'tb_supplier.id_supplier = tb_produk_supplier.id_supplier', 'left')
+            ->orderBy('tb_produk_supplier.nama_produk', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        foreach ($spRows as $r) {
+            $idProd = (int)$r['id_produk_supplier'];
+            if ($idProd === $excludeId || isset($seenIds[$idProd])) {
+                continue;
+            }
+
+            $rowSupplierId = (int)($r['id_supplier'] ?? 0);
+            $rowKey = SupplierModel::makeKey((string)($r['nama_perusahaan'] ?? ''));
+
+            $isMatch = ($idSupplier > 0 && $rowSupplierId === $idSupplier)
+                || ($targetKey !== '' && $rowKey === $targetKey);
+
+            if (!$isMatch) {
+                continue;
+            }
+
+            $seenIds[$idProd] = true;
+            $results[] = [
+                'id_produk_supplier' => $idProd,
+                'id_supplier'        => $rowSupplierId > 0 ? $rowSupplierId : null,
+                'nama_produk'        => !empty($r['nama_produk']) ? $r['nama_produk'] : 'Produk Supplier',
+                'foto_1'             => $r['foto_1'] ?? null,
+                'foto_url'           => self::photoUrl($r, 1),
+                'sumber'             => 'supplier',
+            ];
+        }
+
+        // 2. Produk dari tb_ecp_ekspor (virtual ID = 10000 + id_ecp)
+        if ($targetKey !== '') {
+            $ecpRows = $db->table('tb_ecp_ekspor')
+                ->select('id_ecp, nama_perusahaan, produk_ekspor, produk_dipasarkan')
+                ->orderBy('id_ecp', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            foreach ($ecpRows as $r) {
+                $idEcp = (int)$r['id_ecp'];
+                $virtualId = 10000 + $idEcp;
+                if ($virtualId === $excludeId || isset($seenIds[$virtualId])) {
+                    continue;
+                }
+
+                $rowKey = SupplierModel::makeKey((string)($r['nama_perusahaan'] ?? ''));
+                if ($rowKey !== $targetKey) {
+                    continue;
+                }
+
+                $namaProduk = !empty($r['produk_ekspor'])
+                    ? $r['produk_ekspor']
+                    : (!empty($r['produk_dipasarkan']) ? $r['produk_dipasarkan'] : 'Produk Ekspor');
+
+                $seenIds[$virtualId] = true;
+                $results[] = [
+                    'id_produk_supplier' => $virtualId,
+                    'id_supplier'        => null,
+                    'nama_produk'        => $namaProduk,
+                    'foto_1'             => null,
+                    'foto_url'           => null,
+                    'sumber'             => 'ecp',
+                ];
+            }
+        }
+
+        return $results;
+    }
+
+    /**
      * Menghitung total seluruh produk terpadu (Supplier IE + ECP)
      * Sama persis dengan sumber data yang tampil di halaman Produk Sales.
      *

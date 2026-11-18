@@ -690,13 +690,13 @@ if ($is_internal && $rawIg !== '') {
                             <?php foreach ($produkLain as $pLain): ?>
                                 <?php
                                     $pLainId = (int)($pLain['id_produk_supplier'] ?? 0);
-                                    $pLainPhoto = \App\Models\SupplierProductModel::photoUrl($pLain, 1);
+                                    $pLainPhoto = array_key_exists('foto_url', $pLain) ? $pLain['foto_url'] : \App\Models\SupplierProductModel::photoUrl($pLain, 1);
                                     $pLainImg = !empty($pLainPhoto) ? $pLainPhoto : base_url('assets/img/logo.png');
                                     $pLainIsPlaceholder = empty($pLainPhoto);
                                     $pLainDetailUrl = base_url('sales/produk-supplier/' . $pLainId . (!empty($is_preview) ? '?mode=eksternal' : ''));
                                 ?>
                                 <div class="col">
-                                    <a href="<?= esc($pLainDetailUrl, 'attr') ?>" class="text-decoration-none text-dark d-block h-100" title="<?= esc($pLain['nama_produk'] ?? '') ?>">
+                                    <a href="<?= esc($pLainDetailUrl) ?>" class="text-decoration-none text-dark d-block h-100" title="<?= esc($pLain['nama_produk'] ?? '') ?>">
                                         <div class="card h-100 border shadow-none" style="border-radius: 8px; overflow: hidden; transition: transform 0.15s ease, box-shadow 0.15s ease; border-color: #e2e8f0 !important;" onmouseover="this.style.boxShadow='0 4px 10px rgba(0,0,0,0.08)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='none'; this.style.transform='none';">
                                             <div style="height: 90px; background-color: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                                                 <img src="<?= esc($pLainImg) ?>" 
