@@ -319,7 +319,7 @@ body {
         <?php if (!empty($lokasi)): ?>
             <span class="badge bg-white text-dark border px-2 py-1 d-inline-flex align-items-center gap-1 shadow-sm">
                 <i class="fa-solid fa-location-dot text-danger"></i>
-                <strong><?= esc($lokasi) ?></strong>
+                <strong><?= esc(\App\Libraries\LocationHelper::formatDisplayLocation($lokasi)) ?></strong>
             </span>
         <?php endif; ?>
     </div>
@@ -369,14 +369,15 @@ body {
                 $descClean = trim(strip_tags($descRaw));
                 $descShort = mb_strlen($descClean) > 100 ? mb_substr($descClean, 0, 100) . '...' : $descClean;
                 $supplier = $is_internal ? (!empty($p['nama_perusahaan']) ? $p['nama_perusahaan'] : '') : '';
-                $lokasi = !empty($p['lokasi_barang']) ? $p['lokasi_barang'] : (!empty($p['domisili_usaha']) ? $p['domisili_usaha'] : '');
+                $cardLokasiRaw = !empty($p['lokasi_barang']) ? $p['lokasi_barang'] : (!empty($p['domisili_usaha']) ? $p['domisili_usaha'] : '');
+                $cardLokasiDisplay = \App\Libraries\LocationHelper::formatDisplayLocation($cardLokasiRaw);
 
                 $imgUrl = !empty($p['foto_url']) ? $p['foto_url'] : base_url('assets/img/logo.png');
                 $isPlaceholder = empty($p['foto_url']);
                 
                 $detailUrl = base_url('sales/produk-supplier/' . $idProduk . ($is_preview ? '?mode=eksternal' : ''));
                 $detailPdfUrl = base_url('sales/produk-supplier/' . $idProduk . '/pdf' . ($is_preview ? '?mode=eksternal' : ''));
-                $searchDesc = $is_internal ? ($descClean . ' ' . $supplier . ' ' . $lokasi) : ($descClean . ' ' . $lokasi . ' ' . $kodeProduk);
+                $searchDesc = $is_internal ? ($descClean . ' ' . $supplier . ' ' . $cardLokasiRaw . ' ' . $cardLokasiDisplay) : ($descClean . ' ' . $cardLokasiRaw . ' ' . $cardLokasiDisplay . ' ' . $kodeProduk);
 
                 // Format Komisi untuk Mode Eksternal
                 $rawKomisi = $p['komisi'] ?? null;
@@ -451,11 +452,11 @@ body {
                                 <?= esc($nama) ?>
                             </a>
                         </h5>
-                        <?php if (!empty($lokasi) && $lokasi !== '-'): ?>
+                        <?php if (!empty($cardLokasiRaw) && $cardLokasiRaw !== '-'): ?>
                         <div class="text-muted mb-2 small text-truncate" style="font-size: 12px;">
                             <i class="fa-solid fa-location-dot me-1 text-secondary"></i>
-                            <a href="<?= base_url('sales/produk-supplier?lokasi=' . urlencode($lokasi) . ($is_preview ? '&mode=eksternal' : '')) ?>" class="text-muted text-decoration-none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" title="Filter produk di <?= esc($lokasi, 'attr') ?>">
-                                <?= esc($lokasi) ?>
+                            <a href="<?= base_url('sales/produk-supplier?lokasi=' . urlencode($cardLokasiRaw) . ($is_preview ? '&mode=eksternal' : '')) ?>" class="text-muted text-decoration-none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" title="Filter produk di <?= esc($cardLokasiDisplay, 'attr') ?>">
+                                <?= esc($cardLokasiDisplay) ?>
                             </a>
                         </div>
                         <?php endif; ?>

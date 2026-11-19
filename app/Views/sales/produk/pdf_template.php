@@ -241,7 +241,7 @@ foreach ($items as $index => $item):
                 'Kapasitas Produksi' => $produkSupplier['kapasitas_produksi'] ?? null,
                 'Legalitas'          => (!empty($is_internal)) ? ($produkSupplier['legalitas'] ?? null) : null,
                 'Sertifikasi'        => $produkSupplier['sertifikasi'] ?? null,
-                'Lokasi Barang'      => $produkSupplier['lokasi_barang'] ?? null,
+                'Lokasi Barang'      => !empty($produkSupplier['lokasi_barang']) ? \App\Libraries\LocationHelper::formatDisplayLocation($produkSupplier['lokasi_barang']) : null,
                 'MOQ'                => $produkSupplier['moq'] ?? null,
                 'Harga EXW'          => $produkSupplier['harga_exw'] ?? null,
                 'Komisi'             => (!empty($is_internal)) ? ($produkSupplier['komisi'] ?? null) : null,
@@ -295,7 +295,7 @@ foreach ($items as $index => $item):
 
                 $fields = [
                     'Nama Perusahaan'        => $supplier['nama_perusahaan'] ?? null,
-                    'Domisili Usaha'         => $supplier['domisili_usaha'] ?? null,
+                    'Domisili Usaha'         => !empty($supplier['domisili_usaha']) ? \App\Libraries\LocationHelper::formatDisplayLocation($supplier['domisili_usaha']) : null,
                     'Jenis Perusahaan'       => $supplier['jenis_perusahaan'] ?? null,
                     'Jumlah Pegawai'         => $supplier['jumlah_pegawai'] ?? null,
                     'Frekuensi Ekspor'       => $exportSummary['frekuensi_ekspor'],
@@ -308,7 +308,7 @@ foreach ($items as $index => $item):
                 // Mode eksternal: HANYA 5 field profil usaha (selaras dengan tab Profil Usaha Eksternal)
                 $fields = [
                     'Jenis Perusahaan'       => $supplier['jenis_perusahaan'] ?? null,
-                    'Domisili Usaha'         => $supplier['domisili_usaha'] ?? null,
+                    'Domisili Usaha'         => !empty($supplier['domisili_usaha']) ? \App\Libraries\LocationHelper::formatDisplayLocation($supplier['domisili_usaha']) : null,
                     'Jumlah Pegawai'         => $supplier['jumlah_pegawai'] ?? null,
                     'Pernah Ekspor'          => $exportSummary['pernah_ekspor'],
                 ];

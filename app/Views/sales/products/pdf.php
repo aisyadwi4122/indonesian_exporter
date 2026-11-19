@@ -173,7 +173,7 @@ if (!empty($product['gambar_utama'])) {
         <tr>
             <td class="label">• Domisili Usaha</td>
             <td class="separator">:</td>
-            <td class="value"><?= esc($product['domisili_usaha'] ?? '-'); ?></td>
+            <td class="value"><?= esc(\App\Libraries\LocationHelper::formatDisplayLocation($product['domisili_usaha'] ?? '-')); ?></td>
         </tr>
         <tr>
             <td class="label">• Jenis Perusahaan</td>

@@ -812,7 +812,7 @@ if ($is_internal && $rawIg !== '') {
                     <?php if (!empty($produkSupplier['lokasi_barang']) && $produkSupplier['lokasi_barang'] !== '-'): ?>
                     <div class="row info-row">
                         <div class="col-sm-4 label-col">Lokasi Barang</div>
-                        <div class="col-sm-8 value-col"><?= esc($produkSupplier['lokasi_barang']) ?></div>
+                        <div class="col-sm-8 value-col"><?= esc(\App\Libraries\LocationHelper::formatDisplayLocation($produkSupplier['lokasi_barang'])) ?></div>
                     </div>
                     <?php endif; ?>
 
@@ -963,7 +963,7 @@ if ($is_internal && $rawIg !== '') {
                     <div class="col-md-6">
                         <div class="row info-row">
                             <div class="col-5 label-col">Domisili Usaha</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['domisili_usaha']) ? $supplier['domisili_usaha'] : '-') ?></div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['domisili_usaha']) ? \App\Libraries\LocationHelper::formatDisplayLocation($supplier['domisili_usaha']) : '-') ?></div>
                         </div>
                         <div class="row info-row">
                             <div class="col-5 label-col">Jenis Perusahaan</div>
@@ -1072,7 +1072,7 @@ if ($is_internal && $rawIg !== '') {
                         </div>
                         <div class="row info-row">
                             <div class="col-5 label-col">Domisili Usaha</div>
-                            <div class="col-7 value-col"><?= esc(!empty($supplier['domisili_usaha']) ? $supplier['domisili_usaha'] : '-') ?></div>
+                            <div class="col-7 value-col"><?= esc(!empty($supplier['domisili_usaha']) ? \App\Libraries\LocationHelper::formatDisplayLocation($supplier['domisili_usaha']) : '-') ?></div>
                         </div>
                     </div>
                     <div class="col-md-6">

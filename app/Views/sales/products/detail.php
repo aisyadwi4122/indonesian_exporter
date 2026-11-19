@@ -168,7 +168,7 @@
                     <div>
                         <div class="info-row">
                             <div class="info-label">• Domisili Usaha</div>
-                            <div class="info-value">: <?= esc($product['domisili_usaha'] ?? '-'); ?></div>
+                            <div class="info-value">: <?= esc(\App\Libraries\LocationHelper::formatDisplayLocation($product['domisili_usaha'] ?? '-')); ?></div>
                         </div>
                         <div class="info-row">
                             <div class="info-label">• Jenis Perusahaan</div>

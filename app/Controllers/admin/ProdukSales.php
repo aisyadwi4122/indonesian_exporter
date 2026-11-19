@@ -2,6 +2,7 @@
 
 namespace App\Controllers\admin;
 
+use App\Libraries\LocationHelper;
 use App\Models\ProdukSalesModel;
 use App\Models\SupplierModel;
 use App\Models\SupplierProductModel;
@@ -30,21 +31,61 @@ class ProdukSales extends AdminAuthBase
             return $redirect;
         }
 
-        $searchQuery = trim((string)($this->request->getGet('q') ?? ''));
-        $supplierId  = (int)($this->request->getGet('supplier_id') ?? 0);
+        $searchQuery  = trim((string)($this->request->getGet('q') ?? ''));
+        $supplierId   = (int)($this->request->getGet('supplier_id') ?? 0);
+        $daerahFilter = trim((string)($this->request->getGet('daerah') ?? ''));
+        if (mb_strlen($daerahFilter) > 200) {
+            $daerahFilter = mb_substr($daerahFilter, 0, 200);
+        }
         $page = (int)($this->request->getGet('page') ?? 1);
         if ($page < 1) {
             $page = 1;
         }
         $perPage = 10;
 
-        // Ambil data produk terpadu 127 produk (10 Supplier IE di awal + 117 ECP)
-        $allItems = $this->productModel->getUnifiedProducts($searchQuery);
+        // Ambil data produk terpadu (Supplier IE + ECP)
+        $allItems = $this->productModel->getUnifiedProducts('');
+
+        // Filter pencarian kata kunci (mendukung nilai asli DB maupun lokasi yang sudah diformat tampilan)
+        if ($searchQuery !== '') {
+            $qLower = mb_strtolower($searchQuery, 'UTF-8');
+            $allItems = array_values(array_filter($allItems, function ($item) use ($qLower) {
+                $rawLok = (string)($item['lokasi_barang'] ?? '');
+                $rawDom = (string)($item['domisili_usaha'] ?? '');
+                $fmtLok = LocationHelper::formatDisplayLocation($rawLok);
+                $fmtDom = LocationHelper::formatDisplayLocation($rawDom);
+
+                $haystack = mb_strtolower(
+                    ($item['kode_produk'] ?? '') . ' ' .
+                    ($item['nama_produk'] ?? '') . ' ' .
+                    ($item['nama_perusahaan'] ?? '') . ' ' .
+                    $rawLok . ' ' . $rawDom . ' ' .
+                    $fmtLok . ' ' . $fmtDom . ' ' .
+                    ($item['spesifikasi'] ?? ''),
+                    'UTF-8'
+                );
+
+                return strpos($haystack, $qLower) !== false;
+            }));
+        }
 
         // Filter berdasarkan supplier jika dipilih
         if ($supplierId > 0) {
             $allItems = array_values(array_filter($allItems, function ($item) use ($supplierId) {
                 return isset($item['id_supplier']) && (int)$item['id_supplier'] === $supplierId;
+            }));
+        }
+
+        // Filter berdasarkan daerah (provinsi atau kota/lokasi spesifik)
+        $isProvinceFilter = false;
+        $selectedDaerahLabel = '';
+        if ($daerahFilter !== '') {
+            $resolvedProvince = LocationHelper::resolveExactProvince($daerahFilter);
+            $isProvinceFilter = ($resolvedProvince !== null);
+            $selectedDaerahLabel = LocationHelper::formatDisplayLocation($daerahFilter);
+
+            $allItems = array_values(array_filter($allItems, function ($item) use ($daerahFilter) {
+                return LocationHelper::matchesRegion($item, $daerahFilter);
             }));
         }
 
@@ -73,12 +114,16 @@ class ProdukSales extends AdminAuthBase
         }
 
         return view('admin/produk_sales/index', [
-            'products'             => $products,
-            'pager'                => $pager,
-            'search_query'         => $searchQuery,
-            'selected_supplier_id' => $supplierId,
-            'suppliers'            => $suppliers,
-            'product_counts'       => $productCounts,
+            'products'              => $products,
+            'pager'                 => $pager,
+            'search_query'          => $searchQuery,
+            'selected_supplier_id'  => $supplierId,
+            'selected_daerah'       => $daerahFilter,
+            'selected_daerah_label' => $selectedDaerahLabel,
+            'is_province_filter'    => $isProvinceFilter,
+            'total_rows'            => $totalRows,
+            'suppliers'             => $suppliers,
+            'product_counts'        => $productCounts,
         ]);
     }
 

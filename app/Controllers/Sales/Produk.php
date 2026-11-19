@@ -66,11 +66,13 @@ class Produk extends BaseController
                 $kode = strtolower($item['kode_produk'] ?? '');
                 $nama = strtolower($item['nama_produk'] ?? '');
                 $lokasi = strtolower($item['lokasi_barang'] ?? ($item['domisili_usaha'] ?? ''));
+                $lokasiDisplay = strtolower(\App\Libraries\LocationHelper::formatDisplayLocation($item['lokasi_barang'] ?? ($item['domisili_usaha'] ?? '')));
                 $spesifikasi = strtolower($item['spesifikasi'] ?? '');
 
                 $match = (strpos($kode, $qLower) !== false ||
                           strpos($nama, $qLower) !== false ||
                           strpos($lokasi, $qLower) !== false ||
+                          strpos($lokasiDisplay, $qLower) !== false ||
                           strpos($spesifikasi, $qLower) !== false);
 
                 // Mode Internal boleh mencari nama perusahaan
@@ -352,11 +354,13 @@ class Produk extends BaseController
                 $kode = strtolower($item['kode_produk'] ?? '');
                 $nama = strtolower($item['nama_produk'] ?? '');
                 $lokasi = strtolower($item['lokasi_barang'] ?? ($item['domisili_usaha'] ?? ''));
+                $lokasiDisplay = strtolower(\App\Libraries\LocationHelper::formatDisplayLocation($item['lokasi_barang'] ?? ($item['domisili_usaha'] ?? '')));
                 $spesifikasi = strtolower($item['spesifikasi'] ?? '');
 
                 $match = (strpos($kode, $qLower) !== false ||
                           strpos($nama, $qLower) !== false ||
                           strpos($lokasi, $qLower) !== false ||
+                          strpos($lokasiDisplay, $qLower) !== false ||
                           strpos($spesifikasi, $qLower) !== false);
 
                 if ($isPdfInternal) {

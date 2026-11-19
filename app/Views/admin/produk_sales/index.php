@@ -1,6 +1,12 @@
 <?= $this->extend('admin/template/template'); ?>
 <?= $this->section('content'); ?>
 
+<style>
+.location-filter-link:hover {
+    text-decoration: underline !important;
+}
+</style>
+
 <div class="app-content pt-3 p-md-3 p-lg-4">
     <div class="container-xl">
         <div class="row g-3 mb-4 align-items-center justify-content-between">
@@ -34,6 +40,9 @@
                     <?php if (!empty($search_query)) : ?>
                         <input type="hidden" name="q" value="<?= esc($search_query) ?>">
                     <?php endif; ?>
+                    <?php if (!empty($selected_daerah)) : ?>
+                        <input type="hidden" name="daerah" value="<?= esc($selected_daerah) ?>">
+                    <?php endif; ?>
                     <label for="filterSupplier" class="form-label mb-0 text-muted small text-nowrap fw-semibold">
                         <i class="fa-solid fa-filter me-1"></i>Perusahaan:
                     </label>
@@ -54,6 +63,9 @@
                     <?php if (!empty($selected_supplier_id)) : ?>
                         <input type="hidden" name="supplier_id" value="<?= esc($selected_supplier_id) ?>">
                     <?php endif; ?>
+                    <?php if (!empty($selected_daerah)) : ?>
+                        <input type="hidden" name="daerah" value="<?= esc($selected_daerah) ?>">
+                    <?php endif; ?>
                     <div class="input-group input-group-sm">
                         <input type="text" 
                                name="q" 
@@ -63,7 +75,7 @@
                         <button class="btn btn-primary text-white" type="submit" title="Cari">
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </button>
-                        <?php if ($search_query !== '' || !empty($selected_supplier_id)) : ?>
+                        <?php if ($search_query !== '' || !empty($selected_supplier_id) || !empty($selected_daerah)) : ?>
                             <a href="<?= base_url('admin/produk_sales/index') ?>" class="btn btn-outline-secondary" title="Reset Filter & Pencarian">
                                 <i class="fa-solid fa-rotate-left"></i>
                             </a>
@@ -72,6 +84,38 @@
                 </form>
             </div>
         </div>
+
+        <!-- Bilah Filter Daerah Aktif -->
+        <?php if (!empty($selected_daerah)) : ?>
+            <?php
+                $clearDaerahParams = [];
+                if (!empty($selected_supplier_id)) {
+                    $clearDaerahParams['supplier_id'] = (int)$selected_supplier_id;
+                }
+                if ($search_query !== '') {
+                    $clearDaerahParams['q'] = $search_query;
+                }
+                $clearDaerahUrl = base_url('admin/produk_sales/index') . (!empty($clearDaerahParams) ? '?' . http_build_query($clearDaerahParams) : '');
+            ?>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 px-3 py-2 bg-light border rounded">
+                <div class="d-flex align-items-center flex-wrap gap-2 small">
+                    <span class="text-muted fw-semibold">
+                        <i class="fa-solid fa-location-dot text-danger me-1"></i>Filter Daerah:
+                    </span>
+                    <span class="badge bg-primary text-white d-inline-flex align-items-center gap-2 px-2 py-1" style="font-size: 12.5px;">
+                        <?= esc($selected_daerah_label ?: $selected_daerah) ?>
+                        <?php if (!empty($is_province_filter)) : ?>
+                            <span class="fw-normal opacity-75">(Provinsi)</span>
+                        <?php endif; ?>
+                        <a href="<?= esc($clearDaerahUrl) ?>" class="text-white text-decoration-none ms-1" title="Hapus filter daerah" aria-label="Hapus filter daerah">&times;</a>
+                    </span>
+                    <span class="text-muted">(<?= (int)($total_rows ?? count($products)) ?> produk ditemukan)</span>
+                </div>
+                <a href="<?= esc($clearDaerahUrl) ?>" class="btn btn-sm btn-outline-secondary">
+                    <i class="fa-solid fa-xmark me-1"></i> Hapus filter daerah
+                </a>
+            </div>
+        <?php endif; ?>
 
         <!-- Table Card -->
         <div class="app-card app-card-orders-table shadow-sm mb-4">
@@ -128,12 +172,37 @@
                                                 <?php endif; ?>
                                             </div>
                                             <?php if (!empty($p['domisili_usaha'])) : ?>
-                                                <small class="text-muted d-block"><?= esc($p['domisili_usaha']) ?></small>
+                                                <?php $domisiliDisplay = \App\Libraries\LocationHelper::formatDisplayLocation($p['domisili_usaha']); ?>
+                                                <small class="text-muted d-block"><?= esc($domisiliDisplay) ?></small>
                                             <?php endif; ?>
                                         </td>
                                         <td>
+                                            <?php
+                                                $rawLokasi     = $p['lokasi_barang'] ?: ($p['domisili_usaha'] ?? '-');
+                                                $lokasiDisplay = \App\Libraries\LocationHelper::formatDisplayLocation($rawLokasi);
+                                            ?>
                                             <i class="fa-solid fa-location-dot text-danger me-1 small"></i>
-                                            <?= esc($p['lokasi_barang'] ?: ($p['domisili_usaha'] ?? '-')) ?>
+                                            <?php if ($lokasiDisplay !== '' && $lokasiDisplay !== '-') : ?>
+                                                <?php
+                                                    $daerahParams = [];
+                                                    if (!empty($selected_supplier_id)) {
+                                                        $daerahParams['supplier_id'] = (int)$selected_supplier_id;
+                                                    }
+                                                    if ($search_query !== '') {
+                                                        $daerahParams['q'] = $search_query;
+                                                    }
+                                                    $daerahParams['daerah'] = $lokasiDisplay;
+                                                    $daerahUrl = base_url('admin/produk_sales/index') . '?' . http_build_query($daerahParams);
+                                                ?>
+                                                <a href="<?= esc($daerahUrl) ?>"
+                                                   class="text-reset text-decoration-none location-filter-link"
+                                                   style="cursor: pointer;"
+                                                   title="Filter produk di daerah <?= esc($lokasiDisplay) ?>">
+                                                    <?= esc($lokasiDisplay) ?>
+                                                </a>
+                                            <?php else : ?>
+                                                <?= esc($lokasiDisplay) ?>
+                                            <?php endif; ?>
                                         </td>
                                         <td class="text-center">
                                             <?php if (strtolower(trim((string)$p['sudah_ekspor'])) === 'sudah') : ?>

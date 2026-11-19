@@ -144,7 +144,7 @@
 
                                 <!-- Cuplikan Singkat Perusahaan / Domisili -->
                                 <p class="card-text text-muted small mb-3 flex-grow-1" style="line-height: 1.5;">
-                                    <i class="fa-solid fa-location-dot me-1 text-danger"></i> <?= esc($p['domisili_usaha'] ?? '-'); ?>
+                                    <i class="fa-solid fa-location-dot me-1 text-danger"></i> <?= esc(\App\Libraries\LocationHelper::formatDisplayLocation($p['domisili_usaha'] ?? '-')); ?>
                                     <span class="mx-1">•</span>
                                     <i class="fa-solid fa-building me-1 text-secondary"></i> <?= esc($p['jenis_perusahaan'] ?? '-'); ?>
                                 </p>
