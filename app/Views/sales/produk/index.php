@@ -279,7 +279,7 @@ body {
 
 <!-- Kotak Pencarian Produk -->
 <div class="sales-card mb-4" style="padding: 16px 20px;">
-    <form method="GET" action="<?= base_url('sales/produk-supplier') ?>" class="row g-2 align-items-center">
+    <form method="GET" action="<?= base_url('sales/produk-supplier') ?>" class="row g-2 align-items-start">
         <?php if ($is_preview): ?>
             <input type="hidden" name="mode" value="eksternal">
         <?php endif; ?>
@@ -299,6 +299,9 @@ body {
                        value="<?= esc($q ?? '') ?>" 
                        style="border-radius: 0 8px 8px 0; font-size: 14px;"
                        autocomplete="off">
+            </div>
+            <div class="text-muted small mt-1">
+                Cari dengan kata kunci Indonesia atau Inggris, misalnya "kopi" atau "coffee".
             </div>
         </div>
         <div class="col-auto">
