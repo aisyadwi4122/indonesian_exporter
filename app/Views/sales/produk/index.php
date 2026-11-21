@@ -167,14 +167,7 @@ body {
 
 <div class="produk-hero mb-4">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-        <div class="produk-breadcrumb mb-0">
-            <strong>SALES</strong> / 
-            <?php if (!empty($activePerusahaanDisplay) && $is_internal): ?>
-                <a href="<?= base_url('sales/produk-supplier' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="text-white text-decoration-none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">PRODUK SUPPLIER</a> / <?= esc(strtoupper($activePerusahaanDisplay)) ?>
-            <?php else: ?>
-                PRODUK SUPPLIER
-            <?php endif; ?>
-        </div>
+        <div class="produk-breadcrumb mb-0"><strong>SALES</strong> / PRODUK SUPPLIER</div>
         
         <!-- BADGE & KONTROL MODE -->
         <div class="d-flex align-items-center gap-2">
@@ -208,14 +201,8 @@ body {
 
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div>
-            <h2 class="fw-bold mb-1" style="font-size: 24px;">
-                <?= (!empty($activePerusahaanDisplay) && $is_internal) ? esc($activePerusahaanDisplay) : 'Produk Supplier' ?>
-            </h2>
-            <p class="mb-0" style="font-size: 14px;">
-                <?= (!empty($activePerusahaanDisplay) && $is_internal)
-                    ? 'Daftar katalog produk milik ' . esc($activePerusahaanDisplay) . ' (hanya lihat).'
-                    : 'Daftar katalog produk supplier ekspor (hanya lihat).' ?>
-            </p>
+            <h2 class="fw-bold mb-1" style="font-size: 24px;">Produk Supplier</h2>
+            <p class="mb-0" style="font-size: 14px;">Daftar katalog produk supplier ekspor (hanya lihat).</p>
         </div>
         <div>
             <?php if ($account_tipe === 'internal' && !$is_preview): ?>
@@ -350,7 +337,7 @@ body {
 <!-- Keterangan Jumlah Produk -->
 <?php if (!empty($totalRows) && $totalRows > 0): ?>
 <div class="mb-3 text-white fw-medium" style="font-size: 14px; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);">
-    Menampilkan <?= (int)$startRow ?> - <?= (int)$endRow ?> dari <?= (int)$totalRows ?> produk <?= (!empty($activePerusahaanDisplay) && $is_internal) ? 'dari ' . esc($activePerusahaanDisplay) : 'supplier' ?>
+    Menampilkan <?= (int)$startRow ?> - <?= (int)$endRow ?> dari <?= (int)$totalRows ?> produk supplier
 </div>
 <?php endif; ?>
 
@@ -361,13 +348,7 @@ body {
     </div>
     <h5 class="fw-semibold text-dark mb-1">Tidak ada produk</h5>
     <p class="text-muted mb-0" style="font-size: 14px;">
-        <?php if (!empty($activePerusahaanDisplay) && $is_internal): ?>
-            Tidak ada produk yang sesuai untuk perusahaan <?= esc($activePerusahaanDisplay) ?>.
-            <br>
-            <a href="<?= base_url('sales/produk-supplier' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sm btn-sales-primary mt-3">
-                <i class="fa-solid fa-arrow-rotate-left me-1"></i>Hapus filter & Tampilkan Semua
-            </a>
-        <?php elseif (!empty($lokasi)): ?>
+        <?php if ((!empty($activePerusahaanDisplay) && $is_internal) || !empty($lokasi)): ?>
             Tidak ada produk yang sesuai dengan filter yang dipilih.
             <br>
             <a href="<?= base_url('sales/produk-supplier' . ($is_preview ? '?mode=eksternal' : '')) ?>" class="btn btn-sm btn-sales-primary mt-3">

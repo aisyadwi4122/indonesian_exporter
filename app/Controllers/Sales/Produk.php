@@ -164,17 +164,9 @@ class Produk extends BaseController
             }
         }
 
-        $pageTitle = 'Produk Supplier';
-        $browserTitle = 'Produk Supplier Sales - Indonesian Exporter';
-
-        if (!empty($activePerusahaanDisplay) && $isInternal) {
-            $pageTitle = $activePerusahaanDisplay;
-            $browserTitle = $activePerusahaanDisplay . ' - Indonesian Exporter';
-        }
-
         $data = [
-            'title'                   => $browserTitle,
-            'page_title'              => $pageTitle,
+            'title'                   => 'Produk Supplier Sales - Indonesian Exporter',
+            'page_title'              => 'Produk Supplier',
             'activeMenu'              => 'produk-supplier',
             'products'                => $products,
             'q'                       => $q,
