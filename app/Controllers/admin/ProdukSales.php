@@ -4,6 +4,7 @@ namespace App\Controllers\admin;
 
 use App\Libraries\LocationHelper;
 use App\Models\ProdukSalesModel;
+use App\Models\SupplierExportHistoryModel;
 use App\Models\SupplierModel;
 use App\Models\SupplierProductModel;
 
@@ -15,11 +16,13 @@ class ProdukSales extends AdminAuthBase
 {
     protected ProdukSalesModel $productModel;
     protected SupplierModel $supplierModel;
+    protected SupplierExportHistoryModel $historyModel;
 
     public function __construct()
     {
         $this->productModel  = new ProdukSalesModel();
         $this->supplierModel = new SupplierModel();
+        $this->historyModel  = new SupplierExportHistoryModel();
     }
 
     /**
@@ -193,9 +196,112 @@ class ProdukSales extends AdminAuthBase
             ],
         ];
 
-        if (!$this->validate($rules, $messages)) {
+        $productValid = $this->validate($rules, $messages);
+        $productErrors = $productValid ? [] : $this->validator->getErrors();
+
+        // Validasi keberadaan supplier di database
+        $supplierId = (int)$this->request->getPost('id_supplier');
+        if ($supplierId > 0) {
+            $supplier = $this->supplierModel->find($supplierId);
+            if (!$supplier) {
+                $productErrors['id_supplier'] = 'Supplier yang dipilih tidak terdaftar di database.';
+            }
+        }
+
+        // Proses dan validasi baris history ekspor (opsional)
+        $rawHistory = $this->request->getPost('history');
+        $validHistoryRows = [];
+        $historyErrors = [];
+
+        if (is_array($rawHistory)) {
+            if (count($rawHistory) > 20) {
+                $historyErrors[] = 'Maksimal 20 baris history ekspor yang dapat diproses sekaligus.';
+            } else {
+                $rowIdx = 0;
+                foreach ($rawHistory as $h) {
+                    $rowIdx++;
+                    if (!is_array($h)) {
+                        continue;
+                    }
+
+                    $tahun        = trim((string)($h['tahun'] ?? ''));
+                    $produk       = trim((string)($h['produk'] ?? ''));
+                    $negaraTujuan = trim((string)($h['negara_tujuan'] ?? ''));
+                    $jenisEkspor  = trim((string)($h['jenis_ekspor'] ?? ''));
+                    $kuantitas    = trim((string)($h['kuantitas'] ?? ''));
+                    $nilaiUsdRaw  = trim((string)($h['nilai_ekspor_usd'] ?? ''));
+                    $catatan      = trim((string)($h['catatan'] ?? ''));
+
+                    // Cek apakah seluruh kolom pada baris ini kosong
+                    $isAllEmpty = ($tahun === '' && $produk === '' && $negaraTujuan === '' && $jenisEkspor === '' && $kuantitas === '' && $nilaiUsdRaw === '' && $catatan === '');
+                    if ($isAllEmpty) {
+                        continue; // Baris kosong diabaikan
+                    }
+
+                    // Baris yang terisi sebagian atau lengkap wajib memenuhi aturan
+                    $prefix = "Baris history #{$rowIdx}: ";
+
+                    // Validasi Tahun: wajib, 4 digit angka
+                    if ($tahun === '') {
+                        $historyErrors[] = $prefix . 'Tahun ekspor wajib diisi.';
+                    } elseif (!preg_match('/^\d{4}$/', $tahun) || (int)$tahun < 1900 || (int)$tahun > 2099) {
+                        $historyErrors[] = $prefix . 'Tahun harus berupa 4 digit angka valid (contoh: 2024).';
+                    }
+
+                    // Validasi Produk: wajib, min 2 max 255 karakter
+                    if ($produk === '') {
+                        $historyErrors[] = $prefix . 'Nama produk ekspor wajib diisi.';
+                    } elseif (mb_strlen($produk) < 2 || mb_strlen($produk) > 255) {
+                        $historyErrors[] = $prefix . 'Nama produk ekspor harus antara 2 hingga 255 karakter.';
+                    }
+
+                    // Validasi Negara Tujuan: wajib, min 2 max 150 karakter
+                    if ($negaraTujuan === '') {
+                        $historyErrors[] = $prefix . 'Negara tujuan wajib diisi.';
+                    } elseif (mb_strlen($negaraTujuan) < 2 || mb_strlen($negaraTujuan) > 150) {
+                        $historyErrors[] = $prefix . 'Negara tujuan harus antara 2 hingga 150 karakter.';
+                    }
+
+                    // Validasi Nilai USD: jika diisi, numeric dan >= 0
+                    $nilaiUsd = null;
+                    if ($nilaiUsdRaw !== '') {
+                        if (!is_numeric($nilaiUsdRaw)) {
+                            $historyErrors[] = $prefix . 'Nilai ekspor USD harus berupa angka valid.';
+                        } elseif ((float)$nilaiUsdRaw < 0) {
+                            $historyErrors[] = $prefix . 'Nilai ekspor USD tidak boleh bernilai negatif.';
+                        } else {
+                            $nilaiUsd = (float)$nilaiUsdRaw;
+                        }
+                    }
+
+                    if (mb_strlen($jenisEkspor) > 255) {
+                        $historyErrors[] = $prefix . 'Jenis ekspor maksimal 255 karakter.';
+                    }
+                    if (mb_strlen($kuantitas) > 255) {
+                        $historyErrors[] = $prefix . 'Kuantitas maksimal 255 karakter.';
+                    }
+                    if (mb_strlen($catatan) > 255) {
+                        $historyErrors[] = $prefix . 'Catatan maksimal 255 karakter.';
+                    }
+
+                    $validHistoryRows[] = [
+                        'tahun'            => (int)$tahun,
+                        'produk'           => $produk,
+                        'negara_tujuan'    => $negaraTujuan,
+                        'jenis_ekspor'     => $jenisEkspor !== '' ? $jenisEkspor : null,
+                        'kuantitas'        => $kuantitas !== '' ? $kuantitas : null,
+                        'nilai_ekspor_usd' => $nilaiUsd,
+                        'catatan'          => $catatan !== '' ? $catatan : null,
+                    ];
+                }
+            }
+        }
+
+        // Jika terdapat error pada produk atau history
+        if (!empty($productErrors) || !empty($historyErrors)) {
+            $allErrors = array_merge(array_values($productErrors), array_values($historyErrors));
             session()->setFlashdata('error', 'Terdapat kesalahan pada input formulir. Silakan periksa kembali.');
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return redirect()->back()->withInput()->with('errors', $allErrors);
         }
 
         // Upload foto jika valid
@@ -227,15 +333,51 @@ class ProdukSales extends AdminAuthBase
             'views'              => 0,
         ];
 
-        $insertId = $this->productModel->insert($dataInsert);
-        if (!$insertId) {
-            session()->setFlashdata('error', 'Gagal menyimpan produk ke database.');
+        // Eksekusi penyimpanan produk dan history dalam satu transaksi database
+        $db = \Config\Database::connect();
+        $db->transBegin();
+
+        try {
+            $insertId = $this->productModel->insert($dataInsert);
+            if (!$insertId) {
+                throw new \Exception('Gagal menyimpan produk ke database.');
+            }
+
+            // Simpan semua baris history dengan id_supplier dari supplier produk yang dipilih
+            if (!empty($validHistoryRows)) {
+                foreach ($validHistoryRows as $hRow) {
+                    $hRow['id_supplier'] = $supplierId;
+                    $this->historyModel->insert($hRow);
+                }
+            }
+
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                if ($fotoPath && file_exists(FCPATH . $fotoPath)) {
+                    unlink(FCPATH . $fotoPath);
+                }
+                session()->setFlashdata('error', 'Gagal menyimpan produk dan history ke database.');
+                return redirect()->back()->withInput();
+            }
+
+            $db->transCommit();
+        } catch (\Throwable $e) {
+            $db->transRollback();
+            if ($fotoPath && file_exists(FCPATH . $fotoPath)) {
+                unlink(FCPATH . $fotoPath);
+            }
+            session()->setFlashdata('error', 'Terjadi kesalahan saat menyimpan: ' . $e->getMessage());
             return redirect()->back()->withInput();
         }
 
         $kodeBaru = SupplierProductModel::getKodeProduk((int)$insertId);
-        session()->setFlashdata('success', 'Produk sales berhasil ditambahkan dengan kode ' . $kodeBaru . '.');
+        $msgSuccess = 'Produk sales berhasil ditambahkan dengan kode ' . $kodeBaru;
+        if (!empty($validHistoryRows)) {
+            $msgSuccess .= ' beserta ' . count($validHistoryRows) . ' catatan history ekspor';
+        }
+        $msgSuccess .= '.';
 
+        session()->setFlashdata('success', $msgSuccess);
         return redirect()->to(base_url('admin/produk_sales/index'));
     }
 
@@ -291,6 +433,8 @@ class ProdukSales extends AdminAuthBase
                 'suppliers'         => $suppliers,
                 'kode_produk'       => $kodeProduk,
                 'current_photo_url' => $currentPhoto,
+                'exportHistories'   => [],
+                'supplier_id'       => 0,
                 'validation'        => \Config\Services::validation(),
             ]);
         }
@@ -301,15 +445,19 @@ class ProdukSales extends AdminAuthBase
             return redirect()->to(base_url('admin/produk_sales/index'));
         }
 
-        $suppliers      = $this->supplierModel->orderBy('nama_perusahaan', 'ASC')->findAll();
-        $kodeProduk     = SupplierProductModel::getKodeProduk($id);
-        $currentPhoto   = SupplierProductModel::photoUrl($produk, 1);
+        $supplierId      = !empty($produk['id_supplier']) ? (int)$produk['id_supplier'] : 0;
+        $exportHistories = $supplierId > 0 ? $this->historyModel->getBySupplier($supplierId) : [];
+        $suppliers       = $this->supplierModel->orderBy('nama_perusahaan', 'ASC')->findAll();
+        $kodeProduk      = SupplierProductModel::getKodeProduk($id);
+        $currentPhoto    = SupplierProductModel::photoUrl($produk, 1);
 
         return view('admin/produk_sales/edit', [
             'produk'            => $produk,
             'suppliers'         => $suppliers,
             'kode_produk'       => $kodeProduk,
             'current_photo_url' => $currentPhoto,
+            'exportHistories'   => $exportHistories,
+            'supplier_id'       => $supplierId,
             'validation'        => \Config\Services::validation(),
         ]);
     }
@@ -529,5 +677,203 @@ class ProdukSales extends AdminAuthBase
         session()->setFlashdata('success', 'Produk sales ' . $kode . ' (' . esc($produk['nama_produk']) . ') berhasil dihapus.');
 
         return redirect()->to(base_url('admin/produk_sales/index'));
+    }
+
+    /**
+     * Menambah catatan history ekspor untuk perusahaan pemilik produk
+     */
+    public function history_tambah(int $idProduk)
+    {
+        if ($redirect = $this->checkAuth()) {
+            return $redirect;
+        }
+
+        $produk = $this->productModel->find($idProduk);
+        if (!$produk || empty($produk['id_supplier'])) {
+            session()->setFlashdata('error', 'Produk atau supplier tidak valid untuk menambahkan history ekspor.');
+            return redirect()->to(base_url('admin/produk_sales/index'));
+        }
+
+        $supplierId = (int)$produk['id_supplier'];
+
+        $rules = [
+            'tahun'            => 'required|numeric|exact_length[4]',
+            'produk'           => 'required|min_length[2]|max_length[255]',
+            'negara_tujuan'    => 'required|min_length[2]|max_length[150]',
+            'jenis_ekspor'     => 'permit_empty|max_length[255]',
+            'kuantitas'        => 'permit_empty|max_length[255]',
+            'nilai_ekspor_usd' => 'permit_empty|numeric|greater_than_equal_to[0]',
+            'catatan'          => 'permit_empty|max_length[255]',
+        ];
+
+        $messages = [
+            'tahun' => [
+                'required'     => 'Tahun ekspor wajib diisi.',
+                'numeric'      => 'Tahun harus berupa angka.',
+                'exact_length' => 'Tahun harus 4 digit angka (contoh: 2024).',
+            ],
+            'produk' => [
+                'required'   => 'Nama produk ekspor wajib diisi.',
+                'min_length' => 'Nama produk ekspor minimal 2 karakter.',
+                'max_length' => 'Nama produk ekspor maksimal 255 karakter.',
+            ],
+            'negara_tujuan' => [
+                'required'   => 'Negara tujuan wajib diisi.',
+                'min_length' => 'Negara tujuan minimal 2 karakter.',
+                'max_length' => 'Negara tujuan maksimal 150 karakter.',
+            ],
+            'nilai_ekspor_usd' => [
+                'numeric'               => 'Nilai ekspor USD harus berupa angka valid.',
+                'greater_than_equal_to' => 'Nilai ekspor USD tidak boleh bernilai negatif.',
+            ],
+        ];
+
+        if (!$this->validate($rules, $messages)) {
+            $errList = implode(' ', $this->validator->getErrors());
+            session()->setFlashdata('error', $errList);
+            return redirect()->to(base_url('admin/produk_sales/edit/' . $idProduk))->withInput();
+        }
+
+        $nilaiUsdRaw = trim((string)$this->request->getPost('nilai_ekspor_usd'));
+        $nilaiUsd    = ($nilaiUsdRaw !== '') ? (float)$nilaiUsdRaw : null;
+
+        $dataInsert = [
+            'id_supplier'       => $supplierId,
+            'tahun'             => (int)$this->request->getPost('tahun'),
+            'produk'            => trim((string)$this->request->getPost('produk')),
+            'negara_tujuan'     => trim((string)$this->request->getPost('negara_tujuan')),
+            'jenis_ekspor'      => trim((string)$this->request->getPost('jenis_ekspor')) ?: null,
+            'kuantitas'         => trim((string)$this->request->getPost('kuantitas')) ?: null,
+            'nilai_ekspor_usd'  => $nilaiUsd,
+            'nilai_ekspor_asli' => $nilaiUsdRaw ?: null,
+            'catatan'           => trim((string)$this->request->getPost('catatan')) ?: null,
+        ];
+
+        $this->historyModel->insert($dataInsert);
+        session()->setFlashdata('success', 'Catatan history ekspor berhasil ditambahkan.');
+
+        return redirect()->to(base_url('admin/produk_sales/edit/' . $idProduk));
+    }
+
+    /**
+     * Memperbarui catatan history ekspor
+     */
+    public function history_ubah(int $idProduk, int $idHistory)
+    {
+        if ($redirect = $this->checkAuth()) {
+            return $redirect;
+        }
+
+        $produk = $this->productModel->find($idProduk);
+        if (!$produk || empty($produk['id_supplier'])) {
+            session()->setFlashdata('error', 'Produk atau supplier tidak valid.');
+            return redirect()->to(base_url('admin/produk_sales/index'));
+        }
+
+        $supplierId = (int)$produk['id_supplier'];
+        $history    = $this->historyModel->find($idHistory);
+
+        if (!$history) {
+            session()->setFlashdata('error', 'Catatan history ekspor tidak ditemukan.');
+            return redirect()->to(base_url('admin/produk_sales/edit/' . $idProduk));
+        }
+
+        // Validasi kepemilikan data (Cegah mengubah data perusahaan lain)
+        if ((int)$history['id_supplier'] !== $supplierId) {
+            session()->setFlashdata('error', 'Akses ditolak: History ekspor ini bukan milik perusahaan dari produk yang sedang diedit.');
+            return redirect()->to(base_url('admin/produk_sales/edit/' . $idProduk));
+        }
+
+        $rules = [
+            'tahun'            => 'required|numeric|exact_length[4]',
+            'produk'           => 'required|min_length[2]|max_length[255]',
+            'negara_tujuan'    => 'required|min_length[2]|max_length[150]',
+            'jenis_ekspor'     => 'permit_empty|max_length[255]',
+            'kuantitas'        => 'permit_empty|max_length[255]',
+            'nilai_ekspor_usd' => 'permit_empty|numeric|greater_than_equal_to[0]',
+            'catatan'          => 'permit_empty|max_length[255]',
+        ];
+
+        $messages = [
+            'tahun' => [
+                'required'     => 'Tahun ekspor wajib diisi.',
+                'numeric'      => 'Tahun harus berupa angka.',
+                'exact_length' => 'Tahun harus 4 digit angka (contoh: 2024).',
+            ],
+            'produk' => [
+                'required'   => 'Nama produk ekspor wajib diisi.',
+                'min_length' => 'Nama produk ekspor minimal 2 karakter.',
+                'max_length' => 'Nama produk ekspor maksimal 255 karakter.',
+            ],
+            'negara_tujuan' => [
+                'required'   => 'Negara tujuan wajib diisi.',
+                'min_length' => 'Negara tujuan minimal 2 karakter.',
+                'max_length' => 'Negara tujuan maksimal 150 karakter.',
+            ],
+            'nilai_ekspor_usd' => [
+                'numeric'               => 'Nilai ekspor USD harus berupa angka valid.',
+                'greater_than_equal_to' => 'Nilai ekspor USD tidak boleh bernilai negatif.',
+            ],
+        ];
+
+        if (!$this->validate($rules, $messages)) {
+            $errList = implode(' ', $this->validator->getErrors());
+            session()->setFlashdata('error', $errList);
+            return redirect()->to(base_url('admin/produk_sales/edit/' . $idProduk))->withInput();
+        }
+
+        $nilaiUsdRaw = trim((string)$this->request->getPost('nilai_ekspor_usd'));
+        $nilaiUsd    = ($nilaiUsdRaw !== '') ? (float)$nilaiUsdRaw : null;
+
+        $dataUpdate = [
+            'tahun'             => (int)$this->request->getPost('tahun'),
+            'produk'            => trim((string)$this->request->getPost('produk')),
+            'negara_tujuan'     => trim((string)$this->request->getPost('negara_tujuan')),
+            'jenis_ekspor'      => trim((string)$this->request->getPost('jenis_ekspor')) ?: null,
+            'kuantitas'         => trim((string)$this->request->getPost('kuantitas')) ?: null,
+            'nilai_ekspor_usd'  => $nilaiUsd,
+            'nilai_ekspor_asli' => $nilaiUsdRaw ?: null,
+            'catatan'           => trim((string)$this->request->getPost('catatan')) ?: null,
+        ];
+
+        $this->historyModel->update($idHistory, $dataUpdate);
+        session()->setFlashdata('success', 'Catatan history ekspor berhasil diperbarui.');
+
+        return redirect()->to(base_url('admin/produk_sales/edit/' . $idProduk));
+    }
+
+    /**
+     * Menghapus catatan history ekspor
+     */
+    public function history_hapus(int $idProduk, int $idHistory)
+    {
+        if ($redirect = $this->checkAuth()) {
+            return $redirect;
+        }
+
+        $produk = $this->productModel->find($idProduk);
+        if (!$produk || empty($produk['id_supplier'])) {
+            session()->setFlashdata('error', 'Produk atau supplier tidak valid.');
+            return redirect()->to(base_url('admin/produk_sales/index'));
+        }
+
+        $supplierId = (int)$produk['id_supplier'];
+        $history    = $this->historyModel->find($idHistory);
+
+        if (!$history) {
+            session()->setFlashdata('error', 'Catatan history ekspor tidak ditemukan.');
+            return redirect()->to(base_url('admin/produk_sales/edit/' . $idProduk));
+        }
+
+        // Validasi kepemilikan data (Cegah menghapus data perusahaan lain)
+        if ((int)$history['id_supplier'] !== $supplierId) {
+            session()->setFlashdata('error', 'Akses ditolak: History ekspor ini bukan milik perusahaan dari produk yang sedang diedit.');
+            return redirect()->to(base_url('admin/produk_sales/edit/' . $idProduk));
+        }
+
+        $this->historyModel->delete($idHistory);
+        session()->setFlashdata('success', 'Catatan history ekspor berhasil dihapus.');
+
+        return redirect()->to(base_url('admin/produk_sales/edit/' . $idProduk));
     }
 }

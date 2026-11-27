@@ -1,0 +1,187 @@
+
+=================== 2024 - Sheet1 (Header Row 2) ===================
+Col  1 | TableHeader: None                      | ColHeader: Timestamp
+Col  2 | TableHeader: Tb_Supplier               | ColHeader: Email Address
+Col  3 | TableHeader: None                      | ColHeader: Nama Calon Peserta
+Col  4 | TableHeader: None                      | ColHeader: Wilayah Export Coaching Program yang ingin diikuti ( Mohon Diperhatikan tempat pelaksanaan, dikarenakan ada satu provinsi yang memiliki 2 tempat pelaksanaan, mohon pilih yang jaraknya terdekat dari perusahaan bapak dan ibu)
+Col  5 | TableHeader: None                      | ColHeader: Domisili Usaha (Peserta harus berasal dari 9 wilayah Export Coaching Program di bawah)
+Col  6 | TableHeader: None                      | ColHeader: Nomor Handphone / Whatsapp
+Col  7 | TableHeader: None                      | ColHeader: Dengan mengirimkan form ini, saya menyatakan bahwa data yang diisi adalah benar dan sesuai
+Col  8 | TableHeader: None                      | ColHeader: Nama Lengkap Badan Usaha (UD /Koperasi / CV / PT)
+Col  9 | TableHeader: None                      | ColHeader: Tahun berdiri perusahaan 
+Col 10 | TableHeader: None                      | ColHeader: Alamat Perusahaan
+Col 11 | TableHeader: None                      | ColHeader: Alamat tempat produksi (jika berbeda dengan alamat perusahaan)
+Col 12 | TableHeader: None                      | ColHeader: Kategori Produk
+Col 13 | TableHeader: None                      | ColHeader: Produk yang dipasarkan (Contoh : Tas Kulit, Jahe, dan lain lain secara spesifik)
+Col 14 | TableHeader: None                      | ColHeader: Merk Dagang
+Col 15 | TableHeader: None                      | ColHeader: Jenis Perusahaan
+Col 16 | TableHeader: None                      | ColHeader: Kapasitas Produksi (per bulan)
+Col 17 | TableHeader: None                      | ColHeader: Omset (per bulan)
+Col 18 | TableHeader: None                      | ColHeader: Email Perusahaan
+Col 19 | TableHeader: None                      | ColHeader: Alamat Website
+Col 20 | TableHeader: None                      | ColHeader: ID Facebook / Facebook Fan Page Perusahaan
+Col 21 | TableHeader: None                      | ColHeader: ID Linkedin
+Col 22 | TableHeader: None                      | ColHeader: ID Instagram Perusahaan
+Col 23 | TableHeader: None                      | ColHeader: ID Social Media Perusahaan lainnya
+Col 24 | TableHeader: None                      | ColHeader: Marketplace internasional yg sdh dimiliki
+Col 25 | TableHeader: None                      | ColHeader: Apakah Pernah ikut kursus, pelatihan, training, course, kelas yg membahas ttg eksport?
+Col 26 | TableHeader: None                      | ColHeader: Jika Pernah ikut kursus/pelatihan/kelas yang membahas tentang ekspor? Sebutkan
+Col 27 | TableHeader: None                      | ColHeader: Apakah tergabung dalam komunitas ekspor? Jika iya sebutkan nama komunitasnya
+Col 28 | TableHeader: None                      | ColHeader: Jumlah Pegawai yang dimiliki
+Col 29 | TableHeader: None                      | ColHeader: Pameran bertaraf internasional yang pernah diikuti dalam 2 (dua) tahun terakhir
+Col 30 | TableHeader: None                      | ColHeader: Jelaskan Keunggulan Produk Perusahaan
+Col 31 | TableHeader: None                      | ColHeader: Lampirkan foto produk anda dan foto tempat usaha Anda (maksimal 5 file dengan ukuran maks 10MB untuk keseluruhan file, dengan format file berupa Document, PDF, dan Image)
+Col 32 | TableHeader: None                      | ColHeader: Legalitas perusahaan yang telah dimiliki sekarang?
+Col 33 | TableHeader: None                      | ColHeader: Lampirkan scan/ foto dokumen legalitas dokumen tersebut di atas (file dalam bentuk PDF dan Image maksimum 5 file dan maximum size 10MB untuk keseluruhan file ) 
+Col 34 | TableHeader: None                      | ColHeader: Sertifikat yang dimiliki berkaitan dengan Badan Usaha dan produk
+Col 35 | TableHeader: None                      | ColHeader: Upload hasil scan/ foto dokumen Sertifikasi terkait Badan Usaha dan/ atau Produk yang dimiliki dan disebut di atas (file dalam bentuk PDF dan Image maksimum 5 file dan maximum size 10MB untuk keseluruhan file) 
+Col 36 | TableHeader: None                      | ColHeader: Apakah anda pernah melakukan ekspor?
+Col 37 | TableHeader: None                      | ColHeader: Kategori ekspor
+Col 38 | TableHeader: None                      | ColHeader: 
+Col 39 | TableHeader: None                      | ColHeader: Jika sudah pernah ekspor, sebutkan produknya
+Col 40 | TableHeader: None                      | ColHeader: Jika sudah pernah ekspor, sebutkan kapasitasnya berapa kontainer/ton/kwintal/kilogram/pcs dll.
+Col 41 | TableHeader: None                      | ColHeader: Jika sudah pernah ekspor, sebutkan negara tujuannya
+Col 42 | TableHeader: None                      | ColHeader: Nilai Ekspor (mohon diisi dalam satuan mata uang USD, tidak perlu menggunakan titik untuk pemisah ribuan atau jutaan, titik digunakan jika ada koma di dalam angka capaian contoh : 14.023,45 USD berati ditulis 14023.45)
+Col 43 | TableHeader: None                      | ColHeader: Seberapa seringkah anda melakukan ekspor
+Col 44 | TableHeader: None                      | ColHeader: Seluruh Data ini hanya akan digunakan untuk kepentingan di Kementerian Perdagangan
+Col 45 | TableHeader: Tb_History_export_supplier | ColHeader: Produk
+Col 46 | TableHeader: None                      | ColHeader: Negara Tujuan Ekspor
+Col 47 | TableHeader: None                      | ColHeader: Jenis Ekspor
+Col 48 | TableHeader: None                      | ColHeader: Jumlah produk yang diekspor (kuantitas/ volume) (Contoh : 1.500 Box, atau 1 Container 40 x 20 Feet, disesuaikan dengan satuan produk yang diekspor)
+Col 49 | TableHeader: None                      | ColHeader: Nilai Ekspor (Cara Pengisian : mohon diisi dalam satuan mata uang USD, tidak perlu menggunakan titik untuk pemisah ribuan atau jutaan, titik digunakan jika ada koma di dalam angka capaian contoh : Jika Nilai Real adalah 14.023,45 USD berati ditulis di gform yaitu 14023.45)
+Notes : 1 USD = 16.000 Rupiah
+Col 50 | TableHeader: Tb_Produk_supplier        | ColHeader: Produk Yang Siap Expor
+
+Col 51 | TableHeader: None                      | ColHeader: Spesifikasi 
+
+Col 52 | TableHeader: None                      | ColHeader: Kapasitas Produksi
+Col 53 | TableHeader: None                      | ColHeader: Legalitas
+Col 54 | TableHeader: None                      | ColHeader: Sertifikasi
+Col 55 | TableHeader: None                      | ColHeader: Lokasi Barang
+Col 56 | TableHeader: None                      | ColHeader: Foto 1
+Col 57 | TableHeader: None                      | ColHeader: Foto 2
+Col 58 | TableHeader: None                      | ColHeader: Foto 3
+Col 59 | TableHeader: None                      | ColHeader: Foto 4
+Col 60 | TableHeader: None                      | ColHeader: Foto 5
+Col 61 | TableHeader: None                      | ColHeader: MOQ
+Col 62 | TableHeader: None                      | ColHeader: Harga EXW 
+Col 63 | TableHeader: None                      | ColHeader: Komisi
+Col 64 | TableHeader: None                      | ColHeader: Sudah Ekspor
+
+=================== 2024 - Sheet3 (Header Row 1) ===================
+Col  1 | TableHeader:                           | ColHeader: Timestamp
+Col  2 | TableHeader:                           | ColHeader: Email Address
+Col  3 | TableHeader:                           | ColHeader: Nama Calon Peserta
+Col  4 | TableHeader:                           | ColHeader: Wilayah Export Coaching Program yang ingin diikuti ( Mohon Diperhatikan tempat pelaksanaan, dikarenakan ada satu provinsi yang memiliki 2 tempat pelaksanaan, mohon pilih yang jaraknya terdekat dari perusahaan bapak dan ibu)
+Col  5 | TableHeader:                           | ColHeader: Domisili Usaha (Peserta harus berasal dari 9 wilayah Export Coaching Program di bawah)
+Col  6 | TableHeader:                           | ColHeader: Nomor Handphone / Whatsapp
+Col  7 | TableHeader:                           | ColHeader: Dengan mengirimkan form ini, saya menyatakan bahwa data yang diisi adalah benar dan sesuai
+Col  8 | TableHeader:                           | ColHeader: Nama Lengkap Badan Usaha (UD /Koperasi / CV / PT)
+Col  9 | TableHeader:                           | ColHeader: Produk yang dipasarkan (Contoh : Tas Kulit, Jahe, dan lain lain secara spesifik)
+Col 10 | TableHeader:                           | ColHeader: Seluruh Data ini hanya akan digunakan untuk kepentingan di Kementerian Perdagangan
+Col 11 | TableHeader:                           | ColHeader: Produk
+Col 12 | TableHeader:                           | ColHeader: Negara Tujuan Ekspor
+Col 13 | TableHeader:                           | ColHeader: Jenis Ekspor
+Col 14 | TableHeader:                           | ColHeader: Jumlah produk yang diekspor (kuantitas/ volume) (Contoh : 1.500 Box, atau 1 Container 40 x 20 Feet, disesuaikan dengan satuan produk yang diekspor)
+Col 15 | TableHeader:                           | ColHeader: Nilai Ekspor (Cara Pengisian : mohon diisi dalam satuan mata uang USD, tidak perlu menggunakan titik untuk pemisah ribuan atau jutaan, titik digunakan jika ada koma di dalam angka capaian contoh : Jika Nilai Real adalah 14.023,45 USD berati ditulis di gform yaitu 14023.45)
+Notes : 1 USD = 16.000 Rupiah
+Col 16 | TableHeader:                           | ColHeader: Petugas WA
+Col 17 | TableHeader:                           | ColHeader: Petugas Email
+
+=================== 2025 - Sheet1 (Header Row 2) ===================
+Col  1 | TableHeader: None                      | ColHeader: Timestamp
+Col  2 | TableHeader: Tb_Supplier               | ColHeader: Email Address
+Col  3 | TableHeader: None                      | ColHeader: Nama Calon Peserta
+Col  4 | TableHeader: None                      | ColHeader: Wilayah Export Coaching Program yang ingin diikuti ( Mohon Diperhatikan tempat pelaksanaan, dikarenakan ada satu provinsi yang memiliki 2 tempat pelaksanaan, mohon pilih yang jaraknya terdekat dari perusahaan bapak dan ibu)
+Col  5 | TableHeader: None                      | ColHeader: Domisili Usaha (Peserta harus berasal dari 9 wilayah Export Coaching Program di bawah)
+Col  6 | TableHeader: None                      | ColHeader: Nomor Handphone / Whatsapp
+Col  7 | TableHeader: None                      | ColHeader: Dengan mengirimkan form ini, saya menyatakan bahwa data yang diisi adalah benar dan sesuai
+Col  8 | TableHeader: None                      | ColHeader: Nama Lengkap Badan Usaha (UD /Koperasi / CV / PT)
+Col  9 | TableHeader: None                      | ColHeader: Tahun berdiri perusahaan 
+Col 10 | TableHeader: None                      | ColHeader: Alamat Perusahaan
+Col 11 | TableHeader: None                      | ColHeader: Alamat tempat produksi (jika berbeda dengan alamat perusahaan)
+Col 12 | TableHeader: None                      | ColHeader: Kategori Produk
+Col 13 | TableHeader: None                      | ColHeader: Produk yang dipasarkan (Contoh : Tas Kulit, Jahe, dan lain lain secara spesifik)
+Col 14 | TableHeader: None                      | ColHeader: Merk Dagang
+Col 15 | TableHeader: None                      | ColHeader: Jenis Perusahaan
+Col 16 | TableHeader: None                      | ColHeader: Kapasitas Produksi (per bulan)
+Col 17 | TableHeader: None                      | ColHeader: Omset (per bulan)
+Col 18 | TableHeader: None                      | ColHeader: Email Perusahaan
+Col 19 | TableHeader: None                      | ColHeader: Alamat Website
+Col 20 | TableHeader: None                      | ColHeader: ID Facebook / Facebook Fan Page Perusahaan
+Col 21 | TableHeader: None                      | ColHeader: ID Linkedin
+Col 22 | TableHeader: None                      | ColHeader: ID Instagram Perusahaan
+Col 23 | TableHeader: None                      | ColHeader: ID Social Media Perusahaan lainnya
+Col 24 | TableHeader: None                      | ColHeader: Marketplace internasional yg sdh dimiliki
+Col 25 | TableHeader: None                      | ColHeader: Apakah Pernah ikut kursus, pelatihan, training, course, kelas yg membahas ttg eksport?
+Col 26 | TableHeader: None                      | ColHeader: Jika Pernah ikut kursus/pelatihan/kelas yang membahas tentang ekspor? Sebutkan
+Col 27 | TableHeader: None                      | ColHeader: Apakah tergabung dalam komunitas ekspor? Jika iya sebutkan nama komunitasnya
+Col 28 | TableHeader: None                      | ColHeader: Jumlah Pegawai yang dimiliki
+Col 29 | TableHeader: None                      | ColHeader: Pameran bertaraf internasional yang pernah diikuti dalam 2 (dua) tahun terakhir
+Col 30 | TableHeader: None                      | ColHeader: Jelaskan Keunggulan Produk Perusahaan
+Col 31 | TableHeader: None                      | ColHeader: Lampirkan foto produk anda dan foto tempat usaha Anda (maksimal 5 file dengan ukuran maks 10MB untuk keseluruhan file, dengan format file berupa Document, PDF, dan Image)
+Col 32 | TableHeader: None                      | ColHeader: Legalitas perusahaan yang telah dimiliki sekarang?
+Col 33 | TableHeader: None                      | ColHeader: Lampirkan scan/ foto dokumen legalitas dokumen tersebut di atas (file dalam bentuk PDF dan Image maksimum 5 file dan maximum size 10MB untuk keseluruhan file ) 
+Col 34 | TableHeader: None                      | ColHeader: Sertifikat yang dimiliki berkaitan dengan Badan Usaha dan produk
+Col 35 | TableHeader: None                      | ColHeader: Upload hasil scan/ foto dokumen Sertifikasi terkait Badan Usaha dan/ atau Produk yang dimiliki dan disebut di atas (file dalam bentuk PDF dan Image maksimum 5 file dan maximum size 10MB untuk keseluruhan file) 
+Col 36 | TableHeader: None                      | ColHeader: Apakah anda pernah melakukan ekspor?
+Col 37 | TableHeader: None                      | ColHeader: Kategori ekspor
+Col 38 | TableHeader: None                      | ColHeader: 
+Col 39 | TableHeader: None                      | ColHeader: Jika sudah pernah ekspor, sebutkan produknya
+Col 40 | TableHeader: None                      | ColHeader: Jika sudah pernah ekspor, sebutkan kapasitasnya berapa kontainer/ton/kwintal/kilogram/pcs dll.
+Col 41 | TableHeader: None                      | ColHeader: Jika sudah pernah ekspor, sebutkan negara tujuannya
+Col 42 | TableHeader: None                      | ColHeader: Nilai Ekspor (mohon diisi dalam satuan mata uang USD, tidak perlu menggunakan titik untuk pemisah ribuan atau jutaan, titik digunakan jika ada koma di dalam angka capaian contoh : 14.023,45 USD berati ditulis 14023.45)
+Col 43 | TableHeader: None                      | ColHeader: Seberapa seringkah anda melakukan ekspor
+Col 44 | TableHeader: None                      | ColHeader: Seluruh Data ini hanya akan digunakan untuk kepentingan di Kementerian Perdagangan
+Col 45 | TableHeader: Tb_History_export_supplier | ColHeader: Produk
+Col 46 | TableHeader: None                      | ColHeader: Negara Tujuan Ekspor
+Col 47 | TableHeader: None                      | ColHeader: Jenis Ekspor
+Col 48 | TableHeader: None                      | ColHeader: Jumlah produk yang diekspor (kuantitas/ volume) (Contoh : 1.500 Box, atau 1 Container 40 x 20 Feet, disesuaikan dengan satuan produk yang diekspor)
+Col 49 | TableHeader: None                      | ColHeader: Nilai Ekspor (Cara Pengisian : mohon diisi dalam satuan mata uang USD, tidak perlu menggunakan titik untuk pemisah ribuan atau jutaan, titik digunakan jika ada koma di dalam angka capaian contoh : Jika Nilai Real adalah 14.023,45 USD berati ditulis di gform yaitu 14023.45)
+Notes : 1 USD = 16.000 Rupiah
+Col 50 | TableHeader: Tb_Produk_supplier        | ColHeader: Produk Yang Siap Expor
+
+Col 51 | TableHeader: None                      | ColHeader: Spesifikasi 
+
+Col 52 | TableHeader: None                      | ColHeader: Kapasitas Produksi
+Col 53 | TableHeader: None                      | ColHeader: Legalitas
+Col 54 | TableHeader: None                      | ColHeader: Sertifikasi
+Col 55 | TableHeader: None                      | ColHeader: Lokasi Barang
+Col 56 | TableHeader: None                      | ColHeader: Foto 1
+Col 57 | TableHeader: None                      | ColHeader: Foto 2
+Col 58 | TableHeader: None                      | ColHeader: Foto 3
+Col 59 | TableHeader: None                      | ColHeader: Foto 4
+Col 60 | TableHeader: None                      | ColHeader: Foto 5
+Col 61 | TableHeader: None                      | ColHeader: MOQ
+Col 62 | TableHeader: None                      | ColHeader: Harga EXW 
+Col 63 | TableHeader: None                      | ColHeader: Komisi
+Col 64 | TableHeader: None                      | ColHeader: Sudah Ekspor
+Col 65 | TableHeader: None                      | ColHeader: None
+Col 66 | TableHeader: None                      | ColHeader: None
+Col 67 | TableHeader: None                      | ColHeader: None
+Col 68 | TableHeader: None                      | ColHeader: None
+Col 69 | TableHeader: None                      | ColHeader: None
+
+=================== 2025 - Sheet3 (Header Row 1) ===================
+Col  1 | TableHeader:                           | ColHeader: Timestamp
+Col  2 | TableHeader:                           | ColHeader: Email Address
+Col  3 | TableHeader:                           | ColHeader: Nama Calon Peserta
+Col  4 | TableHeader:                           | ColHeader: Wilayah Export Coaching Program yang ingin diikuti ( Mohon Diperhatikan tempat pelaksanaan, dikarenakan ada satu provinsi yang memiliki 2 tempat pelaksanaan, mohon pilih yang jaraknya terdekat dari perusahaan bapak dan ibu)
+Col  5 | TableHeader:                           | ColHeader: Domisili Usaha (Peserta harus berasal dari 9 wilayah Export Coaching Program di bawah)
+Col  6 | TableHeader:                           | ColHeader: Nomor Handphone / Whatsapp
+Col  7 | TableHeader:                           | ColHeader: Dengan mengirimkan form ini, saya menyatakan bahwa data yang diisi adalah benar dan sesuai
+Col  8 | TableHeader:                           | ColHeader: Nama Lengkap Badan Usaha (UD /Koperasi / CV / PT)
+Col  9 | TableHeader:                           | ColHeader: Tahun berdiri perusahaan 
+Col 10 | TableHeader:                           | ColHeader: Alamat Perusahaan
+Col 11 | TableHeader:                           | ColHeader: Alamat tempat produksi (jika berbeda dengan alamat perusahaan)
+Col 12 | TableHeader:                           | ColHeader: Kategori Produk
+Col 13 | TableHeader:                           | ColHeader: Produk yang dipasarkan (Contoh : Tas Kulit, Jahe, dan lain lain secara spesifik)
+Col 14 | TableHeader:                           | ColHeader: Seluruh Data ini hanya akan digunakan untuk kepentingan di Kementerian Perdagangan
+Col 15 | TableHeader:                           | ColHeader: Produk
+Col 16 | TableHeader:                           | ColHeader: Negara Tujuan Ekspor
+Col 17 | TableHeader:                           | ColHeader: Jenis Ekspor
+Col 18 | TableHeader:                           | ColHeader: Jumlah produk yang diekspor (kuantitas/ volume) (Contoh : 1.500 Box, atau 1 Container 40 x 20 Feet, disesuaikan dengan satuan produk yang diekspor)
+Col 19 | TableHeader:                           | ColHeader: Nilai Ekspor (Cara Pengisian : mohon diisi dalam satuan mata uang USD, tidak perlu menggunakan titik untuk pemisah ribuan atau jutaan, titik digunakan jika ada koma di dalam angka capaian contoh : Jika Nilai Real adalah 14.023,45 USD berati ditulis di gform yaitu 14023.45)
+Notes : 1 USD = 16.000 Rupiah
+Col 20 | TableHeader:                           | ColHeader: Petugas WA
+Col 21 | TableHeader:                           | ColHeader: Petugas Email

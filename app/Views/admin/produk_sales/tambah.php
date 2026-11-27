@@ -20,6 +20,15 @@
             </div>
         </div><!--//row-->
 
+        <!-- Alert Success Flashdata -->
+        <?php if (session()->getFlashdata('success')) : ?>
+            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                <?= esc(session()->getFlashdata('success')) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+
         <!-- Alert Error Flashdata -->
         <?php if (session()->getFlashdata('error')) : ?>
             <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
@@ -234,6 +243,94 @@
                         </div><!--//col-->
                     </div><!--//row-->
 
+                    <!-- Bagian History Ekspor (Opsional) -->
+                    <div class="border-top pt-4 mt-4">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                            <div>
+                                <h5 class="section-title mb-1 text-primary">
+                                    <i class="fa-solid fa-ship me-2"></i>History Ekspor (Opsional)
+                                </h5>
+                                <small class="text-muted">
+                                    <i class="fa-solid fa-circle-info me-1"></i> History ini milik perusahaan yang dipilih di atas, berlaku untuk semua produknya.
+                                </small>
+                            </div>
+                            <div>
+                                <button type="button" id="btn-add-history" class="btn btn-outline-success btn-sm fw-semibold">
+                                    <i class="fa-solid fa-plus me-1"></i> Tambah Baris
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="history-rows-container">
+                            <?php 
+                            $oldHistory = old('history');
+                            $hIdx = 0;
+                            if (is_array($oldHistory) && !empty($oldHistory)) : 
+                                foreach ($oldHistory as $key => $h) :
+                                    $tRow = esc($h['tahun'] ?? '');
+                                    $pRow = esc($h['produk'] ?? '');
+                                    $nRow = esc($h['negara_tujuan'] ?? '');
+                                    $jRow = esc($h['jenis_ekspor'] ?? '');
+                                    $kRow = esc($h['kuantitas'] ?? '');
+                                    $uRow = esc($h['nilai_ekspor_usd'] ?? '');
+                                    $cRow = esc($h['catatan'] ?? '');
+                            ?>
+                                <div class="history-row border rounded-3 p-3 mb-3 bg-light position-relative" data-index="<?= $hIdx ?>">
+                                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                                        <span class="fw-bold text-secondary history-row-number">
+                                            <i class="fa-solid fa-ship me-1 text-primary"></i> Baris History #<span class="row-num-label"><?= $hIdx + 1 ?></span>
+                                        </span>
+                                        <button type="button" class="btn btn-outline-danger btn-sm btn-remove-history" title="Hapus Baris Ini">
+                                            <i class="fa-solid fa-trash-can me-1"></i> Hapus Baris
+                                        </button>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-12 col-md-2">
+                                            <label class="form-label small fw-bold">Tahun <span class="text-danger">*</span></label>
+                                            <input type="number" name="history[<?= $hIdx ?>][tahun]" class="form-control form-control-sm" value="<?= $tRow ?>" placeholder="Contoh: 2024" min="1900" max="2099">
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <label class="form-label small fw-bold">Produk <span class="text-danger">*</span></label>
+                                            <input type="text" name="history[<?= $hIdx ?>][produk]" class="form-control form-control-sm" value="<?= $pRow ?>" placeholder="Nama produk ekspor">
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label small fw-bold">Negara Tujuan <span class="text-danger">*</span></label>
+                                            <input type="text" name="history[<?= $hIdx ?>][negara_tujuan]" class="form-control form-control-sm" value="<?= $nRow ?>" placeholder="Contoh: Malaysia, Singapura">
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <label class="form-label small fw-bold">Jenis Ekspor</label>
+                                            <input type="text" name="history[<?= $hIdx ?>][jenis_ekspor]" class="form-control form-control-sm" value="<?= $jRow ?>" placeholder="Contoh: Langsung, Maklon">
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <label class="form-label small fw-bold">Kuantitas</label>
+                                            <input type="text" name="history[<?= $hIdx ?>][kuantitas]" class="form-control form-control-sm" value="<?= $kRow ?>" placeholder="Contoh: 800 pcs / 20 MT">
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <label class="form-label small fw-bold">Nilai Ekspor (USD)</label>
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" step="0.01" min="0" name="history[<?= $hIdx ?>][nilai_ekspor_usd]" class="form-control form-control-sm" value="<?= $uRow ?>" placeholder="Contoh: 25000.00">
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <label class="form-label small fw-bold">Catatan</label>
+                                            <input type="text" name="history[<?= $hIdx ?>][catatan]" class="form-control form-control-sm" value="<?= $cRow ?>" placeholder="Catatan tambahan (opsional)">
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php 
+                                    $hIdx++;
+                                endforeach; 
+                            endif; 
+                            ?>
+                        </div>
+
+                        <div id="history-empty-placeholder" class="text-muted text-center py-4 border border-dashed rounded-3 bg-light mb-3" style="<?= (!empty($oldHistory) && is_array($oldHistory)) ? 'display: none;' : '' ?>">
+                            <i class="fa-solid fa-box-open fs-3 me-2 text-secondary d-block mb-1"></i>
+                            Belum ada baris history ekspor. Klik tombol <strong>"+ Tambah Baris"</strong> di atas jika perusahaan ini sudah memiliki riwayat ekspor.
+                        </div>
+                    </div>
+
                     <div class="border-top pt-3 mt-4 d-flex justify-content-end gap-2">
                         <a href="<?= base_url('admin/produk_sales/index') ?>" class="btn btn-secondary">
                             Batal
@@ -248,5 +345,108 @@
 
     </div><!--//container-xl-->
 </div><!--//app-content-->
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var historyContainer = document.getElementById('history-rows-container');
+    var emptyPlaceholder = document.getElementById('history-empty-placeholder');
+    var btnAdd = document.getElementById('btn-add-history');
+    var historyIndex = <?= isset($hIdx) && $hIdx > 0 ? $hIdx : 0 ?>;
+
+    function updateVisibilityAndNumbers() {
+        var rows = historyContainer.querySelectorAll('.history-row');
+        if (rows.length === 0) {
+            emptyPlaceholder.style.display = 'block';
+        } else {
+            emptyPlaceholder.style.display = 'none';
+        }
+        rows.forEach(function(row, idx) {
+            var label = row.querySelector('.row-num-label');
+            if (label) {
+                label.textContent = (idx + 1);
+            }
+        });
+    }
+
+    if (btnAdd) {
+        btnAdd.addEventListener('click', function() {
+            var currentRows = historyContainer.querySelectorAll('.history-row');
+            if (currentRows.length >= 20) {
+                alert('Maksimal 20 baris history ekspor yang dapat ditambahkan sekaligus.');
+                return;
+            }
+
+            var defaultProduk = '';
+            var namaProdukInput = document.getElementById('nama_produk');
+            if (namaProdukInput && namaProdukInput.value.trim() !== '') {
+                defaultProduk = namaProdukInput.value.trim();
+            }
+
+            var currentYear = new Date().getFullYear();
+            var rowHtml = `
+            <div class="history-row border rounded-3 p-3 mb-3 bg-light position-relative" data-index="${historyIndex}">
+                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                    <span class="fw-bold text-secondary history-row-number">
+                        <i class="fa-solid fa-ship me-1 text-primary"></i> Baris History #<span class="row-num-label">${currentRows.length + 1}</span>
+                    </span>
+                    <button type="button" class="btn btn-outline-danger btn-sm btn-remove-history" title="Hapus Baris Ini">
+                        <i class="fa-solid fa-trash-can me-1"></i> Hapus Baris
+                    </button>
+                </div>
+                <div class="row g-2">
+                    <div class="col-12 col-md-2">
+                        <label class="form-label small fw-bold">Tahun <span class="text-danger">*</span></label>
+                        <input type="number" name="history[${historyIndex}][tahun]" class="form-control form-control-sm" value="${currentYear}" placeholder="Contoh: 2024" min="1900" max="2099">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small fw-bold">Produk <span class="text-danger">*</span></label>
+                        <input type="text" name="history[${historyIndex}][produk]" class="form-control form-control-sm" value="${defaultProduk.replace(/"/g, '&quot;')}" placeholder="Nama produk ekspor">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-bold">Negara Tujuan <span class="text-danger">*</span></label>
+                        <input type="text" name="history[${historyIndex}][negara_tujuan]" class="form-control form-control-sm" placeholder="Contoh: Malaysia, Singapura">
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label small fw-bold">Jenis Ekspor</label>
+                        <input type="text" name="history[${historyIndex}][jenis_ekspor]" class="form-control form-control-sm" placeholder="Contoh: Langsung, Maklon">
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label small fw-bold">Kuantitas</label>
+                        <input type="text" name="history[${historyIndex}][kuantitas]" class="form-control form-control-sm" placeholder="Contoh: 800 pcs / 20 MT">
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label small fw-bold">Nilai Ekspor (USD)</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="0.01" min="0" name="history[${historyIndex}][nilai_ekspor_usd]" class="form-control form-control-sm" placeholder="Contoh: 25000.00">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label small fw-bold">Catatan</label>
+                        <input type="text" name="history[${historyIndex}][catatan]" class="form-control form-control-sm" placeholder="Catatan tambahan (opsional)">
+                    </div>
+                </div>
+            </div>`;
+
+            historyContainer.insertAdjacentHTML('beforeend', rowHtml);
+            historyIndex++;
+            updateVisibilityAndNumbers();
+        });
+    }
+
+    historyContainer.addEventListener('click', function(e) {
+        var btnRemove = e.target.closest('.btn-remove-history');
+        if (btnRemove) {
+            var row = btnRemove.closest('.history-row');
+            if (row) {
+                row.remove();
+                updateVisibilityAndNumbers();
+            }
+        }
+    });
+
+    updateVisibilityAndNumbers();
+});
+</script>
 
 <?= $this->endSection(); ?>

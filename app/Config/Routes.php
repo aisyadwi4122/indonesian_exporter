@@ -81,6 +81,7 @@ $routes->group('supplier', ['filter' => 'supplierauth'], function ($routes) {
     $routes->post('produk/proses_edit/(:num)', 'Supplier\Produk::proses_edit/$1');
     $routes->post('produk/delete/(:num)', 'Supplier\Produk::delete/$1');
     $routes->get('history', 'Supplier\History::index');
+    $routes->post('history/tambah', 'Supplier\History::tambah');
 });
 
 // ADMIN ROUTES
@@ -202,6 +203,15 @@ $routes->post('admin/produk_sales/proses_tambah', 'admin\ProdukSales::proses_tam
 $routes->get('admin/produk_sales/edit/(:num)', 'admin\ProdukSales::edit/$1');
 $routes->post('admin/produk_sales/proses_edit/(:num)', 'admin\ProdukSales::proses_edit/$1');
 $routes->post('admin/produk_sales/delete/(:num)', 'admin\ProdukSales::delete/$1');
+$routes->post('admin/produk_sales/history_tambah/(:num)', 'admin\ProdukSales::history_tambah/$1');
+$routes->post('admin/produk_sales/history_ubah/(:num)/(:num)', 'admin\ProdukSales::history_ubah/$1/$2');
+$routes->post('admin/produk_sales/history_hapus/(:num)/(:num)', 'admin\ProdukSales::history_hapus/$1/$2');
+
+// ADMIN DATA SUPPLIER
+$routes->get('admin/data-supplier', 'admin\DataSupplier::index');
+$routes->post('admin/data-supplier/tambah-perusahaan', 'admin\DataSupplier::tambahPerusahaan', ['filter' => 'csrf']);
+$routes->post('admin/data-supplier/banyak-periksa', 'admin\DataSupplier::banyakPeriksa', ['filter' => 'csrf']);
+$routes->post('admin/data-supplier/banyak-simpan', 'admin\DataSupplier::banyakSimpan', ['filter' => 'csrf']);
 
 // ADMIN MANAJEMEN AKUN (SALES & SUPPLIER)
 $routes->get('admin/akun', 'admin\Akun::index');

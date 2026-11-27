@@ -1,0 +1,132 @@
+| No | Status Final | Nama Perusahaan | Company Key | Target Supplier ID | Sumber Asal | Catatan Staging |
+| :---: | :---: | :--- | :--- | :---: | :--- | :--- |
+| 1 | **NEW** | CV Amalove Berkah Mulia | `amaloveberkahmulia` | - | ECP 2025 Sheet3 R10 | Supplier baru (belum ada di DB) |
+| 2 | **NEW** | CV BERSAMA SIKUMBANG JAYA | `bersamasikumbangjaya` | - | ECP 2024 Sheet3 R42 | Supplier baru (belum ada di DB) |
+| 3 | **NEW** | CV Indo Rayung Nusantara | `indorayungnusantara` | - | ECP 2024 Sheet3 R2 | Supplier baru (belum ada di DB) |
+| 4 | **NEW** | CV Kaffa Putra | `kaffaputra` | - | ECP 2025 Sheet3 R7 | Supplier baru (belum ada di DB) |
+| 5 | **NEW** | CV kwadungan java coffee | `kwadunganjavacoffee` | - | ECP 2025 Sheet3 R12 | Supplier baru (belum ada di DB) |
+| 6 | **NEW** | CV Malabar | `malabar` | - | ECP 2025 Sheet3 R14 | Supplier baru (belum ada di DB) |
+| 7 | **NEW** | CV PAKU AJI INDONESIA | `pakuajiindonesia` | - | ECP 2024 Sheet3 R6 | Supplier baru (belum ada di DB) |
+| 8 | **NEW** | CV pitoyo indo furniture | `pitoyoindofurniture` | - | ECP 2024 Sheet3 R10 | Supplier baru (belum ada di DB) |
+| 9 | **NEW** | CV ROYAL QUICK INDO | `royalquickindo` | - | ECP 2024 Sheet3 R11 | Supplier baru (belum ada di DB) |
+| 10 | **NEW** | CV Rumah Jeddiah | `rumahjeddiah` | - | ECP 2025 Sheet3 R30 | Supplier baru (belum ada di DB) |
+| 11 | **NEW** | CV. Cherry Blossom Indonesia | `cherryblossomindonesia` | - | ECP 2025 Sheet3 R16 | Supplier baru (belum ada di DB) |
+| 12 | **NEW** | CV. Indococo Pasific | `indococopasific` | - | ECP 2024 Sheet3 R12 | Supplier baru (belum ada di DB) |
+| 13 | **NEW** | CV. LULU LIVING | `lululiving` | - | ECP 2024 Sheet3 R13 | Supplier baru (belum ada di DB) |
+| 14 | **NEW** | CV. Magary Asia | `magaryasia` | - | ECP 2024 Sheet3 R14 | Supplier baru (belum ada di DB) |
+| 15 | **NEW** | CV. Naufan Putra | `naufanputra` | - | ECP 2024 Sheet3 R16 | Supplier baru (belum ada di DB) |
+| 16 | **NEW** | El Art | `elart` | - | ECP 2025 Sheet3 R2 | Supplier baru (belum ada di DB) |
+| 17 | **NEW** | Giri Ismoyo Craft | `giriismoyocraft` | - | ECP 2024 Sheet3 R17 | Supplier baru (belum ada di DB) |
+| 18 | **NEW** | Koperasi Batas Negeri | `koperasibatasnegeri` | - | ECP 2024 Sheet3 R20 | Supplier baru (belum ada di DB) |
+| 19 | **NEW** | Koperasi Semedo Manise Sejahtera | `koperasisemedomanisesejahtera` | - | ECP 2024 Sheet3 R21 | Supplier baru (belum ada di DB) |
+| 20 | **NEW** | Koperasi Trangsan Manunggak Jaya | `koperasitrangsanmanunggakjaya` | - | ECP 2024 Sheet3 R24 | Supplier baru (belum ada di DB) |
+| 21 | **NEW** | KUB Pringmas | `kubpringmas` | - | ECP 2024 Sheet3 R25 | Supplier baru (belum ada di DB) |
+| 22 | **NEW** | Malay Bagan Sejahtera | `malaybagansejahtera` | - | ECP 2025 Sheet3 R36 | Supplier baru (belum ada di DB) |
+| 23 | **NEW** | Planet Silver | `planetsilver` | - | ECP 2025 Sheet3 R18 | Supplier baru (belum ada di DB) |
+| 24 | **NEW** | PT Adarasa Putra Jaya | `adarasaputrajaya` | - | ECP 2025 Sheet3 R15 | Supplier baru (belum ada di DB) |
+| 25 | **NEW** | PT Alchemie berkah Bersama | `alchemieberkahbersama` | - | ECP 2025 Sheet3 R8 | Supplier baru (belum ada di DB) |
+| 26 | **NEW** | PT Andita Hidup Makmur Sempurna | `anditahidupmakmursempurna` | - | ECP 2024 Sheet3 R43 | Supplier baru (belum ada di DB) |
+| 27 | **NEW** | PT Angkasa Kreasi Sewarna | `angkasakreasisewarna` | - | ECP 2024 Sheet3 R22 | Supplier baru (belum ada di DB) |
+| 28 | **NEW** | PT Bangkit Daya Kreasindo | `bangkitdayakreasindo` | - | ECP 2024 Sheet3 R35 | Supplier baru (belum ada di DB) |
+| 29 | **NEW** | PT Banjarnegara Agro Mandiri Sejahtera | `banjarnegaraagromandirisejahtera` | - | ECP 2024 Sheet3 R40 | Supplier baru (belum ada di DB) |
+| 30 | **NEW** | PT Buah Berkah Barokah | `buahberkahbarokah` | - | ECP 2025 Sheet3 R6 | Supplier baru (belum ada di DB) |
+| 31 | **NEW** | PT Crispy Salad Moonbites | `crispysaladmoonbites` | - | ECP 2024 Sheet3 R27 | Supplier baru (belum ada di DB) |
+| 32 | **NEW** | PT Darins Indo Jaya | `darinsindojaya` | - | ECP 2024 Sheet3 R28 | Supplier baru (belum ada di DB) |
+| 33 | **NEW** | PT Hasanayu Putri Jelita | `hasanayuputrijelita` | - | ECP 2025 Sheet3 R17 | Supplier baru (belum ada di DB) |
+| 34 | **NEW** | PT Herba Indo Perkasa | `herbaindoperkasa` | - | ECP 2025 Sheet3 R37 | Supplier baru (belum ada di DB) |
+| 35 | **NEW** | PT Karya Putra Mastina | `karyaputramastina` | - | ECP 2025 Sheet3 R5 | Supplier baru (belum ada di DB) |
+| 36 | **NEW** | PT Lahan Mas Agro | `lahanmasagro` | - | ECP 2024 Sheet3 R31 | Supplier baru (belum ada di DB) |
+| 37 | **NEW** | PT Mandiri Jogja Internasional | `mandirijogjainternasional` | - | ECP 2024 Sheet3 R32 | Supplier baru (belum ada di DB) |
+| 38 | **NEW** | PT Mandiri Kharisma Berkah Nusantara | `mandirikharismaberkahnusantara` | - | ECP 2024 Sheet3 R33 | Supplier baru (belum ada di DB) |
+| 39 | **NEW** | PT Mendong Java Woven | `mendongjavawoven` | - | ECP 2025 Sheet3 R13 | Supplier baru (belum ada di DB) |
+| 40 | **NEW** | PT Voila Living Indonesia | `voilalivingindonesia` | - | ECP 2024 Sheet3 R34 | Supplier baru (belum ada di DB) |
+| 41 | **NEW** | PT. CMN Internasional Indonesia | `cmninternasionalindonesia` | - | ECP 2025 Sheet3 R21 | Supplier baru (belum ada di DB) |
+| 42 | **NEW** | PT. Hijrah Manajemen Global | `hijrahmanajemenglobal` | - | ECP 2025 Sheet3 R11 | Supplier baru (belum ada di DB) |
+| 43 | **NEW** | PT. Interlinkstone Indonesia | `interlinkstoneindonesia` | - | ECP 2025 Sheet3 R27 | Supplier baru (belum ada di DB) |
+| 44 | **NEW** | PT. korindo Komplit Karbon | `korindokomplitkarbon` | - | ECP 2024 Sheet3 R38 | Supplier baru (belum ada di DB) |
+| 45 | **NEW** | PT. Lintas Borneo Logistics | `lintasborneologistics` | - | ECP 2024 Sheet3 R44 | Supplier baru (belum ada di DB) |
+| 46 | **NEW** | PT. Migunani Bersama Internasional | `migunanibersamainternasional` | - | ECP 2025 Sheet3 R9 | Supplier baru (belum ada di DB) |
+| 47 | **NEW** | PT. Wajok Inti Lestari | `wajokintilestari` | - | ECP 2024 Sheet3 R39 | Supplier baru (belum ada di DB) |
+| 48 | **NEW** | Rumah Tengkawang | `rumahtengkawang` | - | ECP 2024 Sheet3 R45 | Supplier baru (belum ada di DB) |
+| 49 | **NEW** | Studio Dapur | `studiodapur` | - | ECP 2025 Sheet3 R4 | Supplier baru (belum ada di DB) |
+| 50 | **NEW** | UD Ngudi Lestari | `ngudilestari` | - | ECP 2024 Sheet3 R41 | Supplier baru (belum ada di DB) |
+| 51 | **EXISTING** | AYUNG SPORTINDO | `ayungsportindo` | 72 | ECP 2025 Sheet1 R44 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 72 sudah memiliki produk di tb_produk_supplier |
+| 52 | **EXISTING** | Cv mebel jati jepara | `mebeljatijepara` | 83 | ECP 2024 Sheet3 R5 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 83 sudah memiliki produk di tb_produk_supplier |
+| 53 | **EXISTING** | Lumbung Kopi Nusantara | `lumbungkopinusantara` | 82 | ECP 2025 Sheet3 R34 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 82 sudah memiliki produk di tb_produk_supplier |
+| 54 | **EXISTING** | Mella Kreasi | `mellakreasi` | 80 | ECP 2024 Sheet3 R18 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 80 sudah memiliki produk di tb_produk_supplier |
+| 55 | **EXISTING** | PT CALIO PRATAMA NUSANTARA | `caliopratamanusantara` | 56 | ECP 2025 Sheet1 R7 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 56 sudah memiliki produk di tb_produk_supplier |
+| 56 | **EXISTING** | PT. Kylafood Boga Indonesia | `kylafoodbogaindonesia` | 63 | ECP 2025 Sheet1 R16 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 63 sudah memiliki produk di tb_produk_supplier |
+| 57 | **EXISTING** | PT. SINANG LEMBAH BUTUH | `sinanglembahbutuh` | 34 | ECP 2024 Sheet1 R42 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 34 sudah memiliki produk di tb_produk_supplier |
+| 58 | **EXISTING** | Sony Sentral Industri, UD | `sonysentralindustri` | 85 | ECP 2025 Sheet1 R39 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 85 sudah memiliki produk di tb_produk_supplier |
+| 59 | **EXISTING_BELUM_LENGKAP** | craftote Gallery & Coffee | `craftotegallerycoffee` | 61 | ECP 2025 Sheet1 R13 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 61 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 60 | **EXISTING_BELUM_LENGKAP** | CV ARVA Indonesia | `arvaindonesia` | 1 | ECP 2024 Sheet1 R3 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 1 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 61 | **EXISTING_BELUM_LENGKAP** | CV CAHAYA SINAR TERANG | `cahayasinarterang` | 3 | ECP 2024 Sheet1 R6 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 3 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 62 | **EXISTING_BELUM_LENGKAP** | CV INDIGO SEJAHTERA | `indigosejahtera` | 73 | ECP 2025 Sheet1 R47 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 73 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 63 | **EXISTING_BELUM_LENGKAP** | CV Jogja Deco | `jogjadeco` | 43 | ECP 2024 Sheet1 R52 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 43 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 64 | **EXISTING_BELUM_LENGKAP** | CV Leni Snacks Indo Jaya | `lenisnacksindojaya` | 60 | ECP 2025 Sheet1 R11 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 60 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 65 | **EXISTING_BELUM_LENGKAP** | CV Maju Jaya Teknik | `majujayateknik` | 53 | ECP 2025 Sheet1 R3 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 53 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 66 | **EXISTING_BELUM_LENGKAP** | CV Nurissah Indomakmur | `nurissahindomakmur` | 76 | ECP 2025 Sheet1 R53 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 76 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 67 | **EXISTING_BELUM_LENGKAP** | CV Pilar Factory | `pilarfactory` | 46 | ECP 2024 Sheet1 R55 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 46 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 68 | **EXISTING_BELUM_LENGKAP** | CV Prapanca Jaya Alam | `prapancajayaalam` | 4 | ECP 2024 Sheet1 R7 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 4 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 69 | **EXISTING_BELUM_LENGKAP** | CV SHANIQUA MARIGOLD BAMBOO | `shaniquamarigoldbamboo` | 40 | ECP 2024 Sheet1 R48 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 40 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 70 | **EXISTING_BELUM_LENGKAP** | CV Simetris Asia Rotan | `simetrisasiarotan` | 7 | ECP 2024 Sheet1 R10 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 7 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 71 | **EXISTING_BELUM_LENGKAP** | CV SNR BUMI INDONESIA | `snrbumiindonesia` | 5 | ECP 2024 Sheet1 R8 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 5 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 72 | **EXISTING_BELUM_LENGKAP** | CV WOOD STORY INDONESIA | `woodstoryindonesia` | 49 | ECP 2024 Sheet1 R58 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 49 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 73 | **EXISTING_BELUM_LENGKAP** | CV Zaroha | `zaroha` | 65 | ECP 2025 Sheet1 R21 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 65 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 74 | **EXISTING_BELUM_LENGKAP** | CV. CANDRA GRAHA - C | `candragrahac` | 77 | ECP 2025 Sheet1 R57 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 77 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 75 | **EXISTING_BELUM_LENGKAP** | CV. Indo Rattan Furniture Distributor | `indorattanfurnituredistributor` | 50 | ECP 2024 Sheet1 R59 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 50 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 76 | **EXISTING_BELUM_LENGKAP** | CV. LUMOSH LIVING | `lumoshliving` | 58 | ECP 2025 Sheet1 R9 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 58 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 77 | **EXISTING_BELUM_LENGKAP** | CV. MITRA PERDANA INDUSTRI | `mitraperdanaindustri` | 44 | ECP 2024 Sheet1 R53 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 44 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 78 | **EXISTING_BELUM_LENGKAP** | CV. Mitra Tata Usaha | `mitratatausaha` | 6 | ECP 2024 Sheet1 R9 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 6 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 79 | **EXISTING_BELUM_LENGKAP** | CV. Mitra Usaha Khatulistiwa | `mitrausahakhatulistiwa` | 45 | ECP 2024 Sheet1 R54 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 45 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 80 | **EXISTING_BELUM_LENGKAP** | CV. MUARA BERKAH APRESINDO | `muaraberkahapresindo` | 75 | ECP 2025 Sheet1 R52 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 75 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 81 | **EXISTING_BELUM_LENGKAP** | CV. Ranata Nursery | `ranatanursery` | 2 | ECP 2024 Sheet1 R4 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 2 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 82 | **EXISTING_BELUM_LENGKAP** | CV.Rasdi and Co | `rasdiandco` | 47 | ECP 2024 Sheet1 R56 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 47 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 83 | **EXISTING_BELUM_LENGKAP** | Gorgeous Indonesia | `gorgeousindonesia` | 78 | ECP 2025 Sheet1 R58 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 78 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 84 | **EXISTING_BELUM_LENGKAP** | Koperasi | `koperasi` | 54 | ECP 2025 Sheet1 R4 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 54 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 85 | **EXISTING_BELUM_LENGKAP** | Luthfi Craft | `luthficraft` | 8 | ECP 2024 Sheet1 R12 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 8 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 86 | **EXISTING_BELUM_LENGKAP** | Madu Diarra | `madudiarra` | 59 | ECP 2025 Sheet1 R10 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 59 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 87 | **EXISTING_BELUM_LENGKAP** | Mustika Indah Keramik | `mustikaindahkeramik` | 10 | ECP 2024 Sheet1 R14 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 10 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 88 | **EXISTING_BELUM_LENGKAP** | NES by HDK | `nesbyhdk` | 11 | ECP 2024 Sheet1 R15 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 11 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 89 | **EXISTING_BELUM_LENGKAP** | Noxioussport | `noxioussport` | 12 | ECP 2024 Sheet1 R16 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 12 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 90 | **EXISTING_BELUM_LENGKAP** | Optima Global Harmoni | `optimaglobalharmoni` | 25 | ECP 2024 Sheet1 R33 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 25 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 91 | **EXISTING_BELUM_LENGKAP** | PT Bekawan Agro Mandiri (perorangan) | `bekawanagromandiriperorangan` | 55 | ECP 2025 Sheet1 R5 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 55 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 92 | **EXISTING_BELUM_LENGKAP** | PT Berkah Melano Indonesia | `berkahmelanoindonesia` | 67 | ECP 2025 Sheet1 R23 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 67 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 93 | **EXISTING_BELUM_LENGKAP** | PT Bipang Jangkar Abadi | `bipangjangkarabadi` | 62 | ECP 2025 Sheet1 R14 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 62 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 94 | **EXISTING_BELUM_LENGKAP** | PT Cabaco Leather Goods | `cabacoleathergoods` | 57 | ECP 2025 Sheet1 R8 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 57 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 95 | **EXISTING_BELUM_LENGKAP** | PT DEMPO ANDALAS SAMUDERA | `dempoandalassamudera` | 13 | ECP 2024 Sheet1 R17 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 13 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 96 | **EXISTING_BELUM_LENGKAP** | PT Doree Dagang Makmur | `doreedagangmakmur` | 14 | ECP 2024 Sheet1 R18 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 14 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 97 | **EXISTING_BELUM_LENGKAP** | PT EXPORT TANI NUSANTARA | `exporttaninusantara` | 79 | ECP 2025 Sheet1 R59 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 79 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 98 | **EXISTING_BELUM_LENGKAP** | PT EXPORTIR JAYA MAKMUR | `exportirjayamakmur` | 28 | ECP 2024 Sheet1 R36 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 28 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 99 | **EXISTING_BELUM_LENGKAP** | PT Fahma Hair Tunggal Mandiri | `fahmahairtunggalmandiri` | 51 | ECP 2024 Sheet1 R60 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 51 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 100 | **EXISTING_BELUM_LENGKAP** | PT Global Indo Pangan | `globalindopangan` | 15 | ECP 2024 Sheet1 R19 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 15 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 101 | **EXISTING_BELUM_LENGKAP** | PT IFI DRY FOOD | `ifidryfood` | 16 | ECP 2024 Sheet1 R20 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 16 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 102 | **EXISTING_BELUM_LENGKAP** | PT Infinity Global Export | `infinityglobalexport` | 17 | ECP 2024 Sheet1 R21 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 17 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 103 | **EXISTING_BELUM_LENGKAP** | PT Insus Fortunate Trade | `insusfortunatetrade` | 64 | ECP 2025 Sheet1 R20 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 64 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 104 | **EXISTING_BELUM_LENGKAP** | PT Inti Agro Solution | `intiagrosolution` | 18 | ECP 2024 Sheet1 R22 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 18 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 105 | **EXISTING_BELUM_LENGKAP** | PT Karaban Valley Lestari | `karabanvalleylestari` | 19 | ECP 2024 Sheet1 R25 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 19 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 106 | **EXISTING_BELUM_LENGKAP** | PT Kuliner tempe indonesia | `kulinertempeindonesia` | 21 | ECP 2024 Sheet1 R28 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 21 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 107 | **EXISTING_BELUM_LENGKAP** | PT Mahkota Riebisi Nusantara | `mahkotariebisinusantara` | 9 | ECP 2024 Sheet1 R13 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 9 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 108 | **EXISTING_BELUM_LENGKAP** | PT Masagena Maruarar Salawasna | `masagenamaruararsalawasna` | 22 | ECP 2024 Sheet1 R29 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 22 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 109 | **EXISTING_BELUM_LENGKAP** | PT Mekar Saluyu Grup | `mekarsaluyugrup` | 23 | ECP 2024 Sheet1 R31 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 23 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 110 | **EXISTING_BELUM_LENGKAP** | PT Nikra Galuh Agriniaga | `nikragaluhagriniaga` | 52 | ECP 2024 Sheet1 R62 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 52 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 111 | **EXISTING_BELUM_LENGKAP** | PT Perseorangan | `perseorangan` | 24 | ECP 2024 Sheet1 R32 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 24 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 112 | **EXISTING_BELUM_LENGKAP** | PT Sumatera Tropical Spices | `sumateratropicalspices` | 26 | ECP 2024 Sheet1 R34 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 26 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 113 | **EXISTING_BELUM_LENGKAP** | PT Tidiart Kriya Nusantara | `tidiartkriyanusantara` | 69 | ECP 2025 Sheet1 R38 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 69 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 114 | **EXISTING_BELUM_LENGKAP** | PT. Aquila Pelita Indonesia | `aquilapelitaindonesia` | 27 | ECP 2024 Sheet1 R35 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 27 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 115 | **EXISTING_BELUM_LENGKAP** | PT. JUARA ROTI INDONESIA | `juararotiindonesia` | 29 | ECP 2024 Sheet1 R37 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 29 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 116 | **EXISTING_BELUM_LENGKAP** | PT. Khyang Pari Agung | `khyangpariagung` | 20 | ECP 2024 Sheet1 R27 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 20 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 117 | **EXISTING_BELUM_LENGKAP** | PT. KUSUMA TANI SEJAHTERA | `kusumatanisejahtera` | 30 | ECP 2024 Sheet1 R38 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 30 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 118 | **EXISTING_BELUM_LENGKAP** | PT. Langkah Hijau Bersama | `langkahhijaubersama` | 66 | ECP 2025 Sheet1 R22 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 66 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 119 | **EXISTING_BELUM_LENGKAP** | PT. Madhar Madhava Manggala | `madharmadhavamanggala` | 31 | ECP 2024 Sheet1 R39 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 31 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 120 | **EXISTING_BELUM_LENGKAP** | PT. Manggala Aksata Indo | `manggalaaksataindo` | 32 | ECP 2024 Sheet1 R40 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 32 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 121 | **EXISTING_BELUM_LENGKAP** | PT. SAMPURNA AGRO PUTRA | `sampurnaagroputra` | 33 | ECP 2024 Sheet1 R41 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 33 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 122 | **EXISTING_BELUM_LENGKAP** | PT. SYAILENDRA BUMI INVESTAMA | `syailendrabumiinvestama` | 35 | ECP 2024 Sheet1 R43 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 35 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 123 | **EXISTING_BELUM_LENGKAP** | PT. Trimatari Biopersada Recovery | `trimataribiopersadarecovery` | 38 | ECP 2024 Sheet1 R46 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 38 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 124 | **EXISTING_BELUM_LENGKAP** | PT. Yuksri Prima Indonesia | `yuksriprimaindonesia` | 36 | ECP 2024 Sheet1 R44 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 36 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 125 | **EXISTING_BELUM_LENGKAP** | PT.Karya Herbal Nusantara | `karyaherbalnusantara` | 37 | ECP 2024 Sheet1 R45 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 37 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 126 | **EXISTING_BELUM_LENGKAP** | Putri Aneka Murah | `putrianekamurah` | 39 | ECP 2024 Sheet1 R47 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 39 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 127 | **EXISTING_BELUM_LENGKAP** | UD DAMAR SIAK | `damarsiak` | 68 | ECP 2025 Sheet1 R24 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 68 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 128 | **EXISTING_BELUM_LENGKAP** | UD Sabda Batik | `sabdabatik` | 42 | ECP 2024 Sheet1 R51 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 42 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 129 | **EXISTING_BELUM_LENGKAP** | UD. Rebana Gresik Tiga Putri | `rebanagresiktigaputri` | 41 | ECP 2024 Sheet1 R50 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 41 ada di DB tetapi belum ada produk di tb_produk_supplier |
+| 130 | **EXISTING_BELUM_LENGKAP** | Wanoja coffee | `wanojacoffee` | 48 | ECP 2024 Sheet1 R57 | Match DB via nama_perusahaan / nama_kunci; Supplier ID 48 ada di DB tetapi belum ada produk di tb_produk_supplier |

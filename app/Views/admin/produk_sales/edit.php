@@ -20,6 +20,15 @@
             </div>
         </div><!--//row-->
 
+        <!-- Alert Success Flashdata -->
+        <?php if (session()->getFlashdata('success')) : ?>
+            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                <?= esc(session()->getFlashdata('success')) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+
         <!-- Alert Error Flashdata -->
         <?php if (session()->getFlashdata('error')) : ?>
             <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
@@ -268,6 +277,331 @@
                 </form>
             </div><!--//app-card-body-->
         </div><!--//app-card-->
+
+        <!-- Bagian History Ekspor Perusahaan -->
+        <div class="app-card shadow-sm mb-4">
+            <div class="app-card-header p-3 border-bottom">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <div>
+                        <h5 class="app-card-title mb-1 text-primary">
+                            <i class="fa-solid fa-ship me-2"></i>History Ekspor Perusahaan Ini
+                        </h5>
+                        <p class="text-muted small mb-0">
+                            <i class="fa-solid fa-circle-info me-1"></i> Data ini milik perusahaan, berlaku untuk semua produknya.
+                        </p>
+                    </div>
+                    <div>
+                        <?php if (!empty($supplier_id)) : ?>
+                            <button type="button" class="btn btn-success text-white btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahHistory">
+                                <i class="fa-solid fa-plus me-1"></i> Tambah History
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div><!--//app-card-header-->
+            <div class="app-card-body p-3">
+                <?php if (empty($supplier_id)) : ?>
+                    <div class="alert alert-warning mb-0" role="alert">
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                        Produk ini belum terhubung dengan data supplier terdaftar. Silakan pilih dan simpan Supplier pada form di atas terlebih dahulu untuk mengelola riwayat ekspor.
+                    </div>
+                <?php else : ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-center" style="width: 50px;">No</th>
+                                    <th style="width: 90px;">Tahun</th>
+                                    <th>Produk</th>
+                                    <th>Negara Tujuan</th>
+                                    <th>Jenis Ekspor</th>
+                                    <th>Kuantitas</th>
+                                    <th class="text-end">Nilai Ekspor (USD)</th>
+                                    <th>Catatan</th>
+                                    <th class="text-center" style="width: 150px;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($exportHistories)) : ?>
+                                    <?php $no = 1; foreach ($exportHistories as $hist) : ?>
+                                        <tr>
+                                            <td class="text-center fw-bold text-muted"><?= $no++ ?></td>
+                                            <td>
+                                                <span class="badge bg-secondary"><?= esc($hist['tahun']) ?></span>
+                                            </td>
+                                            <td class="fw-semibold"><?= esc($hist['produk']) ?></td>
+                                            <td>
+                                                <i class="fa-solid fa-location-dot me-1 text-danger"></i>
+                                                <?= esc($hist['negara_tujuan']) ?>
+                                            </td>
+                                            <td><?= !empty($hist['jenis_ekspor']) ? esc($hist['jenis_ekspor']) : '<span class="text-muted">-</span>' ?></td>
+                                            <td><?= !empty($hist['kuantitas']) ? esc($hist['kuantitas']) : '<span class="text-muted">-</span>' ?></td>
+                                            <td class="text-end fw-bold text-success font-monospace">
+                                                <?= ($hist['nilai_ekspor_usd'] !== null && $hist['nilai_ekspor_usd'] !== '') ? '$' . number_format((float)$hist['nilai_ekspor_usd'], 2, '.', ',') : '<span class="text-muted fw-normal">-</span>' ?>
+                                            </td>
+                                            <td class="small text-muted"><?= !empty($hist['catatan']) ? esc($hist['catatan']) : '-' ?></td>
+                                            <td class="text-center">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <button type="button" 
+                                                            class="btn btn-outline-primary btn-edit-history"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#modalUbahHistory"
+                                                            data-id="<?= $hist['id_history'] ?>"
+                                                            data-tahun="<?= esc($hist['tahun']) ?>"
+                                                            data-produk="<?= esc($hist['produk'], 'attr') ?>"
+                                                            data-negara="<?= esc($hist['negara_tujuan'], 'attr') ?>"
+                                                            data-jenis="<?= esc($hist['jenis_ekspor'] ?? '', 'attr') ?>"
+                                                            data-kuantitas="<?= esc($hist['kuantitas'] ?? '', 'attr') ?>"
+                                                            data-nilai="<?= esc($hist['nilai_ekspor_usd'] ?? '', 'attr') ?>"
+                                                            data-catatan="<?= esc($hist['catatan'] ?? '', 'attr') ?>"
+                                                            title="Ubah">
+                                                        <i class="fa-solid fa-pen-to-square"></i>
+                                                    </button>
+                                                    <form action="<?= base_url('admin/produk_sales/history_hapus/' . $produk['id_produk_supplier'] . '/' . $hist['id_history']) ?>" 
+                                                          method="POST" 
+                                                          class="d-inline"
+                                                          onsubmit="return confirm('Apakah Anda yakin ingin menghapus history ekspor produk <?= esc($hist['produk'], 'js') ?> ke <?= esc($hist['negara_tujuan'], 'js') ?>?');">
+                                                        <?= csrf_field() ?>
+                                                        <button type="submit" class="btn btn-outline-danger" title="Hapus">
+                                                            <i class="fa-solid fa-trash-can"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else : ?>
+                                    <tr>
+                                        <td colspan="9" class="text-center py-4 text-muted">
+                                            <i class="fa-solid fa-box-open fa-2x mb-2 d-block text-secondary"></i>
+                                            Belum ada history ekspor.
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div><!--//app-card-body-->
+        </div><!--//app-card-->
+
+        <?php if (!empty($supplier_id)) : ?>
+            <!-- Modal Tambah History Ekspor -->
+            <div class="modal fade" id="modalTambahHistory" tabindex="-1" aria-labelledby="modalTambahHistoryLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form action="<?= base_url('admin/produk_sales/history_tambah/' . $produk['id_produk_supplier']) ?>" method="POST">
+                            <?= csrf_field() ?>
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalTambahHistoryLabel">
+                                    <i class="fa-solid fa-plus-circle text-success me-2"></i>Tambah History Ekspor
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="tambah_tahun" class="form-label fw-bold">Tahun <span class="text-danger">*</span></label>
+                                    <input type="number" 
+                                           name="tahun" 
+                                           id="tambah_tahun" 
+                                           class="form-control" 
+                                           min="1900" 
+                                           max="2099" 
+                                           value="<?= date('Y') ?>" 
+                                           placeholder="Contoh: 2024" 
+                                           required>
+                                    <small class="text-muted">Format 4 digit angka.</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tambah_produk" class="form-label fw-bold">Produk <span class="text-danger">*</span></label>
+                                    <input type="text" 
+                                           name="produk" 
+                                           id="tambah_produk" 
+                                           class="form-control" 
+                                           value="<?= esc($produk['nama_produk']) ?>" 
+                                           placeholder="Nama produk yang diekspor" 
+                                           required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tambah_negara_tujuan" class="form-label fw-bold">Negara Tujuan <span class="text-danger">*</span></label>
+                                    <input type="text" 
+                                           name="negara_tujuan" 
+                                           id="tambah_negara_tujuan" 
+                                           class="form-control" 
+                                           placeholder="Contoh: Malaysia, Amerika Serikat, dll." 
+                                           required>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label for="tambah_jenis_ekspor" class="form-label fw-bold">Jenis Ekspor</label>
+                                        <input type="text" 
+                                               name="jenis_ekspor" 
+                                               id="tambah_jenis_ekspor" 
+                                               class="form-control" 
+                                               placeholder="Contoh: Langsung, Maklon">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="tambah_kuantitas" class="form-label fw-bold">Kuantitas</label>
+                                        <input type="text" 
+                                               name="kuantitas" 
+                                               id="tambah_kuantitas" 
+                                               class="form-control" 
+                                               placeholder="Contoh: 1 Kontainer 20ft">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tambah_nilai_ekspor_usd" class="form-label fw-bold">Nilai Ekspor (USD)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" 
+                                               step="0.01" 
+                                               min="0" 
+                                               name="nilai_ekspor_usd" 
+                                               id="tambah_nilai_ekspor_usd" 
+                                               class="form-control" 
+                                               placeholder="Contoh: 25000.00">
+                                    </div>
+                                    <small class="text-muted">Hanya angka &ge; 0 atau kosongkan jika tidak ada data.</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tambah_catatan" class="form-label fw-bold">Catatan</label>
+                                    <textarea name="catatan" 
+                                              id="tambah_catatan" 
+                                              class="form-control" 
+                                              rows="2" 
+                                              placeholder="Catatan tambahan (opsional)"></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary text-white">
+                                    <i class="fa-solid fa-floppy-disk me-1"></i> Simpan History
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Ubah History Ekspor -->
+            <div class="modal fade" id="modalUbahHistory" tabindex="-1" aria-labelledby="modalUbahHistoryLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form id="formUbahHistory" action="" method="POST">
+                            <?= csrf_field() ?>
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalUbahHistoryLabel">
+                                    <i class="fa-solid fa-pen-to-square text-primary me-2"></i>Ubah History Ekspor
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="ubah_tahun" class="form-label fw-bold">Tahun <span class="text-danger">*</span></label>
+                                    <input type="number" 
+                                           name="tahun" 
+                                           id="ubah_tahun" 
+                                           class="form-control" 
+                                           min="1900" 
+                                           max="2099" 
+                                           required>
+                                    <small class="text-muted">Format 4 digit angka.</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ubah_produk" class="form-label fw-bold">Produk <span class="text-danger">*</span></label>
+                                    <input type="text" 
+                                           name="produk" 
+                                           id="ubah_produk" 
+                                           class="form-control" 
+                                           required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ubah_negara_tujuan" class="form-label fw-bold">Negara Tujuan <span class="text-danger">*</span></label>
+                                    <input type="text" 
+                                           name="negara_tujuan" 
+                                           id="ubah_negara_tujuan" 
+                                           class="form-control" 
+                                           required>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label for="ubah_jenis_ekspor" class="form-label fw-bold">Jenis Ekspor</label>
+                                        <input type="text" 
+                                               name="jenis_ekspor" 
+                                               id="ubah_jenis_ekspor" 
+                                               class="form-control">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="ubah_kuantitas" class="form-label fw-bold">Kuantitas</label>
+                                        <input type="text" 
+                                               name="kuantitas" 
+                                               id="ubah_kuantitas" 
+                                               class="form-control">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ubah_nilai_ekspor_usd" class="form-label fw-bold">Nilai Ekspor (USD)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" 
+                                               step="0.01" 
+                                               min="0" 
+                                               name="nilai_ekspor_usd" 
+                                               id="ubah_nilai_ekspor_usd" 
+                                               class="form-control">
+                                    </div>
+                                    <small class="text-muted">Hanya angka &ge; 0 atau kosongkan jika tidak ada data.</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ubah_catatan" class="form-label fw-bold">Catatan</label>
+                                    <textarea name="catatan" 
+                                              id="ubah_catatan" 
+                                              class="form-control" 
+                                              rows="2"></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary text-white">
+                                    <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var modalUbahEl = document.getElementById('modalUbahHistory');
+                if (modalUbahEl) {
+                    var formUbah = document.getElementById('formUbahHistory');
+                    var inputTahun = document.getElementById('ubah_tahun');
+                    var inputProduk = document.getElementById('ubah_produk');
+                    var inputNegara = document.getElementById('ubah_negara_tujuan');
+                    var inputJenis = document.getElementById('ubah_jenis_ekspor');
+                    var inputKuantitas = document.getElementById('ubah_kuantitas');
+                    var inputNilai = document.getElementById('ubah_nilai_ekspor_usd');
+                    var inputCatatan = document.getElementById('ubah_catatan');
+                    var baseUrlUbah = "<?= base_url('admin/produk_sales/history_ubah/' . $produk['id_produk_supplier']) ?>";
+
+                    modalUbahEl.addEventListener('show.bs.modal', function(event) {
+                        var btn = event.relatedTarget;
+                        if (!btn) return;
+                        var id = btn.getAttribute('data-id');
+                        formUbah.action = baseUrlUbah + '/' + id;
+                        inputTahun.value = btn.getAttribute('data-tahun') || '';
+                        inputProduk.value = btn.getAttribute('data-produk') || '';
+                        inputNegara.value = btn.getAttribute('data-negara') || '';
+                        inputJenis.value = btn.getAttribute('data-jenis') || '';
+                        inputKuantitas.value = btn.getAttribute('data-kuantitas') || '';
+                        inputNilai.value = btn.getAttribute('data-nilai') || '';
+                        inputCatatan.value = btn.getAttribute('data-catatan') || '';
+                    });
+                }
+            });
+            </script>
+        <?php endif; ?>
 
     </div><!--//container-xl-->
 </div><!--//app-content-->

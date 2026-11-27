@@ -73,4 +73,50 @@ class SupplierModel extends Model
         $name = preg_replace('/\b(pt|cv|ud|p\.t\.|c\.v\.|u\.d\.|p\.t|c\.v|u\.d)\b/u', '', $name);
         return preg_replace('/[^a-z0-9]/', '', $name);
     }
+
+    /**
+     * Membersihkan teks input dari Excel/form: buang karakter kontrol,
+     * rapikan spasi ganda/unicode menjadi satu spasi, dan trim.
+     */
+    public static function cleanText(?string $value): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+
+        $cleaned = preg_replace('/[\x{FEFF}\x{200B}-\x{200D}]/u', '', $value);
+        $cleaned = preg_replace('/[\x00-\x1F\x7F]/u', ' ', $cleaned ?? '');
+        $cleaned = preg_replace('/[\p{Zs}\s]+/u', ' ', $cleaned ?? '');
+
+        return trim($cleaned ?? '');
+    }
+
+    /**
+     * Mengambil seluruh pasangan nama_kunci => nama_perusahaan dalam satu query.
+     *
+     * @return array<string, string>
+     */
+    public function getExistingKeyMap(): array
+    {
+        $rows = $this->db->table($this->table)
+            ->select('nama_perusahaan, nama_kunci')
+            ->get()
+            ->getResultArray();
+
+        $map = [];
+        foreach ($rows as $row) {
+            $companyName = (string)($row['nama_perusahaan'] ?? '');
+            $dbKey       = strtolower(trim((string)($row['nama_kunci'] ?? '')));
+            if ($dbKey !== '' && !isset($map[$dbKey])) {
+                $map[$dbKey] = $companyName;
+            }
+
+            $computedKey = self::makeKey($companyName);
+            if ($computedKey !== '' && !isset($map[$computedKey])) {
+                $map[$computedKey] = $companyName;
+            }
+        }
+
+        return $map;
+    }
 }

@@ -115,6 +115,15 @@
                 </li>
 
                 <li class="nav-item">
+                    <a class="nav-link <?= (strpos(current_url(), 'admin/data-supplier') !== false ? 'active' : '') ?>" href="<?= base_url('admin/data-supplier') ?>">
+                        <span class="nav-icon">
+                            <i class="fa-solid fa-building"></i>
+                        </span>
+                        <span class="nav-link-text">Data Supplier</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
                     <!--//Bootstrap Icons: https://icons.getbootstrap.com/ -->
                     <a class="nav-link <?= (current_url() == base_url('admin/kategoriAktivitas/index') ? 'active' : '') ?>" href="<?= base_url('admin/kategoriAktivitas/index') ?>">
                         <span class="nav-icon">

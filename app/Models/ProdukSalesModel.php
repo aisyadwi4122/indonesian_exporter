@@ -198,6 +198,17 @@ class ProdukSalesModel extends SupplierProductModel
     }
 
     /**
+     * Mengambil semua item katalog produk sales terpadu (130 item)
+     * tanpa filter dan tanpa paginasi, identik dengan katalog sales.
+     *
+     * @return array
+     */
+    public function getAllCatalogItems(): array
+    {
+        return $this->getUnifiedProducts('', '', '');
+    }
+
+    /**
      * Mengambil semua produk lain milik perusahaan yang sama dari tb_produk_supplier
      * DAN tb_ecp_ekspor dengan format seragam, mengecualikan produk yang sedang dibuka.
      * Pencocokan nama perusahaan dilakukan dengan normalisasi di kedua sisi via SupplierModel::makeKey().

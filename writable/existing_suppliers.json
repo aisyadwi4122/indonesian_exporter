@@ -1,0 +1,597 @@
+[
+    {
+        "id_supplier": 1,
+        "nama_perusahaan": "CV ARVA Indonesia",
+        "nama_kunci": "cvarvaindonesia",
+        "email": "arnold_wirakusuma@hotmail.com",
+        "no_hp": "081327773388"
+    },
+    {
+        "id_supplier": 2,
+        "nama_perusahaan": "CV. Ranata Nursery",
+        "nama_kunci": "cvranatanursery",
+        "email": "ardhy354@gmail.com",
+        "no_hp": "087766989268"
+    },
+    {
+        "id_supplier": 3,
+        "nama_perusahaan": "CV CAHAYA SINAR TERANG",
+        "nama_kunci": "cvcahayasinarterang",
+        "email": "jlokasari@gmail.com",
+        "no_hp": "811258717"
+    },
+    {
+        "id_supplier": 4,
+        "nama_perusahaan": "CV Prapanca Jaya Alam",
+        "nama_kunci": "cvprapancajayaalam",
+        "email": "prapja16@yahoo.com",
+        "no_hp": "87816275331"
+    },
+    {
+        "id_supplier": 5,
+        "nama_perusahaan": "CV SNR BUMI INDONESIA",
+        "nama_kunci": "cvsnrbumiindonesia",
+        "email": "snrbumiindonesia@gmail.com",
+        "no_hp": "89610210729"
+    },
+    {
+        "id_supplier": 6,
+        "nama_perusahaan": "CV. Mitra Tata Usaha",
+        "nama_kunci": "cvmitratatausaha",
+        "email": "mtu.corp@gmail.com",
+        "no_hp": "85159143773"
+    },
+    {
+        "id_supplier": 7,
+        "nama_perusahaan": "CV Simetris Asia Rotan",
+        "nama_kunci": "cvsimetrisasiarotan",
+        "email": "shelly@simetrisasiarotan.com",
+        "no_hp": "85722299588"
+    },
+    {
+        "id_supplier": 8,
+        "nama_perusahaan": "Luthfi Craft",
+        "nama_kunci": "luthficraft",
+        "email": "luthficraftbantul@gmail.com",
+        "no_hp": "81568468687"
+    },
+    {
+        "id_supplier": 9,
+        "nama_perusahaan": "PT Mahkota Riebisi Nusantara",
+        "nama_kunci": "ptmahkotariebisinusantara",
+        "email": "Mahkotariebisi@gmail.com",
+        "no_hp": "81283984842"
+    },
+    {
+        "id_supplier": 10,
+        "nama_perusahaan": "Mustika Indah Keramik",
+        "nama_kunci": "mustikaindahkeramik",
+        "email": "mustikaindahkeramik@gmail.com",
+        "no_hp": "82138927651"
+    },
+    {
+        "id_supplier": 11,
+        "nama_perusahaan": "NES by HDK",
+        "nama_kunci": "nesbyhdk",
+        "email": "ursula228@yahoo.com",
+        "no_hp": "81818220867"
+    },
+    {
+        "id_supplier": 12,
+        "nama_perusahaan": "Noxioussport",
+        "nama_kunci": "noxioussport",
+        "email": "noxiousindo@gmail.com",
+        "no_hp": "88223543994"
+    },
+    {
+        "id_supplier": 13,
+        "nama_perusahaan": "PT DEMPO ANDALAS SAMUDERA",
+        "nama_kunci": "ptdempoandalassamudera",
+        "email": "gitaramdhani@dempoandalas.com",
+        "no_hp": "82113105624"
+    },
+    {
+        "id_supplier": 14,
+        "nama_perusahaan": "PT Doree Dagang Makmur",
+        "nama_kunci": "ptdoreedagangmakmur",
+        "email": "info.fumeedoree@gmail.com",
+        "no_hp": "8999160612"
+    },
+    {
+        "id_supplier": 15,
+        "nama_perusahaan": "PT Global Indo Pangan",
+        "nama_kunci": "ptglobalindopangan",
+        "email": "dok.globalindopangan@gmail.com",
+        "no_hp": "82316063184"
+    },
+    {
+        "id_supplier": 16,
+        "nama_perusahaan": "PT IFI DRY FOOD",
+        "nama_kunci": "ptifidryfood",
+        "email": "ifidryfood@gmail.com",
+        "no_hp": "87729473507"
+    },
+    {
+        "id_supplier": 17,
+        "nama_perusahaan": "PT Infinity Global Export",
+        "nama_kunci": "ptinfinityglobalexport",
+        "email": "infinityexport.id@gmail.com",
+        "no_hp": "88215914876‬"
+    },
+    {
+        "id_supplier": 18,
+        "nama_perusahaan": "PT Inti Agro Solution",
+        "nama_kunci": "ptintiagrosolution",
+        "email": "support@intiagrosolution.com",
+        "no_hp": "8977732251"
+    },
+    {
+        "id_supplier": 19,
+        "nama_perusahaan": "PT Karaban Valley Lestari",
+        "nama_kunci": "ptkarabanvalleylestari",
+        "email": "karabanvalley@gmail.com",
+        "no_hp": "6282134815150"
+    },
+    {
+        "id_supplier": 20,
+        "nama_perusahaan": "PT. Khyang Pari Agung",
+        "nama_kunci": "ptkhyangpariagung",
+        "email": "agungpariharto@gamol.com",
+        "no_hp": "87774074829"
+    },
+    {
+        "id_supplier": 21,
+        "nama_perusahaan": "PT Kuliner tempe indonesia",
+        "nama_kunci": "ptkulinertempeindonesia",
+        "email": "drgyosh@gmail.com",
+        "no_hp": "81390221224"
+    },
+    {
+        "id_supplier": 22,
+        "nama_perusahaan": "PT Masagena Maruarar Salawasna",
+        "nama_kunci": "ptmasagenamaruararsalawasna",
+        "email": "nopansinaga12@gmail.com",
+        "no_hp": "82115410225"
+    },
+    {
+        "id_supplier": 23,
+        "nama_perusahaan": "PT Mekar Saluyu Grup",
+        "nama_kunci": "ptmekarsaluyugrup",
+        "email": "mekarsaluyugrup@gmail.com",
+        "no_hp": "82114226606"
+    },
+    {
+        "id_supplier": 24,
+        "nama_perusahaan": "PT Perseorangan",
+        "nama_kunci": "ptperseorangan",
+        "email": "multipangansehatid@gmail.com",
+        "no_hp": "81703448761"
+    },
+    {
+        "id_supplier": 25,
+        "nama_perusahaan": "Optima Global Harmoni",
+        "nama_kunci": "optimaglobalharmoni",
+        "email": "optimaglobalharmoni@gmail.com",
+        "no_hp": "81315319980"
+    },
+    {
+        "id_supplier": 26,
+        "nama_perusahaan": "PT Sumatera Tropical Spices",
+        "nama_kunci": "ptsumateratropicalspices",
+        "email": "marketing@stspices.id",
+        "no_hp": "85265039567"
+    },
+    {
+        "id_supplier": 27,
+        "nama_perusahaan": "PT. Aquila Pelita Indonesia",
+        "nama_kunci": "ptaquilapelitaindonesia",
+        "email": "aquila.pelita.indonesia@gmail.com",
+        "no_hp": "8975813821"
+    },
+    {
+        "id_supplier": 28,
+        "nama_perusahaan": "PT EXPORTIR JAYA MAKMUR",
+        "nama_kunci": "ptexportirjayamakmur",
+        "email": "eurothalib8@gmail.com",
+        "no_hp": "87770714184"
+    },
+    {
+        "id_supplier": 29,
+        "nama_perusahaan": "PT. JUARA ROTI INDONESIA",
+        "nama_kunci": "ptjuararotiindonesia",
+        "email": "rotiropi@gmail.com",
+        "no_hp": "85800066825"
+    },
+    {
+        "id_supplier": 30,
+        "nama_perusahaan": "PT. KUSUMA TANI SEJAHTERA",
+        "nama_kunci": "ptkusumatanisejahtera",
+        "email": "romadanikusumaatmaja@gmail.com",
+        "no_hp": "89694129179"
+    },
+    {
+        "id_supplier": 31,
+        "nama_perusahaan": "PT. Madhar Madhava Manggala",
+        "nama_kunci": "ptmadharmadhavamanggala",
+        "email": "auditdwi@gmail.com",
+        "no_hp": "82243777444"
+    },
+    {
+        "id_supplier": 32,
+        "nama_perusahaan": "PT. Manggala Aksata Indo",
+        "nama_kunci": "ptmanggalaaksataindo",
+        "email": "marcel_marcelina@rocketmail.com",
+        "no_hp": "82124114816"
+    },
+    {
+        "id_supplier": 33,
+        "nama_perusahaan": "PT. SAMPURNA AGRO PUTRA",
+        "nama_kunci": "ptsampurnaagroputra",
+        "email": "imamsyukronaffanii@icloud.com",
+        "no_hp": "82338866609"
+    },
+    {
+        "id_supplier": 34,
+        "nama_perusahaan": "PT. SINANG LEMBAH BUTUH",
+        "nama_kunci": "ptsinanglembahbutuh",
+        "email": "sinanglembahbutuh@gmail.com",
+        "no_hp": "81228893992"
+    },
+    {
+        "id_supplier": 35,
+        "nama_perusahaan": "PT. SYAILENDRA BUMI INVESTAMA",
+        "nama_kunci": "ptsyailendrabumiinvestama",
+        "email": "syailendrabumiinvestama@gmail.com",
+        "no_hp": "81393319338"
+    },
+    {
+        "id_supplier": 36,
+        "nama_perusahaan": "PT. Yuksri Prima Indonesia",
+        "nama_kunci": "ptyuksriprimaindonesia",
+        "email": "wijayaprimasaputra@gmail.com",
+        "no_hp": "85706465108"
+    },
+    {
+        "id_supplier": 37,
+        "nama_perusahaan": "PT.Karya Herbal Nusantara",
+        "nama_kunci": "ptkaryaherbalnusantara",
+        "email": "karyaherbalnusantara@yahoo.com",
+        "no_hp": "8116626668"
+    },
+    {
+        "id_supplier": 38,
+        "nama_perusahaan": "PT. Trimatari Biopersada Recovery",
+        "nama_kunci": "pttrimataribiopersadarecovery",
+        "email": "tari.surardjo@gmail.com",
+        "no_hp": "82111369221"
+    },
+    {
+        "id_supplier": 39,
+        "nama_perusahaan": "Putri Aneka Murah",
+        "nama_kunci": "putrianekamurah",
+        "email": "yantiiyuliati@gmail.com",
+        "no_hp": "85280577660"
+    },
+    {
+        "id_supplier": 40,
+        "nama_perusahaan": "CV SHANIQUA MARIGOLD BAMBOO",
+        "nama_kunci": "cvshaniquamarigoldbamboo",
+        "email": "syahdanidp@gmail.com",
+        "no_hp": "87808624916"
+    },
+    {
+        "id_supplier": 41,
+        "nama_perusahaan": "UD. Rebana Gresik Tiga Putri",
+        "nama_kunci": "udrebanagresiktigaputri",
+        "email": "dwichristinafauziyah@gmail.com",
+        "no_hp": "85731230150"
+    },
+    {
+        "id_supplier": 42,
+        "nama_perusahaan": "UD Sabda Batik",
+        "nama_kunci": "udsabdabatik",
+        "email": "sabdairawati@gmail.com",
+        "no_hp": "81393976047"
+    },
+    {
+        "id_supplier": 43,
+        "nama_perusahaan": "CV Jogja Deco",
+        "nama_kunci": "cvjogjadeco",
+        "email": "jogjadeco.personal@gmail.com",
+        "no_hp": "87839915757"
+    },
+    {
+        "id_supplier": 44,
+        "nama_perusahaan": "CV. MITRA PERDANA INDUSTRI",
+        "nama_kunci": "cvmitraperdanaindustri",
+        "email": "arizal.romdoni@gmail.com",
+        "no_hp": "82219168064"
+    },
+    {
+        "id_supplier": 45,
+        "nama_perusahaan": "CV. Mitra Usaha Khatulistiwa",
+        "nama_kunci": "cvmitrausahakhatulistiwa",
+        "email": "dedi.marjani@yahoo.com",
+        "no_hp": "85228604666"
+    },
+    {
+        "id_supplier": 46,
+        "nama_perusahaan": "CV Pilar Factory",
+        "nama_kunci": "cvpilarfactory",
+        "email": "pilarbalifurniture@gmail.com",
+        "no_hp": "81353015583"
+    },
+    {
+        "id_supplier": 47,
+        "nama_perusahaan": "CV.Rasdi and Co",
+        "nama_kunci": "cvrasdiandco",
+        "email": "rimasari218@gmail.com",
+        "no_hp": "82171556390"
+    },
+    {
+        "id_supplier": 48,
+        "nama_perusahaan": "Wanoja coffee",
+        "nama_kunci": "wanojacoffee",
+        "email": "satrea.amambi@gmail.com",
+        "no_hp": "81320739302"
+    },
+    {
+        "id_supplier": 49,
+        "nama_perusahaan": "CV WOOD STORY INDONESIA",
+        "nama_kunci": "cvwoodstoryindonesia",
+        "email": "kayoeartindo@gmail.com",
+        "no_hp": "82137543952"
+    },
+    {
+        "id_supplier": 50,
+        "nama_perusahaan": "CV. Indo Rattan Furniture Distributor",
+        "nama_kunci": "cvindorattanfurnituredistributor",
+        "email": "adiansyah2161@gmail.com",
+        "no_hp": "87781819650"
+    },
+    {
+        "id_supplier": 51,
+        "nama_perusahaan": "PT Fahma Hair Tunggal Mandiri",
+        "nama_kunci": "ptfahmahairtunggalmandiri",
+        "email": "marketing.fahmahair@gmail.com",
+        "no_hp": "81283332709"
+    },
+    {
+        "id_supplier": 52,
+        "nama_perusahaan": "PT Nikra Galuh Agriniaga",
+        "nama_kunci": "ptnikragaluhagriniaga",
+        "email": "manikdonald31@gmail.com",
+        "no_hp": "6281224187543"
+    },
+    {
+        "id_supplier": 53,
+        "nama_perusahaan": "CV Maju Jaya Teknik",
+        "nama_kunci": "cvmajujayateknik",
+        "email": "terlibeauty.official@gmail.com",
+        "no_hp": "81214351476"
+    },
+    {
+        "id_supplier": 54,
+        "nama_perusahaan": "Koperasi",
+        "nama_kunci": "koperasi",
+        "email": "muzamilmuhammad@gmail.com",
+        "no_hp": "8126871701"
+    },
+    {
+        "id_supplier": 55,
+        "nama_perusahaan": "PT Bekawan Agro Mandiri (perorangan)",
+        "nama_kunci": "ptbekawanagromandiriperorangan",
+        "email": "burhanuddinrafik@gmail.com",
+        "no_hp": "6282268466678"
+    },
+    {
+        "id_supplier": 56,
+        "nama_perusahaan": "PT CALIO PRATAMA NUSANTARA",
+        "nama_kunci": "ptcaliopratamanusantara",
+        "email": "nandaliaseptarini@gmail.com",
+        "no_hp": "6282233310464"
+    },
+    {
+        "id_supplier": 57,
+        "nama_perusahaan": "PT Cabaco Leather Goods",
+        "nama_kunci": "ptcabacoleathergoods",
+        "email": "cabacohandcraft@gmail.com",
+        "no_hp": "628111929495"
+    },
+    {
+        "id_supplier": 58,
+        "nama_perusahaan": "CV. LUMOSH LIVING",
+        "nama_kunci": "cvlumoshliving",
+        "email": "lumosh.ceramic@gmail.com",
+        "no_hp": "6282211880058"
+    },
+    {
+        "id_supplier": 59,
+        "nama_perusahaan": "Madu Diarra",
+        "nama_kunci": "madudiarra",
+        "email": "djoko.poedjo@gmail.com",
+        "no_hp": "6281371710233"
+    },
+    {
+        "id_supplier": 60,
+        "nama_perusahaan": "CV Leni Snacks Indo Jaya",
+        "nama_kunci": "cvlenisnacksindojaya",
+        "email": "lenisnacks@gmail.com",
+        "no_hp": "6282112870708"
+    },
+    {
+        "id_supplier": 61,
+        "nama_perusahaan": "craftote Gallery & Coffee",
+        "nama_kunci": "craftotegallerycoffee",
+        "email": "craftotegallery@gmail.com",
+        "no_hp": "628161816456"
+    },
+    {
+        "id_supplier": 62,
+        "nama_perusahaan": "PT Bipang Jangkar Abadi",
+        "nama_kunci": "ptbipangjangkarabadi",
+        "email": "bipangjangkar73@gmail.com",
+        "no_hp": "6285232672886"
+    },
+    {
+        "id_supplier": 63,
+        "nama_perusahaan": "PT. Kylafood Boga Indonesia",
+        "nama_kunci": "ptkylafoodbogaindonesia",
+        "email": "garibaldihilya@gmail.com",
+        "no_hp": "6285798442109"
+    },
+    {
+        "id_supplier": 64,
+        "nama_perusahaan": "PT Insus Fortunate Trade",
+        "nama_kunci": "ptinsusfortunatetrade",
+        "email": "insusfortunatetrade@gmail.com",
+        "no_hp": "6281295611295"
+    },
+    {
+        "id_supplier": 65,
+        "nama_perusahaan": "CV Zaroha",
+        "nama_kunci": "cvzaroha",
+        "email": "zaroha.cv@gmail.com",
+        "no_hp": "85265648180"
+    },
+    {
+        "id_supplier": 66,
+        "nama_perusahaan": "PT. Langkah Hijau Bersama",
+        "nama_kunci": "ptlangkahhijaubersama",
+        "email": "organiccenterproduct@organiccenter.company",
+        "no_hp": "6282288387975"
+    },
+    {
+        "id_supplier": 67,
+        "nama_perusahaan": "PT Berkah Melano Indonesia",
+        "nama_kunci": "ptberkahmelanoindonesia",
+        "email": "info@artgardenflowers.com",
+        "no_hp": "89699092497"
+    },
+    {
+        "id_supplier": 68,
+        "nama_perusahaan": "UD DAMAR SIAK",
+        "nama_kunci": "uddamarsiak",
+        "email": "rowilcannnhasugian@gmail.com",
+        "no_hp": "6287729252681"
+    },
+    {
+        "id_supplier": 69,
+        "nama_perusahaan": "PT Tidiart Kriya Nusantara",
+        "nama_kunci": "pttidiartkriyanusantara",
+        "email": "wendi.tidiartbandung@gmail.com",
+        "no_hp": "8997181986"
+    },
+    {
+        "id_supplier": 70,
+        "nama_perusahaan": "Sony Sentral Industri, UD",
+        "nama_kunci": "sonysentralindustriud",
+        "email": "andresutedjo@yahoo.com",
+        "no_hp": "6285325924748"
+    },
+    {
+        "id_supplier": 71,
+        "nama_perusahaan": "CV. Jenius Revolusi Aquarium",
+        "nama_kunci": "cvjeniusrevolusiaquarium",
+        "email": "cvjeniusrevolusiaquarium@gmail.com",
+        "no_hp": "6285732988355"
+    },
+    {
+        "id_supplier": 72,
+        "nama_perusahaan": "AYUNG SPORTINDO",
+        "nama_kunci": "ayungsportindo",
+        "email": "asrultsani0705@gmail.com",
+        "no_hp": "6281805728451"
+    },
+    {
+        "id_supplier": 73,
+        "nama_perusahaan": "CV INDIGO SEJAHTERA",
+        "nama_kunci": "cvindigosejahtera",
+        "email": "indigosejahtera69@gmail.com",
+        "no_hp": "85961581118"
+    },
+    {
+        "id_supplier": 74,
+        "nama_perusahaan": "PT Osyara Mitra Gemilang",
+        "nama_kunci": "ptosyaramitragemilang",
+        "email": "ubaneste@gmail.com",
+        "no_hp": "62818204749"
+    },
+    {
+        "id_supplier": 75,
+        "nama_perusahaan": "CV. MUARA BERKAH APRESINDO",
+        "nama_kunci": "cvmuaraberkahapresindo",
+        "email": "muaraberkahapresindo@gmail.com",
+        "no_hp": "83818178473"
+    },
+    {
+        "id_supplier": 76,
+        "nama_perusahaan": "CV Nurissah Indomakmur",
+        "nama_kunci": "cvnurissahindomakmur",
+        "email": "tikanurissahindomakmur@gmail.com",
+        "no_hp": "6285314467024"
+    },
+    {
+        "id_supplier": 77,
+        "nama_perusahaan": "CV. CANDRA GRAHA - C",
+        "nama_kunci": "cvcandragrahac",
+        "email": "edwintf22@gmail.com",
+        "no_hp": "6285375577773"
+    },
+    {
+        "id_supplier": 78,
+        "nama_perusahaan": "Gorgeous Indonesia",
+        "nama_kunci": "gorgeousindonesia",
+        "email": "hellogorgeousindonesia@gmail.com",
+        "no_hp": "628118978169"
+    },
+    {
+        "id_supplier": 79,
+        "nama_perusahaan": "PT EXPORT TANI NUSANTARA",
+        "nama_kunci": "ptexporttaninusantara",
+        "email": "alfiqie2805@gmail.com",
+        "no_hp": "85263757962"
+    },
+    {
+        "id_supplier": 80,
+        "nama_perusahaan": "UD Mella Kreasi",
+        "nama_kunci": "udmellakreasi",
+        "email": "info@mk-deco.com",
+        "no_hp": "085171067697"
+    },
+    {
+        "id_supplier": 81,
+        "nama_perusahaan": "CV. Hawila Agro Indonesia",
+        "nama_kunci": "cvhawilaagroindonesia",
+        "email": "Julyana@hawila-agro.com",
+        "no_hp": "08975813821"
+    },
+    {
+        "id_supplier": 82,
+        "nama_perusahaan": "Lumbung kopi nusantara",
+        "nama_kunci": "lumbungkopinusantara",
+        "email": "Jl. Karanganyar - Lolong KM.22, Ds.Limbangan, Kec.Karanganyar, Pekalongan",
+        "no_hp": "08112727975"
+    },
+    {
+        "id_supplier": 83,
+        "nama_perusahaan": "CV Mebel Jati Jepara",
+        "nama_kunci": "cvmebeljatijepara",
+        "email": "mebeljatijepara.cv@gmail.com",
+        "no_hp": "082220119568"
+    },
+    {
+        "id_supplier": 84,
+        "nama_perusahaan": "CV Mitra Manajemen Bersama",
+        "nama_kunci": "cvmitramanajemenbersama",
+        "email": "mitra.manajemenkita@gmail.com",
+        "no_hp": "081270975117"
+    },
+    {
+        "id_supplier": 85,
+        "nama_perusahaan": "CV. Sony Sentral Industri",
+        "nama_kunci": "cvsonysentralindustri",
+        "email": "Desa Suwawal Timur RT3 RW2, Kec. Pakis Aji Jepara",
+        "no_hp": "085325924748"
+    }
+]

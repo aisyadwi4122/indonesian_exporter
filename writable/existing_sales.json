@@ -1,0 +1,15 @@
+[
+    {
+        "id_sales": 9,
+        "nama_sales": "fernandes",
+        "username": "fernandes",
+        "password": "$2y$10$9u9V4RuvJEic..V9fh0BU.hqH7sAlHgxevVhp9wSH.T2QP\/vaRc3u",
+        "email": null,
+        "no_hp": null,
+        "wilayah": null,
+        "status": "aktif",
+        "tipe_akses": "internal",
+        "created_at": "2026-11-05 07:09:53",
+        "updated_at": "2026-11-05 07:09:53"
+    }
+]
